@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace DoctoralManagement.Controllers
+namespace DoctoralManagement.API.Controllers
 {
     [ApiController]
     [Route("[controller]")]

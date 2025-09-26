@@ -1,4 +1,4 @@
-namespace DoctoralManagement
+namespace DoctoralManagement.API
 {
     public class WeatherForecast
     {

@@ -1,5 +1,4 @@
-
-namespace DoctoralManagement
+namespace DoctoralManagement.API
 {
     public class Program
     {
