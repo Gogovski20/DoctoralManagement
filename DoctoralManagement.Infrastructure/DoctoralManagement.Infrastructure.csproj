@@ -6,4 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\DoctoralManagement.Application\DoctoralManagement.Application.csproj" />
+    <ProjectReference Include="..\DoctoralManagement.Domain\DoctoralManagement.Domain.csproj" />
+  </ItemGroup>
+
 </Project>
