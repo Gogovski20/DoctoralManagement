@@ -1,3 +1,6 @@
+using DoctoralManagement.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+
 namespace DoctoralManagement.API
 {
     public class Program
@@ -9,6 +12,10 @@ namespace DoctoralManagement.API
             // Add services to the container.
 
             builder.Services.AddControllers();
+
+            builder.Services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
