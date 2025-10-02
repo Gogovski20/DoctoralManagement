@@ -1,7 +1,7 @@
-﻿using DoctoralManagement.Domain.Entities;
-using DoctoralManagement.Infrastructure.Persistence;
+﻿using DoctoralManagement.Application.Students.Commands;
+using DoctoralManagement.Application.Students.Queries;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace DoctoralManagement.API.Controllers
 {
@@ -9,95 +9,70 @@ namespace DoctoralManagement.API.Controllers
     [ApiController]
     public class StudentsController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IMediator _mediator;
 
-        public StudentsController(ApplicationDbContext context)
+        public StudentsController(IMediator mediator)
         {
-            _context = context;
+            _mediator = mediator;
         }
 
         // GET: api/Students
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Student>>> GetStudents()
+        public async Task<ActionResult<IEnumerable<GetAllStudentsResponse>>> GetStudents()
         {
-            return await _context.Students.ToListAsync();
+            var query = new GetAllStudentsQuery();
+            var result = await _mediator.Send(query);
+            return Ok(result);
         }
 
         // GET: api/Students/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Student>> GetStudent(int id)
+        public async Task<ActionResult<GetStudentByIdResponse>> GetStudentById(int id)
         {
-            var student = await _context.Students.FindAsync(id);
-
-            if (student == null)
-            {
-                return NotFound();
-            }
-
-            return student;
+            var query = new GetStudentByIdQuery { Id = id };
+            var result = await _mediator.Send(query);
+            return Ok(result);
         }
 
         // PUT: api/Students/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutStudent(int id, Student student)
+        public async Task<IActionResult> UpdateStudent(int id, [FromBody] UpdateStudentCommand command)
         {
-            if (id != student.Id)
+            if (id != command.Id)
             {
-                return BadRequest();
+                return BadRequest("ID in the URL does not match ID in the body.");
             }
 
-            _context.Entry(student).State = EntityState.Modified;
+            var result = await _mediator.Send(command);
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!StudentExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            return Ok(result);
         }
 
         // POST: api/Students
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Student>> PostStudent(Student student)
+        public async Task<ActionResult<CreateStudentResponse>> CreateStudent(CreateStudentCommand command)
         {
-            _context.Students.Add(student);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetStudent", new { id = student.Id }, student);
+            try
+            {
+                var result = await _mediator.Send(command);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         // DELETE: api/Students/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteStudent(int id)
         {
-            var student = await _context.Students.FindAsync(id);
-            if (student == null)
-            {
-                return NotFound();
-            }
+            var command = new DeleteStudentCommand { Id = id };
 
-            _context.Students.Remove(student);
-            await _context.SaveChangesAsync();
+            await _mediator.Send(command);
 
             return NoContent();
-        }
-
-        private bool StudentExists(int id)
-        {
-            return _context.Students.Any(e => e.Id == id);
         }
     }
 }

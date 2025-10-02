@@ -1,5 +1,10 @@
+using DoctoralManagement.Application.Students.Commands;
+using DoctoralManagement.Domain.Interfaces;
 using DoctoralManagement.Infrastructure.Persistence;
+using DoctoralManagement.Infrastructure.Repositories;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
 
 namespace DoctoralManagement.API
 {
@@ -16,9 +21,14 @@ namespace DoctoralManagement.API
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+            builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
+            builder.Services.AddMediatR(cfg =>
+                cfg.RegisterServicesFromAssembly(typeof(CreateStudentCommand).Assembly));
 
             var app = builder.Build();
 
