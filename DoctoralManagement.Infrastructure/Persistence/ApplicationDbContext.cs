@@ -47,7 +47,7 @@ namespace DoctoralManagement.Infrastructure.Persistence
                 entity.Property(s => s.Email).IsRequired().HasMaxLength(100);
                 entity.Property(s => s.IndexNumber).IsRequired().HasMaxLength(20);
                 entity.Property(s => s.EnglishCertificate).HasMaxLength(300);
-                entity.Property(s => s.GPA).HasPrecision(3, 2); // e.g., 8.50
+                entity.Property(s => s.GPA).HasPrecision(4, 2); 
 
                 entity.HasIndex(s => s.Email).IsUnique();
                 entity.HasIndex(s => s.IndexNumber).IsUnique();

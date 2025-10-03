@@ -21,8 +21,17 @@ namespace DoctoralManagement.Application.Students.Commands
                 throw new Exception($"Student with id: {request.Id} not found.");
             }
 
+            if (student.Email != request.Email && await _studentRepository.ExistsByEmailAsync(request.Email))
+            {
+                throw new Exception($"Student with email: {request.Email} already exists.");
+            }
+
             student.FullName = request.FullName;
             student.Email = request.Email;
+            student.GPA = request.GPA;
+            student.EnglishCertificate = request.EnglishCertificate;
+            student.Status = request.StudentStatus;
+            //student.DoctoralProgramId = request.DoctoralProgramId;
 
             await _studentRepository.UpdateAsync(student);
 
@@ -33,7 +42,11 @@ namespace DoctoralManagement.Application.Students.Commands
                 Email = student.Email,
                 IndexNumber = student.IndexNumber,
                 EnrollmentDate = student.EnrollmentDate,
-                TotalCredits = student.TotalCredits
+                GPA = student.GPA,
+                EnglishCertificate = student.EnglishCertificate,
+                StudentStatus = student.Status,
+                TotalCredits = student.TotalCredits,
+                //DoctoralProgramId = student.DoctoralProgramId
             };
         }
     }

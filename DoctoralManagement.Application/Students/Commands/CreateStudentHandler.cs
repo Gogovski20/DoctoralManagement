@@ -25,14 +25,28 @@ namespace DoctoralManagement.Application.Students.Commands
                 throw new Exception("A student with the same index number already exists.");
             }
 
+            if (request.GPA < 8.00m)
+            {
+                throw new Exception("GPA must be at least 8.00 for doctoral studies!.");
+            }
+
+            if (request.TotalCreditsFromBachelor + request.TotalCreditsFromMaster < 300)
+            {
+                throw new Exception("Total credits from previous education must be at least 300 ECTS!.");
+            }
+
             var student = new Student
             {
                 FullName = request.FullName,
                 Email = request.Email,
                 IndexNumber = request.IndexNumber,
                 EnrollmentDate = request.EnrollmentDate,
+                GPA = request.GPA,
+                EnglishCertificate = request.EnglishCertificate,
                 TotalCreditsFromBachelor = request.TotalCreditsFromBachelor,
-                TotalCreditsFromMaster = request.TotalCreditsFromMaster
+                TotalCreditsFromMaster = request.TotalCreditsFromMaster,
+                //DoctoralProgramId = request.DoctoralProgramId,
+                Status = StudentStatus.Active
             };
             
             var createdStudent = await _studentRepository.AddAsync(student);
@@ -44,7 +58,12 @@ namespace DoctoralManagement.Application.Students.Commands
                 Email = createdStudent.Email,
                 IndexNumber = createdStudent.IndexNumber,
                 EnrollmentDate = createdStudent.EnrollmentDate,
-                TotalCredits = createdStudent.TotalCredits
+                GPA = createdStudent.GPA,
+                EnglishCertificate = createdStudent.EnglishCertificate,
+                TotalCredits = createdStudent.TotalCredits,
+                StudentStatus = createdStudent.Status
+                //DoctoralProgramId = createdStudent.DoctoralProgramId,
+                //DoctoralProgramName = null // This can be populated if needed
             };
         }
     }

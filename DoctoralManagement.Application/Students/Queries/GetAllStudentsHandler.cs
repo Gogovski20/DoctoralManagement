@@ -22,6 +22,8 @@ namespace DoctoralManagement.Application.Students.Queries
                 FullName = s.FullName,
                 Email = s.Email,
                 IndexNumber = s.IndexNumber,
+                GPA = s.GPA,
+                StudentStatus = s.Status,
                 TotalCredits = s.TotalCredits
             });
         }

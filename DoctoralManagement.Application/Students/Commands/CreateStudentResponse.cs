@@ -1,4 +1,6 @@
-﻿namespace DoctoralManagement.Application.Students.Commands
+﻿using DoctoralManagement.Domain.Entities;
+
+namespace DoctoralManagement.Application.Students.Commands
 {
     public class CreateStudentResponse
     {
@@ -7,6 +9,11 @@
         public string Email { get; set; } = string.Empty;
         public string IndexNumber { get; set; } = string.Empty;
         public DateTime EnrollmentDate { get; set; }
+        public decimal GPA { get; set; }
         public int TotalCredits { get; set; }
+        public StudentStatus StudentStatus { get; set; }
+        public string EnglishCertificate { get; set; } = string.Empty;
+        //public int? DoctoralProgramId { get; set; }
+        //public string DoctoralProgramName { get; set; } = string.Empty;
     }
 }
