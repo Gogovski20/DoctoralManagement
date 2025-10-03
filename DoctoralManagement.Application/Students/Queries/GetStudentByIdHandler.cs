@@ -28,6 +28,11 @@ namespace DoctoralManagement.Application.Students.Queries
                 Email = student.Email,
                 IndexNumber = student.IndexNumber,
                 EnrollmentDate = student.EnrollmentDate,
+                GPA = student.GPA,
+                EnglishCertificate = student.EnglishCertificate,
+                StudentStatus = student.Status,
+                TotalCreditsFromBachelor = student.TotalCreditsFromBachelor,
+                TotalCreditsFromMaster = student.TotalCreditsFromMaster,
                 TotalCredits = student.TotalCredits
             };
         }
