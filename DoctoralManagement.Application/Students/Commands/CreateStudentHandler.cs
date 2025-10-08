@@ -45,7 +45,6 @@ namespace DoctoralManagement.Application.Students.Commands
                 EnglishCertificate = request.EnglishCertificate,
                 TotalCreditsFromBachelor = request.TotalCreditsFromBachelor,
                 TotalCreditsFromMaster = request.TotalCreditsFromMaster,
-                //DoctoralProgramId = request.DoctoralProgramId,
                 Status = StudentStatus.Active
             };
             
@@ -62,8 +61,6 @@ namespace DoctoralManagement.Application.Students.Commands
                 EnglishCertificate = createdStudent.EnglishCertificate,
                 TotalCredits = createdStudent.TotalCredits,
                 StudentStatus = createdStudent.Status
-                //DoctoralProgramId = createdStudent.DoctoralProgramId,
-                //DoctoralProgramName = null // This can be populated if needed
             };
         }
     }

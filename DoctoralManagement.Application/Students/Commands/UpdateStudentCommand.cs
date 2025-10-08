@@ -11,6 +11,5 @@ namespace DoctoralManagement.Application.Students.Commands
         public decimal GPA { get; set; }
         public string EnglishCertificate { get; set; } = string.Empty;
         public StudentStatus StudentStatus { get; set; }
-        //public int? DoctoralProgramId { get; set; }
     }
 }
