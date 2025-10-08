@@ -12,6 +12,5 @@ namespace DoctoralManagement.Application.Students.Commands
         public string EnglishCertificate { get; set; } = string.Empty;
         public int TotalCreditsFromBachelor { get; set; }
         public int TotalCreditsFromMaster { get; set; }
-        //public int? DoctoralProgramId { get; set; }
     }
 }

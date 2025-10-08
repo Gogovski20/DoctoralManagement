@@ -31,7 +31,6 @@ namespace DoctoralManagement.Application.Students.Commands
             student.GPA = request.GPA;
             student.EnglishCertificate = request.EnglishCertificate;
             student.Status = request.StudentStatus;
-            //student.DoctoralProgramId = request.DoctoralProgramId;
 
             await _studentRepository.UpdateAsync(student);
 
@@ -45,8 +44,7 @@ namespace DoctoralManagement.Application.Students.Commands
                 GPA = student.GPA,
                 EnglishCertificate = student.EnglishCertificate,
                 StudentStatus = student.Status,
-                TotalCredits = student.TotalCredits,
-                //DoctoralProgramId = student.DoctoralProgramId
+                TotalCredits = student.TotalCredits
             };
         }
     }

@@ -26,6 +26,7 @@ namespace DoctoralManagement.API
 
             builder.Services.AddScoped<IStudentRepository, StudentRepository>();
             builder.Services.AddScoped<IDoctoralProgramRepository, DoctoralProgramRepository>();
+            builder.Services.AddScoped<IApplicationRepository, ApplicationRepository>();
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
