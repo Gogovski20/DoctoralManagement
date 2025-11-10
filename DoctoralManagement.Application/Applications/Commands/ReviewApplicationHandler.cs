@@ -7,15 +7,19 @@ namespace DoctoralManagement.Application.Applications.Commands
     public class ReviewApplicationHandler : IRequestHandler<ReviewApplicationCommand, ReviewApplicationResponse>
     {
         private readonly IApplicationRepository _applicationRepository;
+        private readonly IDoctoralProgramRepository _doctoralProgramRepository;
+        private readonly IStudentRepository _studentRepository;
 
-        public ReviewApplicationHandler(IApplicationRepository applicationRepository)
+        public ReviewApplicationHandler(IApplicationRepository applicationRepository, IDoctoralProgramRepository doctoralProgramRepository, IStudentRepository studentRepository)
         {
             _applicationRepository = applicationRepository;
+            _doctoralProgramRepository = doctoralProgramRepository;
+            _studentRepository = studentRepository;
         }
 
         public async Task<ReviewApplicationResponse> Handle(ReviewApplicationCommand request, CancellationToken cancellationToken)
         {
-            var application = await _applicationRepository.GetByIdAsync(request.Id);
+            var application = await _applicationRepository.GetByIdWithDetailsAsync(request.Id);
 
             if (application == null)
             {
@@ -25,6 +29,24 @@ namespace DoctoralManagement.Application.Applications.Commands
             if (!IsValidStatusTransition(application.ApplicationStatus, request.NewStatus))
             {
                 throw new Exception($"Invalid status transition from {application.ApplicationStatus} to {request.NewStatus}");
+            }
+
+            if (request.NewStatus == ApplicationStatus.FinalAccepted)
+            {
+                var program = await _doctoralProgramRepository.GetByIdAsync(application.DoctoralProgramId);
+                
+                if (program.CurrentStudentsCount >= program.AvailableSlots)
+                {
+                    throw new Exception($"Cannot accept application - program '{program.Name}' is full. Current: {program.CurrentStudentsCount}/{program.AvailableSlots}");
+                }
+
+                var student = await _studentRepository.GetByIdAsync(application.StudentId);
+
+                program.CurrentStudentsCount += 1;
+                await _doctoralProgramRepository.UpdateAsync(program);
+
+                student.DoctoralProgramId = application.DoctoralProgramId;
+                await _studentRepository.UpdateAsync(student);
             }
 
             application.ApplicationStatus = request.NewStatus;

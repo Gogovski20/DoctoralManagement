@@ -13,5 +13,6 @@ namespace DoctoralManagement.Domain.Interfaces
         Task UpdateAsync(Application application);
         Task DeleteAsync(Application application);
         Task<bool> HasActiveApplicationAsync(int studentId, int programId);
+        Task<Application> GetByIdWithDetailsAsync(int id);
     }
 }

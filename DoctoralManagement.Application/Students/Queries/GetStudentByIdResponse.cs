@@ -15,5 +15,7 @@ namespace DoctoralManagement.Application.Students.Queries
         public int TotalCreditsFromBachelor { get; set; }
         public int TotalCreditsFromMaster { get; set; }
         public int TotalCredits { get; set; }
+        public int? DoctoralProgramId { get; set; }
+        public string? DoctoralProgramName { get; set; }
     }
 }

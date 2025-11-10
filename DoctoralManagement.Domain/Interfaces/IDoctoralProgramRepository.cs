@@ -12,5 +12,8 @@ namespace DoctoralManagement.Domain.Interfaces
         Task UpdateAsync(DoctoralProgram doctoralProgram);
         Task DeleteAsync(DoctoralProgram doctoralProgram);
         Task<bool> ExistsByNameAsync(string name);
+
+        Task<DoctoralProgram> GetByIdNoTrackingAsync(int id);
+        Task<IEnumerable<DoctoralProgram>> GetAllNoTrackingAsync();
     }
 }

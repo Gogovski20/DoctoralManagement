@@ -33,9 +33,9 @@ namespace DoctoralManagement.Application.Applications.Commands
                 throw new Exception($"Doctoral Program with ID: {request.DoctoralProgramId} not found");
             }
 
-            if (await _applicationRepository.HasActiveApplicationAsync(request.StudentId, request.DoctoralProgramId))
+            if (program.CurrentStudentsCount >= program.AvailableSlots)
             {
-                throw new Exception("Student already has an active application for this program");
+                throw new Exception($"Program '{program.Name}' has no available slots. Current: {program.CurrentStudentsCount}/{program.AvailableSlots}");
             }
 
             var meetsGradeRequirements = student.GPA >= 8.00m;
@@ -54,6 +54,11 @@ namespace DoctoralManagement.Application.Applications.Commands
             if (string.IsNullOrEmpty(request.EnglishCertificatePath))
             {
                 throw new Exception("English certificate is required for application!");
+            }
+
+            if (await _applicationRepository.HasActiveApplicationAsync(request.StudentId, request.DoctoralProgramId))
+            {
+                throw new Exception("Student already has an active application for this program");
             }
 
             var application = new Domain.Entities.Application

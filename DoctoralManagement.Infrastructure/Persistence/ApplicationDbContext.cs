@@ -123,6 +123,8 @@ namespace DoctoralManagement.Infrastructure.Persistence
                 entity.Property(dp => dp.SpecialRequirements).HasMaxLength(1000);
                 entity.Property(dp => dp.TuitionFee).HasPrecision(10, 2);
                 entity.Property(dp => dp.InternationalTuitionFee).HasPrecision(10, 2);
+                entity.Property(dp => dp.AvailableSlots).IsRequired();
+                entity.Property(dp => dp.CurrentStudentsCount).IsRequired();
 
                 entity.HasIndex(dp => dp.Name).IsUnique();
             });

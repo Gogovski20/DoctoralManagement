@@ -14,7 +14,7 @@ namespace DoctoralManagement.Application.Students.Queries
 
         public async Task<IEnumerable<GetAllStudentsResponse>> Handle(GetAllStudentsQuery request, CancellationToken cancellationToken)
         {
-            var students = await _studentRepository.GetAllAsync();
+            var students = await _studentRepository.GetAllWithProgramNoTrackingAsync();
 
             return students.Select(s => new GetAllStudentsResponse
             {
@@ -24,7 +24,9 @@ namespace DoctoralManagement.Application.Students.Queries
                 IndexNumber = s.IndexNumber,
                 GPA = s.GPA,
                 StudentStatus = s.Status,
-                TotalCredits = s.TotalCredits
+                TotalCredits = s.TotalCredits,
+                DoctoralProgramId = s.DoctoralProgramId,
+                DoctoralProgramName = s.DoctoralProgram?.Name
             });
         }
     }

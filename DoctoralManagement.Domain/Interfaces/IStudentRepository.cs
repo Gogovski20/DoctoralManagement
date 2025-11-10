@@ -13,5 +13,12 @@ namespace DoctoralManagement.Domain.Interfaces
         Task DeleteAsync(Student student);
         Task<bool> ExistsByEmailAsync(string email);
         Task<bool> ExistsByIndexNumberAsync(string indexNumber);
+        Task<Student> GetByIdWithProgramAsync(int id);
+        Task<IEnumerable<Student>> GetAllWithProgramAsync();
+
+        Task<Student> GetByIdNoTrackingAsync(int id);
+        Task<IEnumerable<Student>> GetAllNoTrackingAsync();
+        Task<Student> GetByIdWithProgramNoTrackingAsync(int id);
+        Task<IEnumerable<Student>> GetAllWithProgramNoTrackingAsync();
     }
 }
