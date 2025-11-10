@@ -14,8 +14,8 @@ namespace DoctoralManagement.Application.Students.Queries
 
         public async Task<GetStudentByIdResponse> Handle(GetStudentByIdQuery request, CancellationToken cancellationToken)
         {
-            var student = await _studentRepository.GetByIdAsync(request.Id);
-            
+            var student = await _studentRepository.GetByIdWithProgramNoTrackingAsync(request.Id);
+
             if (student == null)
             {
                 throw new KeyNotFoundException($"Student with ID {request.Id} not found.");
@@ -33,7 +33,9 @@ namespace DoctoralManagement.Application.Students.Queries
                 StudentStatus = student.Status,
                 TotalCreditsFromBachelor = student.TotalCreditsFromBachelor,
                 TotalCreditsFromMaster = student.TotalCreditsFromMaster,
-                TotalCredits = student.TotalCredits
+                TotalCredits = student.TotalCredits,
+                DoctoralProgramId = student.DoctoralProgramId,
+                DoctoralProgramName = student.DoctoralProgram?.Name
             };
         }
     }

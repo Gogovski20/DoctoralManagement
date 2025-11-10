@@ -11,5 +11,7 @@ namespace DoctoralManagement.Application.Students.Queries
         public decimal GPA { get; set; }
         public StudentStatus StudentStatus { get; set; }
         public int TotalCredits { get; set; }
+        public int? DoctoralProgramId { get; set; }
+        public string? DoctoralProgramName { get; set; }
     }
 }

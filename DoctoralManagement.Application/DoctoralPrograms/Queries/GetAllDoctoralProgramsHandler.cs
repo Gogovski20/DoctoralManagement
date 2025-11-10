@@ -14,7 +14,7 @@ namespace DoctoralManagement.Application.DoctoralPrograms.Queries
 
         public async Task<IEnumerable<GetAllDoctoralProgramsResponse>> Handle(GetAllDoctoralProgramsQuery request, CancellationToken cancellationToken)
         {
-            var programs = await _repository.GetAllAsync();
+            var programs = await _repository.GetAllNoTrackingAsync();
 
             return programs.Select(p => new GetAllDoctoralProgramsResponse
             {
@@ -27,7 +27,7 @@ namespace DoctoralManagement.Application.DoctoralPrograms.Queries
                 InternationalTuitionFee = p.InternationalTuitionFee,
                 SpecialRequirements = p.SpecialRequirements,
                 IsActive = p.IsActive,
-                CurrentStudentsCount = p.Students?.Count ?? 0 // Calculate current students count
+                CurrentStudentsCount = p.CurrentStudentsCount // Calculate current students count
             });
         }
     }

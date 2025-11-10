@@ -14,7 +14,7 @@ namespace DoctoralManagement.Application.DoctoralPrograms.Queries
 
         public async Task<GetDoctoralProgramByIdResponse> Handle(GetDoctoralProgramByIdQuery request, CancellationToken cancellationToken)
         {
-            var doctoralProgram = await _repository.GetByIdAsync(request.Id);
+            var doctoralProgram = await _repository.GetByIdNoTrackingAsync(request.Id);
 
             if (doctoralProgram == null)
             {
@@ -32,7 +32,7 @@ namespace DoctoralManagement.Application.DoctoralPrograms.Queries
                 InternationalTuitionFee = doctoralProgram.InternationalTuitionFee,
                 SpecialRequirements = doctoralProgram.SpecialRequirements,
                 IsActive = doctoralProgram.IsActive,
-                CurrentStudentsCount = doctoralProgram.Students?.Count ?? 0
+                CurrentStudentsCount = doctoralProgram.CurrentStudentsCount
             };
         }
     }

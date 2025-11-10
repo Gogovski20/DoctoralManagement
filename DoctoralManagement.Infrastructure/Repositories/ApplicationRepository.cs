@@ -45,6 +45,14 @@ namespace DoctoralManagement.Infrastructure.Repositories
                 .FirstOrDefaultAsync(a => a.Id == id);
         }
 
+        public async Task<Domain.Entities.Application> GetByIdWithDetailsAsync(int id)
+        {
+            return await _context.Applications
+                .Include(a => a.Student)
+                .Include(a => a.DoctoralProgram)
+                .FirstOrDefaultAsync(a => a.Id == id);
+        }
+
         public async Task<IEnumerable<Domain.Entities.Application>> GetByProgramIdAsync(int programId)
         {
             return await _context.Applications
