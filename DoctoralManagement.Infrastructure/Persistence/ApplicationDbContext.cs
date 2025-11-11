@@ -10,18 +10,18 @@ namespace DoctoralManagement.Infrastructure.Persistence
         {
         }
 
-        // Existing DbSets
+        
         public DbSet<Student> Students { get; set; }
         public DbSet<Mentor> Mentors { get; set; }
         public DbSet<DoctoralProject> DoctoralProjects { get; set; }
         public DbSet<Publication> Publications { get; set; }
         public DbSet<Mobility> Mobilities { get; set; }
-
-        // NEW DbSets
         public DbSet<DoctoralProgram> DoctoralPrograms { get; set; }
         public DbSet<ProgramMentor> ProgramMentors { get; set; }
         public DbSet<Domain.Entities.Application> Applications { get; set; }
         public DbSet<ECTSTracking> ECTSTrackings { get; set; }
+        public DbSet<ThesisDefense> ThesisDefenses { get; set; }
+        public DbSet<ConferenceParticipation> ConferenceParticipations { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -36,6 +36,8 @@ namespace DoctoralManagement.Infrastructure.Persistence
             ConfigureDoctoralProject(modelBuilder);
             ConfigurePublication(modelBuilder);
             ConfigureMobility(modelBuilder);
+            ConfigureThesisDefense(modelBuilder);
+            ConfigureConferenceParticipation(modelBuilder);
         }
 
         private void ConfigureStudent(ModelBuilder modelBuilder)
@@ -228,6 +230,39 @@ namespace DoctoralManagement.Infrastructure.Persistence
                 entity.HasKey(m => m.Id);
                 entity.Property(m => m.Institution).IsRequired().HasMaxLength(200);
                 entity.Property(m => m.Country).IsRequired().HasMaxLength(100);
+            });
+        }
+
+        private void ConfigureThesisDefense(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ThesisDefense>(entity =>
+            {
+                entity.HasKey(d => d.Id);
+                entity.Property(d => d.Room).HasMaxLength(100);
+
+                entity.Property(d => d.CommitteeMemberIds)
+                    .HasConversion(
+                        v => string.Join(',', v),
+                        v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList()
+                    );
+
+                entity.HasOne(d => d.DoctoralProject)
+                    .WithMany(p => p.Defenses)
+                    .HasForeignKey(d => d.DoctoralProjectId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+        }
+
+        private void ConfigureConferenceParticipation(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ConferenceParticipation>(entity =>
+            {
+                entity.HasKey(c => c.Id);
+                entity.Property(c => c.ConferenceName).IsRequired().HasMaxLength(300);
+                entity.HasOne(c => c.Student)
+                      .WithMany() // later we can create navigation property
+                      .HasForeignKey(c => c.StudentId)
+                      .OnDelete(DeleteBehavior.Cascade);
             });
         }
     }
