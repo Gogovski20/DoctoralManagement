@@ -7,7 +7,8 @@
         UnderReview,
         Approved,
         ChangesRequested,
-        Rejected
+        Rejected,
+        Completed
     }
 
     public class DoctoralProject
