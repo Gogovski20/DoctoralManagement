@@ -44,5 +44,12 @@ namespace DoctoralManagement.API.Controllers
             var result = await _mediator.Send(new GetDoctoralProjectsByMentorQuery(mentorId));
             return Ok(result);
         }
+
+        [HttpPost("review")]
+        public async Task<IActionResult> Review([FromBody] ReviewDoctoralProjectCommand command)
+        {
+            var result = await _mediator.Send(command);
+            return Ok(result);
+        }
     }
 }

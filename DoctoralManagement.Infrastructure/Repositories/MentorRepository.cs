@@ -57,7 +57,7 @@ namespace DoctoralManagement.Infrastructure.Repositories
             }
 
             var activeProjectsCount = mentor.DoctoralProjects
-                .Count(p => p.Status != ProjectStatus.Rejected && p.Status != ProjectStatus.Completed);
+                .Count(p => p.Status == ProjectStatus.Approved);
 
             return activeProjectsCount < mentor.MaxStudents;
         }
