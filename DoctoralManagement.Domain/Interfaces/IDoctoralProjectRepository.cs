@@ -9,5 +9,7 @@ namespace DoctoralManagement.Domain.Interfaces
         Task<DoctoralProject> AddAsync(DoctoralProject project);
         Task UpdateAsync(DoctoralProject project);
         Task<bool> ExistsActiveProjectForStudentAsync(int studentId);
+        Task<IEnumerable<DoctoralProject>> GetAllWithDetailsAsync();
+        Task<IEnumerable<DoctoralProject>> GetByMentorIdAsync(int mentorId);
     }
 }

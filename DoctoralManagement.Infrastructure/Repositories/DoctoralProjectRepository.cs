@@ -30,6 +30,14 @@ namespace DoctoralManagement.Infrastructure.Repositories
                                 p.Status == ProjectStatus.Approved));
         }
 
+        public async Task<IEnumerable<DoctoralProject>> GetAllWithDetailsAsync()
+        {
+            return await _context.DoctoralProjects
+                .Include(p => p.Student)
+                .Include(p => p.Mentor)
+                .ToListAsync();
+        }
+
         public async Task<DoctoralProject?> GetByIdAsync(int id)
         {
             return await _context.DoctoralProjects
@@ -38,9 +46,20 @@ namespace DoctoralManagement.Infrastructure.Repositories
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 
+        public async Task<IEnumerable<DoctoralProject>> GetByMentorIdAsync(int mentorId)
+        {
+            return await _context.DoctoralProjects
+                .Include(p => p.Student)
+                .Include(p => p.Mentor)
+                .Where(p => p.MentorId == mentorId)
+                .ToListAsync();
+        }
+
         public async Task<IEnumerable<DoctoralProject>> GetByStudentIdAsync(int studentId)
         {
             return await _context.DoctoralProjects
+                .Include(p => p.Student)
+                .Include(p => p.Mentor)
                 .Where(p => p.StudentId == studentId)
                 .ToListAsync();
         }
