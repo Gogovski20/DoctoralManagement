@@ -21,6 +21,16 @@ namespace DoctoralManagement.Infrastructure.Repositories
             return project;
         }
 
+        public async Task DeleteAsync(int id)
+        {
+            var project = await _context.DoctoralProjects.FindAsync(id);
+            if (project != null)
+            {
+                _context.DoctoralProjects.Remove(project);
+                await _context.SaveChangesAsync();
+            }
+        }
+
         public async Task<bool> ExistsActiveProjectForStudentAsync(int studentId)
         {
             return await _context.DoctoralProjects

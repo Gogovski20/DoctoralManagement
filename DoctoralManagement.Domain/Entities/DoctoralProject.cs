@@ -29,7 +29,7 @@
         public DateTime? SubmittedAt { get; set; }
         public DateTime? DecisionAt { get; set; }
 
-        public string ProposalDocumentPath { get; set; } = string.Empty;
+        public string? ProposalDocumentPath { get; set; }
         public string? CommitteeNotes { get; set; }
 
         // Navigation

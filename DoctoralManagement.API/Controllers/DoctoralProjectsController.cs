@@ -16,6 +16,13 @@ namespace DoctoralManagement.API.Controllers
             _mediator = mediator;
         }
 
+        [HttpPost("create-draft")]
+        public async Task<IActionResult> CreateDraft([FromBody] CreateDoctoralProjectDraftCommand command)
+        {
+            var result = await _mediator.Send(command);
+            return Ok(result);
+        }
+
         // POST: api/DoctoralProjects/submit
         [HttpPost("submit")]
         public async Task<IActionResult> Submit([FromBody] SubmitDoctoralProjectCommand command)
@@ -50,6 +57,28 @@ namespace DoctoralManagement.API.Controllers
         {
             var result = await _mediator.Send(command);
             return Ok(result);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateDoctoralProjectCommand command)
+        {
+            if (id != command.Id)
+            {
+                return BadRequest("ID mismatch");
+            }
+            var result = await _mediator.Send(command);
+            return Ok(result);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var ok = await _mediator.Send(new DeleteDoctoralProjectCommand { Id = id });
+            if (!ok)
+            {
+                return BadRequest();
+            }
+            return NoContent();
         }
     }
 }
