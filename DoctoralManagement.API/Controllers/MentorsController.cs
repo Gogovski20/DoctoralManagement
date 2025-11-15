@@ -1,0 +1,62 @@
+﻿using DoctoralManagement.Application.Mentors.Commands;
+using DoctoralManagement.Application.Mentors.Queries;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
+
+namespace DoctoralManagement.API.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class MentorsController : ControllerBase
+    {
+        private readonly IMediator _mediator;
+
+        public MentorsController(IMediator mediator)
+        {
+            _mediator = mediator;
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<GetMentorResponse>>> GetAll()
+        {
+            var mentors = await _mediator.Send(new GetAllMentorsQuery());
+            return Ok(mentors);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<GetMentorResponse>> GetById(int id)
+        {
+            var mentor = await _mediator.Send(new GetMentorByIdQuery { Id = id });
+            if (mentor == null)
+            {
+                return NotFound();
+            }
+            return Ok(mentor);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<MentorResponse>> Create([FromBody] CreateMentorCommand command)
+        {
+            var result = await _mediator.Send(command);
+            return Ok(result);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<ActionResult<MentorResponse>> Update(int id, [FromBody] UpdateMentorCommand command)
+        {
+            if (id != command.Id)
+            {
+                return BadRequest("ID in URL does not match ID in body.");
+            }
+            var result = await _mediator.Send(command);
+            return Ok(result);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            await _mediator.Send(new DeleteMentorCommand { Id = id });
+            return NoContent();
+        }
+    }
+}

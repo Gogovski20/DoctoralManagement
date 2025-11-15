@@ -93,6 +93,13 @@ namespace DoctoralManagement.Infrastructure.Repositories
                                 a.ApplicationStatus == ApplicationStatus.UnderReview));
         }
 
+        public async Task<bool> HasFinalAcceptedApplicationAsync(int studentId)
+        {
+            return await _context.Applications
+                .AnyAsync(a => a.StudentId == studentId &&
+                               a.ApplicationStatus == ApplicationStatus.FinalAccepted);
+        }
+
         public async Task UpdateAsync(Domain.Entities.Application application)
         {
             _context.Applications.Update(application);
