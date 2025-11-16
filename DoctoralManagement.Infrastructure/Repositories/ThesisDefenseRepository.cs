@@ -30,6 +30,7 @@ namespace DoctoralManagement.Infrastructure.Repositories
         public async Task<ThesisDefense?> GetByIdAsync(int id)
         {
             return await _context.ThesisDefenses
+                .Include(d => d.Reviews)
                 .FirstOrDefaultAsync(d => d.Id == id);
         }
 

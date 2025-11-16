@@ -22,6 +22,7 @@ namespace DoctoralManagement.Infrastructure.Persistence
         public DbSet<ECTSTracking> ECTSTrackings { get; set; }
         public DbSet<ThesisDefense> ThesisDefenses { get; set; }
         public DbSet<ConferenceParticipation> ConferenceParticipations { get; set; }
+        public DbSet<CommitteeReview> CommitteeReviews { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -38,6 +39,7 @@ namespace DoctoralManagement.Infrastructure.Persistence
             ConfigureMobility(modelBuilder);
             ConfigureThesisDefense(modelBuilder);
             ConfigureConferenceParticipation(modelBuilder);
+            ConfigureCommitteeReview(modelBuilder);
         }
 
         private void ConfigureStudent(ModelBuilder modelBuilder)
@@ -265,5 +267,21 @@ namespace DoctoralManagement.Infrastructure.Persistence
                       .OnDelete(DeleteBehavior.Cascade);
             });
         }
+
+        private void ConfigureCommitteeReview(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<CommitteeReview>(entity =>
+            {
+                entity.HasKey(r => r.Id);
+
+                entity.Property(r => r.Comments).HasMaxLength(2000);
+
+                entity.HasOne(r => r.ThesisDefense)
+                    .WithMany(d => d.Reviews)  
+                    .HasForeignKey(r => r.ThesisDefenseId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+        }
+
     }
 }

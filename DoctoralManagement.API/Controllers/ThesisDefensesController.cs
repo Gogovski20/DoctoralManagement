@@ -1,4 +1,6 @@
-﻿using DoctoralManagement.Application.ThesisDefenses;
+﻿using DoctoralManagement.Application.ThesisDefenseReviews;
+using DoctoralManagement.Application.ThesisDefenses;
+using DoctoralManagement.Domain.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,10 +11,12 @@ namespace DoctoralManagement.API.Controllers
     public class ThesisDefensesController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly ICommitteeReviewRepository _committeeReviewRepository;
 
-        public ThesisDefensesController(IMediator mediator)
+        public ThesisDefensesController(IMediator mediator, ICommitteeReviewRepository committeeReviewRepository)
         {
             _mediator = mediator;
+            _committeeReviewRepository = committeeReviewRepository;
         }
 
         [HttpPost("schedule")]
@@ -27,6 +31,23 @@ namespace DoctoralManagement.API.Controllers
         {
             var result = await _mediator.Send(command);
             return Ok(result);
+        }
+
+        [HttpPost("{defenseId}/committee-review")]
+        public async Task<IActionResult> SubmitReview(
+            int defenseId,
+            [FromBody] SubmitCommitteeReviewCommand command)
+        {
+            command.DefenseId = defenseId;
+            var result = await _mediator.Send(command);
+            return Ok(result);
+        }
+
+        [HttpGet("{defenseId}/reviews")]
+        public async Task<IActionResult> GetReviews(int defenseId)
+        {
+            var reviews = await _committeeReviewRepository.GetByDefenseIdAsync(defenseId);
+            return Ok(reviews);
         }
     }
 }
