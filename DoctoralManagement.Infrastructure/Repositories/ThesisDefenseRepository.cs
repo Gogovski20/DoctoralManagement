@@ -27,10 +27,22 @@ namespace DoctoralManagement.Infrastructure.Repositories
                 .AnyAsync(d => d.DoctoralProjectId == projectId);
         }
 
+        public async Task<ThesisDefense?> GetByIdAsync(int id)
+        {
+            return await _context.ThesisDefenses
+                .FirstOrDefaultAsync(d => d.Id == id);
+        }
+
         public async Task<ThesisDefense?> GetByProjectIdAsync(int projectId)
         {
             return await _context.ThesisDefenses
                 .FirstOrDefaultAsync(d => d.DoctoralProjectId == projectId);
+        }
+
+        public async Task UpdateAsync(ThesisDefense defense)
+        {
+            _context.ThesisDefenses.Update(defense);
+            await _context.SaveChangesAsync();
         }
     }
 }

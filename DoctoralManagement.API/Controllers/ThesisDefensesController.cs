@@ -21,5 +21,12 @@ namespace DoctoralManagement.API.Controllers
             var result = await _mediator.Send(command);
             return Ok(result);
         }
+
+        [HttpPost("complete")]
+        public async Task<IActionResult> Complete([FromBody] CompleteThesisDefenseCommand command)
+        {
+            var result = await _mediator.Send(command);
+            return Ok(result);
+        }
     }
 }
