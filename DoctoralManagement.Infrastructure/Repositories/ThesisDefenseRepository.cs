@@ -31,6 +31,8 @@ namespace DoctoralManagement.Infrastructure.Repositories
         {
             return await _context.ThesisDefenses
                 .Include(d => d.Reviews)
+                .Include(d => d.DoctoralProject)
+                    .ThenInclude(p => p.Student) 
                 .FirstOrDefaultAsync(d => d.Id == id);
         }
 

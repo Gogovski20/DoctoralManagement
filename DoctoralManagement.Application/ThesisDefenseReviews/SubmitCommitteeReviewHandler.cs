@@ -19,9 +19,9 @@ namespace DoctoralManagement.Application.ThesisDefenseReviews
             var defense = await _thesisDefenseRepository.GetByIdAsync(request.DefenseId)
                 ?? throw new Exception("Defense not found");
 
-            if (defense.Status != Domain.Entities.DefenseStatus.Scheduled)
+            if (defense.Status != Domain.Entities.DefenseStatus.Completed)
             {
-                throw new Exception("Defense must be scheduled to accept reviews");
+                throw new Exception("Committee reviews can only be submitted AFTER the defense is completed.");
             }
 
             if (!defense.CommitteeMemberIds.Contains(request.ReviewerId))

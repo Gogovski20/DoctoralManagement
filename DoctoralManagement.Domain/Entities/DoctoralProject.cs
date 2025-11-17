@@ -8,7 +8,11 @@
         Approved,
         ChangesRequested,
         Rejected,
-        Completed
+        Completed,
+        DefenseUnderReview,
+        DefenseChangesRequired,
+        DefenseRejected,
+        DefenseApproved
     }
 
     public class DoctoralProject

@@ -49,5 +49,16 @@ namespace DoctoralManagement.API.Controllers
             var reviews = await _committeeReviewRepository.GetByDefenseIdAsync(defenseId);
             return Ok(reviews);
         }
+
+        [HttpPost("{defenseId}/finalize-reviews")]
+        public async Task<IActionResult> FinalizeReviews(int defenseId)
+        {
+            var result = await _mediator.Send(new FinalizeCommitteeReviewsCommand
+            {
+                DefenseId = defenseId
+            });
+
+            return Ok(result);
+        }
     }
 }

@@ -22,39 +22,18 @@ namespace DoctoralManagement.Application.ThesisDefenses
             var defense = await _thesisDefenseRepository.GetByIdAsync(request.DefenseId)
                 ?? throw new Exception($"Defense with id {request.DefenseId} not found");
 
-            if (defense.Status != Domain.Entities.DefenseStatus.Scheduled)
-            {
-                throw new Exception("Only scheduled defenses can be completed");
-            }
+            if (defense.Status != DefenseStatus.Scheduled)
+                throw new Exception("Only scheduled defenses can be completed.");
 
-            if (request.Result != DefenseStatus.Passed &&
-                request.Result != DefenseStatus.Failed)
-            {
-                throw new Exception("Defense result must be Passed or Failed");
-            }
-
-            defense.Status = request.Result;
+            // Set defense as completed (NOT passed/failed yet)
+            defense.Status = DefenseStatus.Completed;
             defense.ResultNotes = request.ResultNotes;
             defense.CompletedAt = DateTime.UtcNow;
 
-            if (request.Result == DefenseStatus.Passed)
-            {
-                defense.ArchiveNumber = string.IsNullOrWhiteSpace(request.ArchiveNumber)
-                    ? GenerateArchiveNumber(defense)
-                    : request.ArchiveNumber;
-
-                var project = await _projectRepository.GetByIdAsync(defense.DoctoralProjectId)
-                    ?? throw new Exception("Associated project not found");
-
-                project.Status = ProjectStatus.Completed;
-                await _projectRepository.UpdateAsync(project);
-
-                var student = await _studentRepository.GetByIdAsync(project.StudentId)
-                    ?? throw new Exception("Student not found");
-
-                student.Status = StudentStatus.Graduated;
-                await _studentRepository.UpdateAsync(student);
-            }
+            // Generate archive number once defense is completed
+            defense.ArchiveNumber = string.IsNullOrWhiteSpace(request.ArchiveNumber)
+                ? GenerateArchiveNumber(defense)
+                : request.ArchiveNumber;
 
             await _thesisDefenseRepository.UpdateAsync(defense);
 
@@ -67,6 +46,7 @@ namespace DoctoralManagement.Application.ThesisDefenses
                 CompletedAt = defense.CompletedAt
             };
         }
+
 
         private string GenerateArchiveNumber(ThesisDefense d)
         {
