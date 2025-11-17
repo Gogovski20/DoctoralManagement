@@ -24,5 +24,7 @@
         public string? ResultNotes { get; set; }
         public DateTime? CompletedAt { get; set; }
         public string? ArchiveNumber { get; set; }
+
+        public List<CommitteeReview> Reviews { get; set; } = new();
     }
 }
