@@ -12,6 +12,7 @@ namespace DoctoralManagement.Application.Students.Commands
         public decimal GPA { get; set; }
         public int TotalCredits { get; set; }
         public StudentStatus StudentStatus { get; set; }
+        public int CurrentSemester { get; set; }
         public string EnglishCertificate { get; set; } = string.Empty;
     }
 }

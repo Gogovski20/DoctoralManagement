@@ -11,5 +11,6 @@
         public string Role { get; set; } = "Participant";
         public int EctsAwarded { get; set; } = 0;
         public string? EvidencePath { get; set; }
+        public bool IsInternational { get; set; }
     }
 }

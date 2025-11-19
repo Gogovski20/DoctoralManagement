@@ -10,6 +10,7 @@
         public decimal GPA { get; set; }
         public string EnglishCertificate { get; set; } = string.Empty;
         public StudentStatus Status { get; set; } = StudentStatus.Active;
+        public int CurrentSemester { get; set; } = 1;
 
 
         public int TotalCreditsFromBachelor { get; set; }

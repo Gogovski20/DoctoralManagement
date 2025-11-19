@@ -45,7 +45,8 @@ namespace DoctoralManagement.Application.Students.Commands
                 EnglishCertificate = request.EnglishCertificate,
                 TotalCreditsFromBachelor = request.TotalCreditsFromBachelor,
                 TotalCreditsFromMaster = request.TotalCreditsFromMaster,
-                Status = StudentStatus.Active
+                Status = StudentStatus.Active,
+                CurrentSemester = 1
             };
             
             var createdStudent = await _studentRepository.AddAsync(student);
@@ -60,7 +61,8 @@ namespace DoctoralManagement.Application.Students.Commands
                 GPA = createdStudent.GPA,
                 EnglishCertificate = createdStudent.EnglishCertificate,
                 TotalCredits = createdStudent.TotalCredits,
-                StudentStatus = createdStudent.Status
+                StudentStatus = createdStudent.Status,
+                CurrentSemester = createdStudent.CurrentSemester
             };
         }
     }
