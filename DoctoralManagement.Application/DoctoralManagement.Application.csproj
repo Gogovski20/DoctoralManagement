@@ -14,4 +14,8 @@
     <ProjectReference Include="..\DoctoralManagement.Domain\DoctoralManagement.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="ECTS\Commands\" />
+  </ItemGroup>
+
 </Project>
