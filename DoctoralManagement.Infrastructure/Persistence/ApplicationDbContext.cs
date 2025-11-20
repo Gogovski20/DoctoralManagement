@@ -23,6 +23,8 @@ namespace DoctoralManagement.Infrastructure.Persistence
         public DbSet<ThesisDefense> ThesisDefenses { get; set; }
         public DbSet<ConferenceParticipation> ConferenceParticipations { get; set; }
         public DbSet<CommitteeReview> CommitteeReviews { get; set; }
+        public DbSet<Course> Courses { get; set; }
+        public DbSet<CourseEnrollment> CourseEnrollments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -40,6 +42,8 @@ namespace DoctoralManagement.Infrastructure.Persistence
             ConfigureThesisDefense(modelBuilder);
             ConfigureConferenceParticipation(modelBuilder);
             ConfigureCommitteeReview(modelBuilder);
+            ConfigureCourse(modelBuilder);
+            ConfigureCourseEnrollment(modelBuilder);
         }
 
         private void ConfigureStudent(ModelBuilder modelBuilder)
@@ -281,6 +285,85 @@ namespace DoctoralManagement.Infrastructure.Persistence
                     .HasForeignKey(r => r.ThesisDefenseId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
+        }
+
+        private void ConfigureCourse(ModelBuilder modelBuilder) 
+        {
+            modelBuilder.Entity<Course>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Code)
+                    .IsRequired()
+                    .HasMaxLength(20)
+                    .HasColumnType("varchar(20)");
+
+                entity.Property(e => e.Title)
+                    .IsRequired()
+                    .HasMaxLength(200)
+                    .HasColumnType("varchar(200)");
+
+                entity.Property(e => e.EctsCredits)
+                    .IsRequired();
+
+                entity.Property(e => e.InstructorName)
+                    .IsRequired()
+                    .HasMaxLength(150)
+                    .HasColumnType("varchar(150)");
+
+                entity.Property(e => e.Semester)
+                    .IsRequired();
+
+                entity.Property(e => e.Description)
+                    .HasMaxLength(1000)
+                    .HasColumnType("varchar(1000)");
+
+                // Navigation
+                entity.HasMany(e => e.Enrollments)
+                    .WithOne(e => e.Course)
+                    .HasForeignKey(e => e.CourseId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.ToTable("Courses");
+            });
+        }
+
+        private void ConfigureCourseEnrollment(ModelBuilder modelBuilder) 
+        {
+            modelBuilder.Entity<CourseEnrollment>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.StudentId).IsRequired();
+                entity.Property(e => e.CourseId).IsRequired();
+                entity.Property(e => e.EnrolledDate)
+                    .IsRequired()
+                    .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                entity.Property(e => e.Completed)
+                    .IsRequired()
+                    .HasDefaultValue(false);
+
+                entity.Property(e => e.Grade)
+                    .HasColumnType("numeric(3,1)");
+
+                // Foreign keys
+                entity.HasOne(e => e.Student)
+                    .WithMany(s => s.CourseEnrollments)
+                    .HasForeignKey(e => e.StudentId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.Course)
+                    .WithMany(c => c.Enrollments)
+                    .HasForeignKey(e => e.CourseId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(e => new { e.StudentId, e.CourseId })
+                    .IsUnique();
+
+                entity.ToTable("CourseEnrollments");
+            });
+
         }
 
     }

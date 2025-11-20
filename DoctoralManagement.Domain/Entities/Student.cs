@@ -21,6 +21,7 @@
         public DoctoralProgram? DoctoralProgram { get; set; }
 
         // Navigation
+        public ICollection<CourseEnrollment> CourseEnrollments { get; set; } = new List<CourseEnrollment>();
         public ICollection<DoctoralProject> DoctoralProjects { get; set; } = new List<DoctoralProject>();
         public ICollection<Publication> Publications { get; set; } = new List<Publication>();
         public ICollection<Mobility> Mobilities { get; set; } = new List<Mobility>();
