@@ -9,12 +9,14 @@ namespace DoctoralManagement.Application.Applications.Commands
         private readonly IApplicationRepository _applicationRepository;
         private readonly IDoctoralProgramRepository _doctoralProgramRepository;
         private readonly IStudentRepository _studentRepository;
+        private readonly IEctsTrackingRepository _ectsTrackingRepository;
 
-        public ReviewApplicationHandler(IApplicationRepository applicationRepository, IDoctoralProgramRepository doctoralProgramRepository, IStudentRepository studentRepository)
+        public ReviewApplicationHandler(IApplicationRepository applicationRepository, IDoctoralProgramRepository doctoralProgramRepository, IStudentRepository studentRepository, IEctsTrackingRepository ectsTrackingRepository)
         {
             _applicationRepository = applicationRepository;
             _doctoralProgramRepository = doctoralProgramRepository;
             _studentRepository = studentRepository;
+            _ectsTrackingRepository = ectsTrackingRepository;
         }
 
         public async Task<ReviewApplicationResponse> Handle(ReviewApplicationCommand request, CancellationToken cancellationToken)
@@ -46,7 +48,29 @@ namespace DoctoralManagement.Application.Applications.Commands
                 await _doctoralProgramRepository.UpdateAsync(program);
 
                 student.DoctoralProgramId = application.DoctoralProgramId;
+
+                if (student.CurrentSemester == 0)
+                {
+                    student.CurrentSemester = 1;
+                }
+
                 await _studentRepository.UpdateAsync(student);
+
+                var existingEcts = await _ectsTrackingRepository.GetByStudentIdAsync(student.Id);
+                if (existingEcts == null)
+                {
+                    var newEctsTracking = new ECTSTracking
+                    {
+                        StudentId = student.Id,
+                        OrganizedAcademicTraining = 0,
+                        IndependentResearchProject = 0,
+                        InternationalMobility = 0,
+                        TeachingActivities = 0,
+                        Publications = 0,
+                        ThesisDefence = 0
+                    };
+                    await _ectsTrackingRepository.CreateAsync(newEctsTracking);
+                }
             }
 
             application.ApplicationStatus = request.NewStatus;

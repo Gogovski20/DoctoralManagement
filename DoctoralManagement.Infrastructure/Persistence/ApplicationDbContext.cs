@@ -51,6 +51,10 @@ namespace DoctoralManagement.Infrastructure.Persistence
             modelBuilder.Entity<Student>(entity =>
             {
                 entity.HasKey(s => s.Id);
+
+                entity.Property(s => s.Id)
+                    .ValueGeneratedOnAdd();
+
                 entity.Property(s => s.FullName).IsRequired().HasMaxLength(200);
                 entity.Property(s => s.Email).IsRequired().HasMaxLength(100);
                 entity.Property(s => s.IndexNumber).IsRequired().HasMaxLength(20);
