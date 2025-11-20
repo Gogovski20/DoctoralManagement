@@ -1,0 +1,54 @@
+﻿using DoctoralManagement.Domain.Interfaces;
+using MediatR;
+
+namespace DoctoralManagement.Application.Courses.Commands
+{
+    public class CompleteCourseEnrollmentHandler : IRequestHandler<CompleteCourseEnrollmentCommand, bool>
+    {
+        private readonly ICourseEnrollmentRepository _courseEnrollmentRepository;
+        private readonly ICourseRepository _courseRepository;
+        private readonly IEctsTrackingRepository _ectsTrackingRepository;
+
+        public CompleteCourseEnrollmentHandler(ICourseEnrollmentRepository courseEnrollmentRepository, ICourseRepository courseRepository, IEctsTrackingRepository ectsTrackingRepository)
+        {
+            _courseEnrollmentRepository = courseEnrollmentRepository;
+            _courseRepository = courseRepository;
+            _ectsTrackingRepository = ectsTrackingRepository;
+        }
+
+        public async Task<bool> Handle(CompleteCourseEnrollmentCommand request, CancellationToken cancellationToken)
+        {
+            var enrollment = await _courseEnrollmentRepository.GetByIdAsync(request.EnrollmentId)
+                ?? throw new Exception($"Enrollment with id {request.EnrollmentId} not found");
+
+            if (enrollment.StudentId != request.StudentId) 
+            {
+                throw new Exception("Student ID mismatch");
+            }
+
+            var course = await _courseRepository.GetByIdAsync(enrollment.CourseId)
+                ?? throw new Exception("Course not found");
+
+            if (request.Grade < 6.0m || request.Grade > 10.0m)
+            {
+                throw new Exception("Grade must be between 6.0 and 10.0");
+            }
+
+            enrollment.Completed = true;
+            enrollment.Grade = request.Grade;
+            await _courseEnrollmentRepository.UpdateAsync(enrollment);
+
+            var ectsTracking = await _ectsTrackingRepository.GetByStudentIdAsync(request.StudentId);
+            if (ectsTracking != null) 
+            {
+                ectsTracking.OrganizedAcademicTraining += course.EctsCredits;
+                if (ectsTracking.OrganizedAcademicTraining > 42)
+                {
+                    ectsTracking.OrganizedAcademicTraining = 42;
+                }
+                await _ectsTrackingRepository.UpdateAsync(ectsTracking);
+            }
+            return true;
+        }
+    }
+}
