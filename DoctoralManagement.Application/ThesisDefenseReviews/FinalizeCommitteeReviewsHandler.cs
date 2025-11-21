@@ -11,17 +11,20 @@ namespace DoctoralManagement.Application.ThesisDefenseReviews
         private readonly ICommitteeReviewRepository _reviewRepo;
         private readonly IDoctoralProjectRepository _projectRepo;
         private readonly IStudentRepository _studentRepo;
+        private readonly IEctsTrackingRepository _ectsTrackingRepo;
 
         public FinalizeCommitteeReviewsHandler(
             IThesisDefenseRepository defenseRepo,
             ICommitteeReviewRepository reviewRepo,
             IDoctoralProjectRepository projectRepo,
-            IStudentRepository studentRepo)
+            IStudentRepository studentRepo,
+            IEctsTrackingRepository ectsTrackingRepo)
         {
             _defenseRepo = defenseRepo;
             _reviewRepo = reviewRepo;
             _projectRepo = projectRepo;
             _studentRepo = studentRepo;
+            _ectsTrackingRepo = ectsTrackingRepo;
         }
 
         public async Task<FinalizeCommitteeReviewsResponse> Handle(
@@ -38,6 +41,11 @@ namespace DoctoralManagement.Application.ThesisDefenseReviews
 
             if (!reviews.Any())
                 throw new Exception("Cannot finalize — no committee reviews submitted.");
+
+            if (reviews.Count() < defense.CommitteeMemberIds.Count())
+            {
+                throw new Exception($"Not all committee members have submitted reviews. Expected: {defense.CommitteeMemberIds.Count()}, Received: {reviews.Count()}");
+            }
 
             CommitteeApprovalStatus finalDecision;
 
@@ -72,6 +80,18 @@ namespace DoctoralManagement.Application.ThesisDefenseReviews
                     var student = defense.DoctoralProject.Student;
                     if (student != null)
                     {
+                        var ectsTracking = await _ectsTrackingRepo.GetByStudentIdAsync(student.Id);
+                        if (ectsTracking != null)
+                        {
+                            ectsTracking.ThesisDefence = 46;
+                            await _ectsTrackingRepo.UpdateAsync(ectsTracking);
+
+                            if (ectsTracking.TotalECTS < 180)
+                            {
+                                throw new Exception($"Student ECTS total is {ectsTracking.TotalECTS}. Must be 180 to graduate.");
+                            }
+                        }
+
                         student.Status = StudentStatus.Graduated;
                         await _studentRepo.UpdateAsync(student);
                     }
