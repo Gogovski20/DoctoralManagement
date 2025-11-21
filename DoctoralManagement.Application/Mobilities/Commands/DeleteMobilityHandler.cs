@@ -1,4 +1,5 @@
-﻿using DoctoralManagement.Domain.Interfaces;
+﻿using DoctoralManagement.Application.ECTS.Services;
+using DoctoralManagement.Domain.Interfaces;
 using MediatR;
 
 namespace DoctoralManagement.Application.Mobilities.Commands
@@ -7,11 +8,13 @@ namespace DoctoralManagement.Application.Mobilities.Commands
     {
         private readonly IMobilityRepository _mobilityRepository;
         private readonly IEctsTrackingRepository _ectsRepository;
+        private readonly EctsProgressService _ectsProgressService;
 
-        public DeleteMobilityHandler(IMobilityRepository mobilityRepository, IEctsTrackingRepository ectsRepository)
+        public DeleteMobilityHandler(IMobilityRepository mobilityRepository, IEctsTrackingRepository ectsRepository, EctsProgressService ectsProgressService)
         {
             _mobilityRepository = mobilityRepository;
             _ectsRepository = ectsRepository;
+            _ectsProgressService = ectsProgressService;
         }
 
         public async Task<bool> Handle(DeleteMobilityCommand request, CancellationToken cancellationToken)
@@ -21,6 +24,7 @@ namespace DoctoralManagement.Application.Mobilities.Commands
                 throw new Exception($"Mobility with ID {request.Id} not found.");
 
             int ectsPoints = CalculateEctsForMobility(mobility.StartDate, mobility.EndDate);
+            int studentId = mobility.StudentId;
 
             await _mobilityRepository.DeleteAsync(request.Id);
 
@@ -33,6 +37,7 @@ namespace DoctoralManagement.Application.Mobilities.Commands
                     ectsTracking.InternationalMobility = 0;
 
                 await _ectsRepository.UpdateAsync(ectsTracking);
+                await _ectsProgressService.UpdateStudentSemesterAsync(studentId, ectsTracking.TotalECTS);
             }
 
             return true;

@@ -1,4 +1,5 @@
-﻿using DoctoralManagement.Domain.Interfaces;
+﻿using DoctoralManagement.Application.ECTS.Services;
+using DoctoralManagement.Domain.Interfaces;
 using MediatR;
 
 namespace DoctoralManagement.Application.Courses.Commands
@@ -8,12 +9,14 @@ namespace DoctoralManagement.Application.Courses.Commands
         private readonly ICourseEnrollmentRepository _courseEnrollmentRepository;
         private readonly ICourseRepository _courseRepository;
         private readonly IEctsTrackingRepository _ectsTrackingRepository;
+        private readonly EctsProgressService _progressService;
 
-        public CompleteCourseEnrollmentHandler(ICourseEnrollmentRepository courseEnrollmentRepository, ICourseRepository courseRepository, IEctsTrackingRepository ectsTrackingRepository)
+        public CompleteCourseEnrollmentHandler(ICourseEnrollmentRepository courseEnrollmentRepository, ICourseRepository courseRepository, IEctsTrackingRepository ectsTrackingRepository, EctsProgressService progressService)
         {
             _courseEnrollmentRepository = courseEnrollmentRepository;
             _courseRepository = courseRepository;
             _ectsTrackingRepository = ectsTrackingRepository;
+            _progressService = progressService;
         }
 
         public async Task<bool> Handle(CompleteCourseEnrollmentCommand request, CancellationToken cancellationToken)
@@ -47,6 +50,8 @@ namespace DoctoralManagement.Application.Courses.Commands
                     ectsTracking.OrganizedAcademicTraining = 42;
                 }
                 await _ectsTrackingRepository.UpdateAsync(ectsTracking);
+
+                await _progressService.UpdateStudentSemesterAsync(request.StudentId, ectsTracking.TotalECTS);
             }
             return true;
         }

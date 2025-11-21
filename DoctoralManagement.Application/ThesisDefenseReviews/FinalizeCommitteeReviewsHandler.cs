@@ -1,4 +1,5 @@
-﻿using DoctoralManagement.Domain.Entities;
+﻿using DoctoralManagement.Application.ECTS.Services;
+using DoctoralManagement.Domain.Entities;
 using DoctoralManagement.Domain.Interfaces;
 using MediatR;
 
@@ -12,19 +13,22 @@ namespace DoctoralManagement.Application.ThesisDefenseReviews
         private readonly IDoctoralProjectRepository _projectRepo;
         private readonly IStudentRepository _studentRepo;
         private readonly IEctsTrackingRepository _ectsTrackingRepo;
+        private readonly EctsProgressService _ectsProgressService;
 
         public FinalizeCommitteeReviewsHandler(
             IThesisDefenseRepository defenseRepo,
             ICommitteeReviewRepository reviewRepo,
             IDoctoralProjectRepository projectRepo,
             IStudentRepository studentRepo,
-            IEctsTrackingRepository ectsTrackingRepo)
+            IEctsTrackingRepository ectsTrackingRepo,
+            EctsProgressService ectsProgressService)
         {
             _defenseRepo = defenseRepo;
             _reviewRepo = reviewRepo;
             _projectRepo = projectRepo;
             _studentRepo = studentRepo;
             _ectsTrackingRepo = ectsTrackingRepo;
+            _ectsProgressService = ectsProgressService;
         }
 
         public async Task<FinalizeCommitteeReviewsResponse> Handle(
@@ -90,6 +94,7 @@ namespace DoctoralManagement.Application.ThesisDefenseReviews
                             {
                                 throw new Exception($"Student ECTS total is {ectsTracking.TotalECTS}. Must be 180 to graduate.");
                             }
+                            await _ectsProgressService.UpdateStudentSemesterAsync(student.Id, ectsTracking.TotalECTS);
                         }
 
                         student.Status = StudentStatus.Graduated;

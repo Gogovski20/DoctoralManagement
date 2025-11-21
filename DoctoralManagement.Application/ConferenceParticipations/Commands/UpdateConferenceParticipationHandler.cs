@@ -1,4 +1,5 @@
-﻿using DoctoralManagement.Domain.Interfaces;
+﻿using DoctoralManagement.Application.ECTS.Services;
+using DoctoralManagement.Domain.Interfaces;
 using MediatR;
 
 namespace DoctoralManagement.Application.ConferenceParticipations.Commands
@@ -7,11 +8,13 @@ namespace DoctoralManagement.Application.ConferenceParticipations.Commands
     {
         private readonly IConferenceParticipationRepository _conferenceParticipationRepository;
         private readonly IEctsTrackingRepository _ectsTrackingRepository;
+        private readonly EctsProgressService _ectsProgressService;
 
-        public UpdateConferenceParticipationHandler(IConferenceParticipationRepository conferenceParticipationRepository, IEctsTrackingRepository ectsTrackingRepository)
+        public UpdateConferenceParticipationHandler(IConferenceParticipationRepository conferenceParticipationRepository, IEctsTrackingRepository ectsTrackingRepository, EctsProgressService ectsProgressService)
         {
             _conferenceParticipationRepository = conferenceParticipationRepository;
             _ectsTrackingRepository = ectsTrackingRepository;
+            _ectsProgressService = ectsProgressService;
         }
 
         public async Task<UpdateConferenceParticipationResponse> Handle(UpdateConferenceParticipationCommand request, CancellationToken cancellationToken)
@@ -39,6 +42,7 @@ namespace DoctoralManagement.Application.ConferenceParticipations.Commands
                     ectsTracking.TeachingActivities = 18;
                 }
                 await _ectsTrackingRepository.UpdateAsync(ectsTracking);
+                await _ectsProgressService.UpdateStudentSemesterAsync(conference.StudentId, ectsTracking.TotalECTS);
             }
             return new UpdateConferenceParticipationResponse { };
         }

@@ -1,4 +1,5 @@
-﻿using DoctoralManagement.Domain.Entities;
+﻿using DoctoralManagement.Application.ECTS.Services;
+using DoctoralManagement.Domain.Entities;
 using DoctoralManagement.Domain.Interfaces;
 using MediatR;
 
@@ -7,14 +8,14 @@ namespace DoctoralManagement.Application.DoctoralProjects.Commands
     public class ReviewDoctoralProjectHandler : IRequestHandler<ReviewDoctoralProjectCommand, ReviewDoctoralProjectResponse>
     {
         private readonly IDoctoralProjectRepository _projectRepository;
-        private readonly IMentorRepository _mentorRepository;
         private readonly IEctsTrackingRepository _ectsTrackingRepository;
+        private readonly EctsProgressService _ectsProgressService;
 
-        public ReviewDoctoralProjectHandler(IDoctoralProjectRepository projectRepository, IMentorRepository mentorRepository, IEctsTrackingRepository ectsTrackingRepository)
+        public ReviewDoctoralProjectHandler(IDoctoralProjectRepository projectRepository, IEctsTrackingRepository ectsTrackingRepository, EctsProgressService ectsProgressService)
         {
             _projectRepository = projectRepository;
-            _mentorRepository = mentorRepository;
             _ectsTrackingRepository = ectsTrackingRepository;
+            _ectsProgressService = ectsProgressService;
         }
 
         public async Task<ReviewDoctoralProjectResponse> Handle(ReviewDoctoralProjectCommand request, CancellationToken cancellationToken)
@@ -48,6 +49,8 @@ namespace DoctoralManagement.Application.DoctoralProjects.Commands
                 {
                     ectsTracking.IndependentResearchProject = 41;
                     await _ectsTrackingRepository.UpdateAsync(ectsTracking);
+
+                    await _ectsProgressService.UpdateStudentSemesterAsync(project.StudentId, ectsTracking.TotalECTS);
                 }
                 else
                 {
