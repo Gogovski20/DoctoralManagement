@@ -8,14 +8,12 @@
 
   <ItemGroup>
     <PackageReference Include="MediatR" Version="12.2.0" />
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="7.8.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.8.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\DoctoralManagement.Domain\DoctoralManagement.Domain.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="ECTS\Commands\" />
   </ItemGroup>
 
 </Project>

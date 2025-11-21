@@ -1,4 +1,5 @@
-﻿using DoctoralManagement.Application.Students.Commands;
+﻿using DoctoralManagement.Application.ECTS.Commands;
+using DoctoralManagement.Application.Students.Commands;
 using DoctoralManagement.Application.Students.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -72,6 +73,15 @@ namespace DoctoralManagement.API.Controllers
 
             await _mediator.Send(command);
 
+            return NoContent();
+        }
+
+        [HttpPut("{studentId}/semester")]
+        public async Task<IActionResult> AdvanceStudentSemester(int studentId,
+            [FromBody] AdvanceStudentSemesterCommand command)
+        {
+            command.StudentId = studentId;
+            await _mediator.Send(command);
             return NoContent();
         }
     }

@@ -1,4 +1,5 @@
-﻿using DoctoralManagement.Domain.Interfaces;
+﻿using DoctoralManagement.Application.ECTS.Services;
+using DoctoralManagement.Domain.Interfaces;
 using MediatR;
 
 namespace DoctoralManagement.Application.Mobilities.Commands
@@ -7,11 +8,13 @@ namespace DoctoralManagement.Application.Mobilities.Commands
     {
         private readonly IMobilityRepository _mobilityRepository;
         private readonly IEctsTrackingRepository _ectsRepository;
+        private readonly EctsProgressService _progressService;
 
-        public UpdateMobilityHandler(IMobilityRepository mobilityRepository, IEctsTrackingRepository ectsRepository)
+        public UpdateMobilityHandler(IMobilityRepository mobilityRepository, IEctsTrackingRepository ectsRepository, EctsProgressService progressService)
         {
             _mobilityRepository = mobilityRepository;
             _ectsRepository = ectsRepository;
+            _progressService = progressService;
         }
 
         public async Task<PublicationResponse> Handle(UpdateMobilityCommand request, CancellationToken cancellationToken)
@@ -42,6 +45,7 @@ namespace DoctoralManagement.Application.Mobilities.Commands
                     ectsTracking.InternationalMobility = 0;
 
                 await _ectsRepository.UpdateAsync(ectsTracking);
+                await _progressService.UpdateStudentSemesterAsync(mobility.StudentId, ectsTracking.TotalECTS);
             }
 
             return new PublicationResponse { };

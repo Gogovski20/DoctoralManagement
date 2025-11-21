@@ -1,4 +1,5 @@
-﻿using DoctoralManagement.Domain.Entities;
+﻿using DoctoralManagement.Application.ECTS.Services;
+using DoctoralManagement.Domain.Entities;
 using DoctoralManagement.Domain.Interfaces;
 using MediatR;
 
@@ -10,13 +11,15 @@ namespace DoctoralManagement.Application.ConferenceParticipations.Commands
         private readonly IConferenceParticipationRepository _conferenceParticipationRepository;
         private readonly IEctsTrackingRepository _ectsTrackingRepository;
         private readonly IApplicationRepository _applicationRepository;
+        private readonly EctsProgressService _ectsProgressService;
 
-        public AddConferenceParticipationHandler(IStudentRepository studentRepository, IConferenceParticipationRepository conferenceParticipationRepository, IEctsTrackingRepository ectsTrackingRepository, IApplicationRepository applicationRepository)
+        public AddConferenceParticipationHandler(IStudentRepository studentRepository, IConferenceParticipationRepository conferenceParticipationRepository, IEctsTrackingRepository ectsTrackingRepository, IApplicationRepository applicationRepository, EctsProgressService ectsProgressService)
         {
             _studentRepository = studentRepository;
             _conferenceParticipationRepository = conferenceParticipationRepository;
             _ectsTrackingRepository = ectsTrackingRepository;
             _applicationRepository = applicationRepository;
+            _ectsProgressService = ectsProgressService;
         }
 
         public async Task<AddConferenceParticipationResponse> Handle(AddConferenceParticipationCommand request, CancellationToken cancellationToken)
@@ -52,6 +55,7 @@ namespace DoctoralManagement.Application.ConferenceParticipations.Commands
                     ectsTracking.TeachingActivities = 18;
                 }
                 await _ectsTrackingRepository.UpdateAsync(ectsTracking);
+                await _ectsProgressService.UpdateStudentSemesterAsync(request.StudentId, ectsTracking.TotalECTS);
             }
 
             return new AddConferenceParticipationResponse 

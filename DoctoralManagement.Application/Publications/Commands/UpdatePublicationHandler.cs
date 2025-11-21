@@ -1,4 +1,5 @@
-﻿using DoctoralManagement.Domain.Interfaces;
+﻿using DoctoralManagement.Application.ECTS.Services;
+using DoctoralManagement.Domain.Interfaces;
 using MediatR;
 
 namespace DoctoralManagement.Application.Publications.Commands
@@ -7,11 +8,13 @@ namespace DoctoralManagement.Application.Publications.Commands
     {
         private readonly IPublicationRepository _publicationRepository;
         private readonly IEctsTrackingRepository _ectsRepository;
+        private readonly EctsProgressService _progressService;
 
-        public UpdatePublicationHandler(IPublicationRepository publicationRepository, IEctsTrackingRepository ectsRepository)
+        public UpdatePublicationHandler(IPublicationRepository publicationRepository, IEctsTrackingRepository ectsRepository, EctsProgressService progressService)
         {
             _publicationRepository = publicationRepository;
             _ectsRepository = ectsRepository;
+            _progressService = progressService;
         }
 
         public async Task<PublicationResponse> Handle(UpdatePublicationCommand request, CancellationToken cancellationToken)
@@ -40,6 +43,7 @@ namespace DoctoralManagement.Application.Publications.Commands
                     ectsTracking.Publications = 27;
 
                 await _ectsRepository.UpdateAsync(ectsTracking);
+                await _progressService.UpdateStudentSemesterAsync(publication.StudentId, ectsTracking.TotalECTS);
             }
 
             return new PublicationResponse { };

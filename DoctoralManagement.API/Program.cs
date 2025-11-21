@@ -1,3 +1,4 @@
+using DoctoralManagement.Application.ECTS.Services;
 using DoctoralManagement.Application.Students.Commands;
 using DoctoralManagement.Domain.Interfaces;
 using DoctoralManagement.Infrastructure.Persistence;
@@ -37,6 +38,8 @@ namespace DoctoralManagement.API
             builder.Services.AddScoped<IConferenceParticipationRepository, ConferenceParticipationRepository>();
             builder.Services.AddScoped<ICourseRepository, CourseRepository>();
             builder.Services.AddScoped<ICourseEnrollmentRepository, CourseEnrollmentRepository>();
+
+            builder.Services.AddScoped<EctsProgressService>();
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
