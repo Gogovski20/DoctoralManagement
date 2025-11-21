@@ -25,6 +25,11 @@ namespace DoctoralManagement.Application.ThesisDefenses
             if (defense.Status != DefenseStatus.Scheduled)
                 throw new Exception("Only scheduled defenses can be completed.");
 
+            if (DateTime.UtcNow < defense.ScheduledAt.AddMinutes(-5))
+            {
+                throw new Exception($"Defense cannot be marked complete until scheduled time ({defense.ScheduledAt}).");
+            }
+
             // Set defense as completed (NOT passed/failed yet)
             defense.Status = DefenseStatus.Completed;
             defense.ResultNotes = request.ResultNotes;
@@ -50,9 +55,8 @@ namespace DoctoralManagement.Application.ThesisDefenses
 
         private string GenerateArchiveNumber(ThesisDefense d)
         {
-            var year = DateTime.UtcNow.Year;
-            var rand = new Random().Next(1000, 9999);
-            return $"DEF-{year}-{d.DoctoralProjectId}-{rand}";
+            var timestamp = DateTime.UtcNow.ToString("yyyyMMddHHmmss");
+            return $"DR-{d.DoctoralProjectId}-{timestamp}";
         }
     }
 }

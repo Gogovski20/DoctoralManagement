@@ -9,12 +9,14 @@ namespace DoctoralManagement.Application.DoctoralProjects.Commands
         private readonly IDoctoralProjectRepository _doctoralProjectRepository;
         private readonly IStudentRepository _studentRepository;
         private readonly IMentorRepository _mentorRepository;
+        private readonly IApplicationRepository _applicationRepository;
 
-        public CreateDoctoralProjectDraftHandler(IDoctoralProjectRepository doctoralProjectRepository, IStudentRepository studentRepository, IMentorRepository mentorRepository)
+        public CreateDoctoralProjectDraftHandler(IDoctoralProjectRepository doctoralProjectRepository, IStudentRepository studentRepository, IMentorRepository mentorRepository, IApplicationRepository applicationRepository)
         {
             _doctoralProjectRepository = doctoralProjectRepository;
             _studentRepository = studentRepository;
             _mentorRepository = mentorRepository;
+            _applicationRepository = applicationRepository;
         }
 
         public async Task<CreateDoctoralProjectDraftResponse> Handle(CreateDoctoralProjectDraftCommand request, CancellationToken cancellationToken)
@@ -22,8 +24,20 @@ namespace DoctoralManagement.Application.DoctoralProjects.Commands
             var student = await _studentRepository.GetByIdAsync(request.StudentId)
                 ?? throw new Exception($"Student with id {request.StudentId} not found");
 
+            var hasAccepted = await _applicationRepository.HasFinalAcceptedApplicationAsync(request.StudentId);
+            if (!hasAccepted)
+            {
+                throw new Exception("Student must have FinalAccepted application to create doctoral project");
+            }
+
             var mentor = await _mentorRepository.GetByIdAsync(request.MentorId)
                 ?? throw new Exception($"Mentor with id {request.MentorId} not found");
+
+            var mentorAvailable = await _mentorRepository.IsAvailableForNewStudentAsync(request.MentorId);
+            if (!mentorAvailable)
+            {
+                throw new Exception("Mentor cannot be assigned - reached maximum number of supervised students");
+            }
 
             var project = new DoctoralProject
             {

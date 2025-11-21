@@ -8,11 +8,13 @@ namespace DoctoralManagement.Application.DoctoralProjects.Commands
     {
         private readonly IDoctoralProjectRepository _projectRepository;
         private readonly IMentorRepository _mentorRepository;
+        private readonly IEctsTrackingRepository _ectsTrackingRepository;
 
-        public ReviewDoctoralProjectHandler(IDoctoralProjectRepository projectRepository, IMentorRepository mentorRepository)
+        public ReviewDoctoralProjectHandler(IDoctoralProjectRepository projectRepository, IMentorRepository mentorRepository, IEctsTrackingRepository ectsTrackingRepository)
         {
             _projectRepository = projectRepository;
             _mentorRepository = mentorRepository;
+            _ectsTrackingRepository = ectsTrackingRepository;
         }
 
         public async Task<ReviewDoctoralProjectResponse> Handle(ReviewDoctoralProjectCommand request, CancellationToken cancellationToken)
@@ -20,18 +22,14 @@ namespace DoctoralManagement.Application.DoctoralProjects.Commands
             var project = await _projectRepository.GetByIdAsync(request.ProjectId)
                 ?? throw new Exception($"Doctoral project with id {request.ProjectId} not found.");
 
+            if (project.Status != ProjectStatus.Submitted && project.Status != ProjectStatus.UnderReview && project.Status != ProjectStatus.ChangesRequested)
+            {
+                throw new Exception("Only projects in status: Submitted, UnderReview, ChangesRequested can be reviewed.");
+            }
+
             if (!IsValidTransition(project.Status, request.NewStatus))
             {
                 throw new Exception($"Invalid status transition from {project.Status} to {request.NewStatus}.");
-            }
-
-            if (request.NewStatus == ProjectStatus.Approved)
-            {
-                var mentorAvailable = await _mentorRepository.IsAvailableForNewStudentAsync(project.MentorId);
-                if (!mentorAvailable)
-                {
-                    throw new Exception("Mentor cannot be assigned — reached maximum number of supervised students.");
-                }
             }
 
             project.Status = request.NewStatus;
@@ -41,6 +39,20 @@ namespace DoctoralManagement.Application.DoctoralProjects.Commands
                 request.NewStatus == ProjectStatus.Rejected)
             {
                 project.DecisionAt = DateTime.UtcNow;
+            }
+
+            if (request.NewStatus == ProjectStatus.Approved)
+            {
+                var ectsTracking = await _ectsTrackingRepository.GetByStudentIdAsync(project.StudentId);
+                if (ectsTracking != null)
+                {
+                    ectsTracking.IndependentResearchProject = 41;
+                    await _ectsTrackingRepository.UpdateAsync(ectsTracking);
+                }
+                else
+                {
+                    throw new Exception("ECTS tracking record not found for this student");
+                }
             }
 
             await _projectRepository.UpdateAsync(project);

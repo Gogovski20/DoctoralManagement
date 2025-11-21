@@ -9,12 +9,16 @@ namespace DoctoralManagement.Application.ThesisDefenses
         private readonly IDoctoralProjectRepository _projectRepository;
         private readonly IThesisDefenseRepository _thesisDefenseRepository;
         private readonly IMentorRepository _mentorRepository;
+        private readonly IEctsTrackingRepository _ectsTrackingRepository;
+        private readonly IStudentRepository _studentRepository;
 
-        public ScheduleThesisDefenseHandler(IDoctoralProjectRepository projectRepository, IThesisDefenseRepository thesisDefenseRepository, IMentorRepository mentorRepository)
+        public ScheduleThesisDefenseHandler(IDoctoralProjectRepository projectRepository, IThesisDefenseRepository thesisDefenseRepository, IMentorRepository mentorRepository, IEctsTrackingRepository ectsTrackingRepository, IStudentRepository studentRepository)
         {
             _projectRepository = projectRepository;
             _thesisDefenseRepository = thesisDefenseRepository;
             _mentorRepository = mentorRepository;
+            _ectsTrackingRepository = ectsTrackingRepository;
+            _studentRepository = studentRepository;
         }
 
         public async Task<ScheduleThesisDefenseResponse> Handle(ScheduleThesisDefenseCommand request, CancellationToken cancellationToken)
@@ -32,9 +36,29 @@ namespace DoctoralManagement.Application.ThesisDefenses
                 throw new Exception("A defense is already scheduled for this project");
             }
 
+            var ectsTracking = await _ectsTrackingRepository.GetByStudentIdAsync(project.StudentId)
+                ?? throw new Exception("ECTS tracking not found for student.");
+            int currentEcts = ectsTracking.TotalECTS;
+            if (currentEcts < 134)
+            {
+                throw new Exception($"Student must have at least 134 ECTS before defense scheduling. Current: {currentEcts} ECTS.");
+            }
+
+            var student = await _studentRepository.GetByIdAsync(project.StudentId);
+            if (student?.CurrentSemester < 5)
+            {
+                throw new Exception("Student must be in semester 5 or later to schedule defense (typically final semester).");
+            }
+
+
             if (request.CommitteeMemberIds == null || request.CommitteeMemberIds.Count < 3)
             {
                 throw new Exception("At least 3 committee members are required");
+            }
+
+            if (!request.CommitteeMemberIds.Contains(project.MentorId))
+            {
+                throw new Exception("Project mentor must be part of the defense committee.");
             }
 
             foreach (var memberId in request.CommitteeMemberIds)
