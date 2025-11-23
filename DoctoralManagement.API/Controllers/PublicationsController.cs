@@ -1,6 +1,7 @@
 ﻿using DoctoralManagement.Application.Publications.Commands;
 using DoctoralManagement.Application.Publications.Queries;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DoctoralManagement.API.Controllers
@@ -17,6 +18,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Student,Secretary")]
         public async Task<IActionResult> AddPublication([FromBody] CreatePublicationCommand command)
         {
             var result = await _mediator.Send(command);
@@ -24,6 +26,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpGet("student/{studentId}")]
+        [Authorize(Roles = "Student,Secretary")]
         public async Task<IActionResult> GetStudentPublications(int studentId)
         {
             var query = new GetStudentPublicationsQuery { StudentId = studentId };
@@ -32,6 +35,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Student,Secretary")]
         public async Task<IActionResult> UpdatePublication(int id, [FromBody] UpdatePublicationCommand command)
         {
             if (id != command.Id) return BadRequest("ID mismatch");
@@ -41,6 +45,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Secretary")]
         public async Task<IActionResult> DeletePublication(int id)
         {
             await _mediator.Send(new DeletePublicationCommand { Id = id });

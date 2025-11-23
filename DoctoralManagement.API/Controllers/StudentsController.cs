@@ -2,6 +2,7 @@
 using DoctoralManagement.Application.Students.Commands;
 using DoctoralManagement.Application.Students.Queries;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DoctoralManagement.API.Controllers
@@ -19,6 +20,7 @@ namespace DoctoralManagement.API.Controllers
 
         // GET: api/Students
         [HttpGet]
+        [Authorize(Roles = "Secretary,Mentor")]
         public async Task<ActionResult<IEnumerable<GetAllStudentsResponse>>> GetStudents()
         {
             var query = new GetAllStudentsQuery();
@@ -28,6 +30,7 @@ namespace DoctoralManagement.API.Controllers
 
         // GET: api/Students/5
         [HttpGet("{id}")]
+        [Authorize(Roles = "Secretary,Mentor")]
         public async Task<ActionResult<GetStudentByIdResponse>> GetStudentById(int id)
         {
             var query = new GetStudentByIdQuery { Id = id };
@@ -37,6 +40,7 @@ namespace DoctoralManagement.API.Controllers
 
         // PUT: api/Students/5
         [HttpPut("{id}")]
+        [Authorize(Roles = "Secretary")]
         public async Task<IActionResult> UpdateStudent(int id, [FromBody] UpdateStudentCommand command)
         {
             if (id != command.Id)
@@ -52,6 +56,7 @@ namespace DoctoralManagement.API.Controllers
         // POST: api/Students
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [Authorize(Roles = "Secretary")]
         public async Task<ActionResult<CreateStudentResponse>> CreateStudent(CreateStudentCommand command)
         {
             try
@@ -67,6 +72,7 @@ namespace DoctoralManagement.API.Controllers
 
         // DELETE: api/Students/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Secretary")]
         public async Task<IActionResult> DeleteStudent(int id)
         {
             var command = new DeleteStudentCommand { Id = id };
@@ -77,6 +83,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpPut("{studentId}/semester")]
+        [Authorize(Roles = "Secretary")]
         public async Task<IActionResult> AdvanceStudentSemester(int studentId,
             [FromBody] AdvanceStudentSemesterCommand command)
         {

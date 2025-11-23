@@ -1,5 +1,6 @@
 ﻿using DoctoralManagement.Application.ECTS.Queries;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,6 +18,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpGet("status")]
+        [Authorize(Roles = "Secretary,Student,Mentor")]
         public async Task<IActionResult> GetEctsStatus(int studentId)
         {
             var query = new GetStudentEctsStatusQuery { StudentId = studentId };
@@ -25,6 +27,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpGet("detailed")]
+        [Authorize(Roles = "Secretary,Student,Mentor")]
         public async Task<IActionResult> GetEctsDetailed(int studentId)
         {
             var query = new GetStudentEctsDetailedQuery { StudentId = studentId };

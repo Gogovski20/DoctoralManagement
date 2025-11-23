@@ -1,6 +1,7 @@
 ﻿using DoctoralManagement.Application.DoctoralProjects.Commands;
 using DoctoralManagement.Application.DoctoralProjects.Queries;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DoctoralManagement.API.Controllers
@@ -17,6 +18,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpPost("create-draft")]
+        [Authorize(Roles = "Student,Mentor")]
         public async Task<IActionResult> CreateDraft([FromBody] CreateDoctoralProjectDraftCommand command)
         {
             var result = await _mediator.Send(command);
@@ -25,6 +27,7 @@ namespace DoctoralManagement.API.Controllers
 
         // POST: api/DoctoralProjects/submit
         [HttpPost("submit")]
+        [Authorize(Roles = "Student,Mentor")]
         public async Task<IActionResult> Submit([FromBody] SubmitDoctoralProjectCommand command)
         {
             var result = await _mediator.Send(command);
@@ -32,6 +35,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpGet("all")]
+        [Authorize(Roles = "Secretary,Committee,Mentor")]
         public async Task<IActionResult> GetAll()
         {
             var result = await _mediator.Send(new GetAllDoctoralProjectsQuery());
@@ -39,6 +43,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpGet("by-student/{studentId}")]
+        [Authorize(Roles = "Student,Secretary,Mentor,Committee,Admin")]
         public async Task<IActionResult> GetByStudent(int studentId)
         {
             var result = await _mediator.Send(new GetDoctoralProjectsByStudentQuery(studentId));
@@ -46,6 +51,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpGet("by-mentor/{mentorId}")]
+        [Authorize(Roles = "Student,Secretary,Mentor,Committee,Admin")]
         public async Task<IActionResult> GetByMentor(int mentorId)
         {
             var result = await _mediator.Send(new GetDoctoralProjectsByMentorQuery(mentorId));
@@ -53,6 +59,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpPost("review")]
+        [Authorize(Roles = "Mentor,Committee")]
         public async Task<IActionResult> Review([FromBody] ReviewDoctoralProjectCommand command)
         {
             var result = await _mediator.Send(command);
@@ -60,6 +67,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Student,Mentor")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateDoctoralProjectCommand command)
         {
             if (id != command.Id)
@@ -71,6 +79,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Secretary,Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             var ok = await _mediator.Send(new DeleteDoctoralProjectCommand { Id = id });

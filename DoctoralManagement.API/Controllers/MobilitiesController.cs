@@ -1,6 +1,7 @@
 ﻿using DoctoralManagement.Application.Mobilities.Commands;
 using DoctoralManagement.Application.Mobilities.Queries;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DoctoralManagement.API.Controllers
@@ -17,6 +18,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Student,Secretary")]
         public async Task<IActionResult> AddMobility([FromBody] AddMobilityCommand command)
         {
             var result = await _mediator.Send(command);
@@ -24,6 +26,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpGet("student/{studentId}")]
+        [Authorize(Roles = "Student,Secretary")]
         public async Task<IActionResult> GetStudentMobilities(int studentId)
         {
             var query = new GetStudentMobilitiesQuery { StudentId = studentId };
@@ -32,6 +35,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Student,Secretary")]
         public async Task<IActionResult> UpdateMobility(int id, [FromBody] UpdateMobilityCommand command)
         {
             if (id != command.Id) return BadRequest("ID mismatch");
@@ -41,6 +45,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Secretary")]
         public async Task<IActionResult> DeleteMobility(int id)
         {
             await _mediator.Send(new DeleteMobilityCommand { Id = id });

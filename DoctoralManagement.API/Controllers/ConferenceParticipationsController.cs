@@ -1,6 +1,7 @@
 ﻿using DoctoralManagement.Application.ConferenceParticipations.Commands;
 using DoctoralManagement.Application.ConferenceParticipations.Queries;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DoctoralManagement.API.Controllers
@@ -17,6 +18,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Student,Secretary")]
         public async Task<IActionResult> AddConferenceParticipation([FromBody] AddConferenceParticipationCommand command)
         {
             var result = await _mediator.Send(command);
@@ -24,6 +26,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpGet("student/{studentId}")]
+        [Authorize(Roles = "Student,Secretary")]
         public async Task<IActionResult> GetStudentConferences(int studentId)
         {
             var query = new GetStudentConferencesQuery {StudentId = studentId};
@@ -32,6 +35,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Student,Secretary")]
         public async Task<IActionResult> UpdateConferenceParticipation(int id, 
             [FromBody] UpdateConferenceParticipationCommand command)
         {
@@ -44,6 +48,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Secretary")]
         public async Task<IActionResult> DeleteConferenceParticipation(int id)
         {
             await _mediator.Send(new DeleteConferenceParticipationCommand { Id = id });
