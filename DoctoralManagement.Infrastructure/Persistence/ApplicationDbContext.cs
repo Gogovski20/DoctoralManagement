@@ -1,10 +1,13 @@
 ﻿using DoctoralManagement.Domain.Entities;
+using DoctoralManagement.Infrastructure.Auth;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace DoctoralManagement.Infrastructure.Persistence
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityRole<int>, int>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
@@ -30,6 +33,7 @@ namespace DoctoralManagement.Infrastructure.Persistence
         {
             base.OnModelCreating(modelBuilder);
 
+            ConfigureApplicationUser(modelBuilder);
             ConfigureStudent(modelBuilder);
             ConfigureMentor(modelBuilder);
             ConfigureDoctoralProgram(modelBuilder);
@@ -45,6 +49,27 @@ namespace DoctoralManagement.Infrastructure.Persistence
             ConfigureCourse(modelBuilder);
             ConfigureCourseEnrollment(modelBuilder);
         }
+
+        private void ConfigureApplicationUser(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ApplicationUser>(entity =>
+            {
+                entity.Property(u => u.FullName).HasMaxLength(200);
+
+                entity.HasOne(u => u.Student)
+                    .WithMany()
+                    .HasForeignKey(u => u.StudentId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasOne(u => u.Mentor)
+                    .WithMany()
+                    .HasForeignKey(u => u.MentorId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.ToTable("AspNetUsers"); // keeps original identity table name
+            });
+        }
+
 
         private void ConfigureStudent(ModelBuilder modelBuilder)
         {
@@ -74,6 +99,8 @@ namespace DoctoralManagement.Infrastructure.Persistence
                       .WithOne(et => et.Student)
                       .HasForeignKey<ECTSTracking>(et => et.StudentId)
                       .OnDelete(DeleteBehavior.Cascade);
+
+                entity.ToTable("Students");
             });
         }
 
@@ -121,6 +148,8 @@ namespace DoctoralManagement.Infrastructure.Persistence
                               c => c.ToList()
                           )
                       );
+
+                entity.ToTable("Mentors");
             });
         }
 
@@ -139,6 +168,8 @@ namespace DoctoralManagement.Infrastructure.Persistence
                 entity.Property(dp => dp.CurrentStudentsCount).IsRequired();
 
                 entity.HasIndex(dp => dp.Name).IsUnique();
+
+                entity.ToTable("DoctoralPrograms");
             });
         }
 
@@ -161,6 +192,8 @@ namespace DoctoralManagement.Infrastructure.Persistence
                       .WithMany(m => m.DoctoralPrograms)
                       .HasForeignKey(pm => pm.MentorId)
                       .OnDelete(DeleteBehavior.Cascade);
+
+                entity.ToTable("ProgramMentors");
             });
         }
 
@@ -189,6 +222,8 @@ namespace DoctoralManagement.Infrastructure.Persistence
                       .WithMany()
                       .HasForeignKey(a => a.PrefferedMentorId)
                       .OnDelete(DeleteBehavior.SetNull);
+
+                entity.ToTable("Applications");
             });
         }
 
@@ -198,6 +233,7 @@ namespace DoctoralManagement.Infrastructure.Persistence
             {
                 entity.HasKey(et => et.Id);
 
+                entity.ToTable("ECTSTrackings");
                 // One-to-one with Student is already configured in Student configuration
             });
         }
@@ -220,6 +256,8 @@ namespace DoctoralManagement.Infrastructure.Persistence
                       .WithMany(m => m.DoctoralProjects)
                       .HasForeignKey(dp => dp.MentorId)
                       .OnDelete(DeleteBehavior.Restrict);
+
+                entity.ToTable("DoctoralProjects");
             });
         }
 
@@ -230,6 +268,8 @@ namespace DoctoralManagement.Infrastructure.Persistence
                 entity.HasKey(p => p.Id);
                 entity.Property(p => p.Title).IsRequired().HasMaxLength(500);
                 entity.Property(p => p.Journal).IsRequired().HasMaxLength(200);
+
+                entity.ToTable("Publications");
             });
         }
 
@@ -240,6 +280,8 @@ namespace DoctoralManagement.Infrastructure.Persistence
                 entity.HasKey(m => m.Id);
                 entity.Property(m => m.Institution).IsRequired().HasMaxLength(200);
                 entity.Property(m => m.Country).IsRequired().HasMaxLength(100);
+
+                entity.ToTable("Mobilities");
             });
         }
 
@@ -260,6 +302,8 @@ namespace DoctoralManagement.Infrastructure.Persistence
                     .WithMany(p => p.Defenses)
                     .HasForeignKey(d => d.DoctoralProjectId)
                     .OnDelete(DeleteBehavior.Cascade);
+
+                entity.ToTable("ThesisDefenses");
             });
         }
 
@@ -273,6 +317,8 @@ namespace DoctoralManagement.Infrastructure.Persistence
                       .WithMany() // later we can create navigation property
                       .HasForeignKey(c => c.StudentId)
                       .OnDelete(DeleteBehavior.Cascade);
+
+                entity.ToTable("ConferenceParticipations");
             });
         }
 
@@ -288,6 +334,8 @@ namespace DoctoralManagement.Infrastructure.Persistence
                     .WithMany(d => d.Reviews)  
                     .HasForeignKey(r => r.ThesisDefenseId)
                     .OnDelete(DeleteBehavior.Cascade);
+
+                entity.ToTable("CommitteeReviews");
             });
         }
 

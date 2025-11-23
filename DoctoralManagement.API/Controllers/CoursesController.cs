@@ -1,7 +1,7 @@
 ﻿using DoctoralManagement.Application.Courses.Commands;
 using DoctoralManagement.Application.Courses.Queries;
 using MediatR;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DoctoralManagement.API.Controllers
@@ -18,6 +18,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Secretary")]
         public async Task<IActionResult> CreateCourse([FromBody] CreateCourseCommand command)
         {
             var result = await _mediator.Send(command);

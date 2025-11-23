@@ -2,6 +2,7 @@
 using DoctoralManagement.Application.ThesisDefenses;
 using DoctoralManagement.Domain.Interfaces;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DoctoralManagement.API.Controllers
@@ -20,6 +21,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpPost("schedule")]
+        [Authorize(Roles = "Mentor,Secretary")]
         public async Task<IActionResult> Schedule([FromBody] ScheduleThesisDefenseCommand command)
         {
             var result = await _mediator.Send(command);
@@ -27,6 +29,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpPost("complete")]
+        [Authorize(Roles = "Secretary")]
         public async Task<IActionResult> Complete([FromBody] CompleteThesisDefenseCommand command)
         {
             var result = await _mediator.Send(command);
@@ -34,6 +37,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpPost("{defenseId}/committee-review")]
+        [Authorize(Roles = "Committee")]
         public async Task<IActionResult> SubmitReview(
             int defenseId,
             [FromBody] SubmitCommitteeReviewCommand command)
@@ -44,6 +48,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpGet("{defenseId}/reviews")]
+        [Authorize(Roles = "Student,Secretary,Mentor,Committee")]
         public async Task<IActionResult> GetReviews(int defenseId)
         {
             var reviews = await _committeeReviewRepository.GetByDefenseIdAsync(defenseId);
@@ -51,6 +56,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpPost("{defenseId}/finalize-reviews")]
+        [Authorize(Roles = "Secretary")]
         public async Task<IActionResult> FinalizeReviews(int defenseId)
         {
             var result = await _mediator.Send(new FinalizeCommitteeReviewsCommand

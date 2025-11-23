@@ -1,6 +1,7 @@
 ﻿using DoctoralManagement.Application.Mentors.Commands;
 using DoctoralManagement.Application.Mentors.Queries;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DoctoralManagement.API.Controllers
@@ -24,6 +25,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize(Roles = "Secretary,Mentor")]
         public async Task<ActionResult<GetMentorResponse>> GetById(int id)
         {
             var mentor = await _mediator.Send(new GetMentorByIdQuery { Id = id });
@@ -35,6 +37,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Secretary")]
         public async Task<ActionResult<MentorResponse>> Create([FromBody] CreateMentorCommand command)
         {
             var result = await _mediator.Send(command);
@@ -42,6 +45,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Secretary")]
         public async Task<ActionResult<MentorResponse>> Update(int id, [FromBody] UpdateMentorCommand command)
         {
             if (id != command.Id)
@@ -53,6 +57,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Secretary")]
         public async Task<IActionResult> Delete(int id)
         {
             await _mediator.Send(new DeleteMentorCommand { Id = id });
