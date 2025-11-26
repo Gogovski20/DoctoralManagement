@@ -59,6 +59,7 @@ namespace DoctoralManagement.API
             builder.Services.AddScoped<ICourseEnrollmentRepository, CourseEnrollmentRepository>();
             builder.Services.AddScoped<IJwtService, JwtService>();
             builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
             builder.Services.AddScoped<EctsProgressService>();
 
@@ -122,6 +123,8 @@ namespace DoctoralManagement.API
                     ValidateLifetime = true
                 };
             });
+
+            builder.Services.AddHttpContextAccessor();
 
             var app = builder.Build();
 

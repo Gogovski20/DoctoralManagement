@@ -1,4 +1,5 @@
-﻿using DoctoralManagement.Domain.Interfaces;
+﻿using DoctoralManagement.Application.Common;
+using DoctoralManagement.Domain.Interfaces;
 using MediatR;
 
 namespace DoctoralManagement.Application.Applications.Commands
@@ -6,10 +7,12 @@ namespace DoctoralManagement.Application.Applications.Commands
     public class UpdateApplicationHandler : IRequestHandler<UpdateApplicationCommand, UpdateApplicationResponse>
     {
         private readonly IApplicationRepository _applicationRepository;
+        private readonly ICurrentUserService _currentUserService;
 
-        public UpdateApplicationHandler(IApplicationRepository applicationRepository)
+        public UpdateApplicationHandler(IApplicationRepository applicationRepository, ICurrentUserService currentUserService)
         {
             _applicationRepository = applicationRepository;
+            _currentUserService = currentUserService;
         }
 
         public async Task<UpdateApplicationResponse> Handle(UpdateApplicationCommand request, CancellationToken cancellationToken)
@@ -19,6 +22,14 @@ namespace DoctoralManagement.Application.Applications.Commands
             if (application == null)
             {
                 throw new Exception($"Application with ID {request.Id} not found.");
+            }
+
+            var currentUserId = _currentUserService.UserId;
+            var currentUserRole = _currentUserService.Role;
+
+            if (application.StudentId != currentUserId || currentUserRole != "Secretary")
+            {
+                throw new UnauthorizedAccessException("You can't update this application.");
             }
 
             if (application.ApplicationStatus != Domain.Entities.ApplicationStatus.Draft)

@@ -1,4 +1,5 @@
-﻿using DoctoralManagement.Domain.Entities;
+﻿using DoctoralManagement.Application.Common;
+using DoctoralManagement.Domain.Entities;
 using DoctoralManagement.Domain.Interfaces;
 using MediatR;
 
@@ -9,12 +10,14 @@ namespace DoctoralManagement.Application.Applications.Commands
         private readonly IApplicationRepository _applicationRepository;
         private readonly IStudentRepository _studentRepository;
         private readonly IDoctoralProgramRepository _doctoralProgramRepository;
+        private readonly ICurrentUserService _currentUserService;
 
-        public SubmitApplicationHandler(IApplicationRepository applicationRepository, IStudentRepository studentRepository, IDoctoralProgramRepository doctoralProgramRepository)
+        public SubmitApplicationHandler(IApplicationRepository applicationRepository, IStudentRepository studentRepository, IDoctoralProgramRepository doctoralProgramRepository, ICurrentUserService currentUserService)
         {
             _applicationRepository = applicationRepository;
             _studentRepository = studentRepository;
             _doctoralProgramRepository = doctoralProgramRepository;
+            _currentUserService = currentUserService;
         }
 
         public async Task<SubmitApplicationResponse> Handle(SubmitApplicationCommand request, CancellationToken cancellationToken)
@@ -24,6 +27,13 @@ namespace DoctoralManagement.Application.Applications.Commands
             if (student == null)
             {
                 throw new Exception($"Student with ID: {request.StudentId} not found");
+            }
+
+            var currentUserId = _currentUserService.UserId;
+
+            if (request.StudentId != currentUserId)
+            {
+                throw new UnauthorizedAccessException("You can only submit your own application");
             }
 
             var program = await _doctoralProgramRepository.GetByIdAsync(request.DoctoralProgramId);
@@ -72,7 +82,7 @@ namespace DoctoralManagement.Application.Applications.Commands
                 ApplicationStatus = ApplicationStatus.Submitted,
                 ApplicationDate = DateTime.UtcNow,
                 MeetsGradeRequirements = meetsGradeRequirements,
-                HasRequiredPublications = false // Initial assumption; can be updated later
+                HasRequiredPublications = false 
             };
 
             var createdApplication = await _applicationRepository.AddAsync(application);
