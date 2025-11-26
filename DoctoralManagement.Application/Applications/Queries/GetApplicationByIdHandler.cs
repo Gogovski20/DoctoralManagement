@@ -1,4 +1,5 @@
-﻿using DoctoralManagement.Domain.Interfaces;
+﻿using DoctoralManagement.Application.Common;
+using DoctoralManagement.Domain.Interfaces;
 using MediatR;
 
 namespace DoctoralManagement.Application.Applications.Queries
@@ -6,10 +7,12 @@ namespace DoctoralManagement.Application.Applications.Queries
     public class GetApplicationByIdHandler : IRequestHandler<GetApplicationByIdQuery, GetApplicationByIdResponse>
     {
         private readonly IApplicationRepository _applicationRepository;
+        private readonly ICurrentUserService _currentUserService;
 
-        public GetApplicationByIdHandler(IApplicationRepository applicationRepository)
+        public GetApplicationByIdHandler(IApplicationRepository applicationRepository, ICurrentUserService currentUserService)
         {
             _applicationRepository = applicationRepository;
+            _currentUserService = currentUserService;
         }
 
         public async Task<GetApplicationByIdResponse> Handle(GetApplicationByIdQuery request, CancellationToken cancellationToken)
@@ -19,6 +22,11 @@ namespace DoctoralManagement.Application.Applications.Queries
             if (application == null)
             {
                 throw new Exception($"Application with ID {request.Id} not found.");
+            }
+
+            if (!_currentUserService.CanAccessStudent(application.StudentId))
+            {
+                throw new UnauthorizedAccessException("You can't do this.");
             }
 
             return new GetApplicationByIdResponse

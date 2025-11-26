@@ -55,7 +55,7 @@ namespace DoctoralManagement.API.Controllers
 
         // GET: api/Applications/student/5
         [HttpGet("student/{studentId}")]
-        [Authorize(Roles = "Student,Secretary,Committee,Mentor")]
+        [Authorize(Roles = "Secretary,Committee,Mentor")]
         public async Task<ActionResult<IEnumerable<GetStudentApplicationsResponse>>> GetStudentApplications(int studentId)
         {
             var query = new GetStudentApplicationsQuery { StudentId = studentId };
