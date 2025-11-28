@@ -56,15 +56,17 @@ namespace DoctoralManagement.Infrastructure.Persistence
             {
                 entity.Property(u => u.FullName).HasMaxLength(200);
 
-                entity.HasOne(u => u.Student)
+                entity.HasOne<Student>()
                     .WithMany()
                     .HasForeignKey(u => u.StudentId)
                     .OnDelete(DeleteBehavior.SetNull);
 
-                entity.HasOne(u => u.Mentor)
+                entity.HasOne<Mentor>()
                     .WithMany()
                     .HasForeignKey(u => u.MentorId)
                     .OnDelete(DeleteBehavior.SetNull);
+
+
 
                 entity.ToTable("AspNetUsers"); // keeps original identity table name
             });
@@ -94,6 +96,8 @@ namespace DoctoralManagement.Infrastructure.Persistence
                       .WithMany(p => p.Students)
                       .HasForeignKey(s => s.DoctoralProgramId)
                       .OnDelete(DeleteBehavior.Restrict);
+
+
 
                 entity.HasOne(s => s.ECTSTracking)
                       .WithOne(et => et.Student)

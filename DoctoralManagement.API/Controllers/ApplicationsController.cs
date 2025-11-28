@@ -55,7 +55,7 @@ namespace DoctoralManagement.API.Controllers
 
         // GET: api/Applications/student/5
         [HttpGet("student/{studentId}")]
-        [Authorize(Roles = "Secretary,Committee,Mentor")]
+        [Authorize(Roles = "Secretary,Committee,Mentor,Admin")]
         public async Task<ActionResult<IEnumerable<GetStudentApplicationsResponse>>> GetStudentApplications(int studentId)
         {
             var query = new GetStudentApplicationsQuery { StudentId = studentId };
@@ -96,7 +96,7 @@ namespace DoctoralManagement.API.Controllers
 
         // PUT: api/Applications/5
         [HttpPut("{id}")]
-        [Authorize(Roles = "Student,Secretary")]
+        [Authorize(Roles = "Student,Admin")]
         public async Task<ActionResult<UpdateApplicationResponse>> UpdateApplication(int id, UpdateApplicationCommand command)
         {
             if (id != command.Id)
@@ -138,7 +138,7 @@ namespace DoctoralManagement.API.Controllers
 
         // DELETE: api/Applications/5
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Student,Secretary")]
+        [Authorize(Roles = "Student,Admin")]
         public async Task<IActionResult> DeleteApplication(int id)
         {
             try

@@ -20,6 +20,8 @@
         public int? DoctoralProgramId { get; set; }
         public DoctoralProgram? DoctoralProgram { get; set; }
 
+        public int? ApplicationUserId { get; set; }
+
         // Navigation
         public ICollection<CourseEnrollment> CourseEnrollments { get; set; } = new List<CourseEnrollment>();
         public ICollection<DoctoralProject> DoctoralProjects { get; set; } = new List<DoctoralProject>();

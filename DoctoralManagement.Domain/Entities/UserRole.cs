@@ -4,8 +4,8 @@
     {
         Student = 1,
         Mentor = 2,
-        Admin = 3,
-        Secretary = 4,
-        Committee = 5
+        Secretary = 3,
+        Committee = 4,
+        Admin = 5
     }
 }

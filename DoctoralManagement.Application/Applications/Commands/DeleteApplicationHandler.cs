@@ -8,12 +8,13 @@ namespace DoctoralManagement.Application.Applications.Commands
     {
         private readonly IApplicationRepository _applicationRepository;
         private readonly ICurrentUserService _currentUserService;
+        private readonly IAuthService _authService;
 
-
-        public DeleteApplicationHandler(IApplicationRepository applicationRepository, ICurrentUserService currentUserService)
+        public DeleteApplicationHandler(IApplicationRepository applicationRepository, ICurrentUserService currentUserService, IAuthService authService)
         {
             _applicationRepository = applicationRepository;
             _currentUserService = currentUserService;
+            _authService = authService;
         }
 
         public async Task<DeleteApplicationResponse> Handle(DeleteApplicationCommand request, CancellationToken cancellationToken)
@@ -28,14 +29,19 @@ namespace DoctoralManagement.Application.Applications.Commands
             var currentUserId = _currentUserService.UserId;
             var currentUserRole = _currentUserService.Role;
 
-            if (application.StudentId != currentUserId || currentUserRole != "Secretary")
+            var linkedStudentId = await _authService.GetLinkedStudentIdAsync(currentUserId);
+
+            bool isOwner = linkedStudentId == application.StudentId;
+            bool isPrivileged = currentUserRole is "Admin";
+
+            if (!isOwner && !isPrivileged)
             {
-                throw new UnauthorizedAccessException("Not allowed to delete this application");
+                throw new UnauthorizedAccessException("You are not authorized to delete this application");
             }
 
-            if (application.ApplicationStatus != Domain.Entities.ApplicationStatus.Draft)
+            if (application.ApplicationStatus != Domain.Entities.ApplicationStatus.Draft || application.ApplicationStatus != Domain.Entities.ApplicationStatus.Submitted)
             {
-                throw new Exception("Only applications in 'Draft' status can be deleted.");
+                throw new Exception("Only applications in 'Draft' or 'Submitted' status can be deleted.");
             }
 
             await _applicationRepository.DeleteAsync(application);

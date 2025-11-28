@@ -11,13 +11,15 @@ namespace DoctoralManagement.Application.Applications.Commands
         private readonly IStudentRepository _studentRepository;
         private readonly IDoctoralProgramRepository _doctoralProgramRepository;
         private readonly ICurrentUserService _currentUserService;
+        private readonly IAuthService _authService;
 
-        public SubmitApplicationHandler(IApplicationRepository applicationRepository, IStudentRepository studentRepository, IDoctoralProgramRepository doctoralProgramRepository, ICurrentUserService currentUserService)
+        public SubmitApplicationHandler(IApplicationRepository applicationRepository, IStudentRepository studentRepository, IDoctoralProgramRepository doctoralProgramRepository, ICurrentUserService currentUserService, IAuthService authService)
         {
             _applicationRepository = applicationRepository;
             _studentRepository = studentRepository;
             _doctoralProgramRepository = doctoralProgramRepository;
             _currentUserService = currentUserService;
+            _authService = authService;
         }
 
         public async Task<SubmitApplicationResponse> Handle(SubmitApplicationCommand request, CancellationToken cancellationToken)
@@ -31,7 +33,14 @@ namespace DoctoralManagement.Application.Applications.Commands
 
             var currentUserId = _currentUserService.UserId;
 
-            if (request.StudentId != currentUserId)
+            var linkedStudentId = await _authService.GetLinkedStudentIdAsync(currentUserId);
+
+            if (linkedStudentId == null)
+            {
+                throw new UnauthorizedAccessException("Current user is not linked to a student record");
+            }
+
+            if (request.StudentId != linkedStudentId)
             {
                 throw new UnauthorizedAccessException("You can only submit your own application");
             }
