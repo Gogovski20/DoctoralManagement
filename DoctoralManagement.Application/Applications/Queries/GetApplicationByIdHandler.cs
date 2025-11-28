@@ -8,11 +8,13 @@ namespace DoctoralManagement.Application.Applications.Queries
     {
         private readonly IApplicationRepository _applicationRepository;
         private readonly ICurrentUserService _currentUserService;
+        private readonly IAuthService _authService;
 
-        public GetApplicationByIdHandler(IApplicationRepository applicationRepository, ICurrentUserService currentUserService)
+        public GetApplicationByIdHandler(IApplicationRepository applicationRepository, ICurrentUserService currentUserService, IAuthService authService)
         {
             _applicationRepository = applicationRepository;
             _currentUserService = currentUserService;
+            _authService = authService;
         }
 
         public async Task<GetApplicationByIdResponse> Handle(GetApplicationByIdQuery request, CancellationToken cancellationToken)
@@ -24,9 +26,17 @@ namespace DoctoralManagement.Application.Applications.Queries
                 throw new Exception($"Application with ID {request.Id} not found.");
             }
 
-            if (!_currentUserService.CanAccessStudent(application.StudentId))
+            var currentUserId = _currentUserService.UserId;
+            var currentUserRole = _currentUserService.Role;
+
+            var linkedStudentId = await _authService.GetLinkedStudentIdAsync(currentUserId);
+
+            bool isOwner = linkedStudentId == application.StudentId;
+            bool isPrivileged = currentUserRole is "Mentor" or "Committee" or "Secretary" or "Admin";
+
+            if (!isOwner && !isPrivileged)
             {
-                throw new UnauthorizedAccessException("You can't do this.");
+                throw new UnauthorizedAccessException("You are not authorized to view this application");
             }
 
             return new GetApplicationByIdResponse

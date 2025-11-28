@@ -1,5 +1,4 @@
 ﻿using DoctoralManagement.Application.Common;
-using DoctoralManagement.Domain.Entities;
 using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
 

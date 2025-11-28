@@ -13,12 +13,11 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
 
-
 namespace DoctoralManagement.API
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -127,6 +126,11 @@ namespace DoctoralManagement.API
             builder.Services.AddHttpContextAccessor();
 
             var app = builder.Build();
+
+            using (var scope = app.Services.CreateScope())
+            {
+                await IdentityDataSeeder.SeedAdminAsync(scope.ServiceProvider);
+            }
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

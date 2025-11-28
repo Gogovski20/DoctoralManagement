@@ -8,11 +8,13 @@ namespace DoctoralManagement.Application.Applications.Commands
     {
         private readonly IApplicationRepository _applicationRepository;
         private readonly ICurrentUserService _currentUserService;
+        private readonly IAuthService _authService;
 
-        public UpdateApplicationHandler(IApplicationRepository applicationRepository, ICurrentUserService currentUserService)
+        public UpdateApplicationHandler(IApplicationRepository applicationRepository, ICurrentUserService currentUserService, IAuthService authService)
         {
             _applicationRepository = applicationRepository;
             _currentUserService = currentUserService;
+            _authService = authService;
         }
 
         public async Task<UpdateApplicationResponse> Handle(UpdateApplicationCommand request, CancellationToken cancellationToken)
@@ -27,9 +29,14 @@ namespace DoctoralManagement.Application.Applications.Commands
             var currentUserId = _currentUserService.UserId;
             var currentUserRole = _currentUserService.Role;
 
-            if (application.StudentId != currentUserId || currentUserRole != "Secretary")
+            var linkedStudentId = await _authService.GetLinkedStudentIdAsync(currentUserId);
+
+            bool isOwner = linkedStudentId == application.StudentId;
+            bool isPrivileged = currentUserRole is "Admin";
+
+            if (!isOwner && !isPrivileged)
             {
-                throw new UnauthorizedAccessException("You can't update this application.");
+                throw new UnauthorizedAccessException("You are not authorized to update this application");
             }
 
             if (application.ApplicationStatus != Domain.Entities.ApplicationStatus.Draft)

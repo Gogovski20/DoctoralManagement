@@ -38,6 +38,13 @@ namespace DoctoralManagement.Infrastructure.Repositories
                 .ToListAsync();
         }
 
+        public async Task<Mentor?> GetByEmailAsync(string email)
+        {
+            return await _context.Mentors
+                .AsNoTracking()
+                .FirstOrDefaultAsync(m => m.Email == email);
+        }
+
         public async Task<Mentor?> GetByIdAsync(int id)
         {
             return await _context.Mentors
