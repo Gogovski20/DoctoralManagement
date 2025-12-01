@@ -1,5 +1,8 @@
-﻿using DoctoralManagement.Application.ConferenceParticipations.Commands;
+﻿using DoctoralManagement.Application.ActivityDocuments;
+using DoctoralManagement.Application.ConferenceParticipations.Commands;
 using DoctoralManagement.Application.ConferenceParticipations.Queries;
+using DoctoralManagement.Application.Dtos;
+using DoctoralManagement.Application.Mobilities.Commands;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -53,6 +56,99 @@ namespace DoctoralManagement.API.Controllers
         {
             await _mediator.Send(new DeleteConferenceParticipationCommand { Id = id });
             return NoContent();
+        }
+
+        [HttpPost("{conferenceId}/upload-document")]
+        [Authorize(Roles = "Student")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UploadConferenceDocument(int conferenceId, [FromForm] UploadActivityDocumentDto request)
+        {
+            if (request.File == null || request.File.Length == 0)
+                return BadRequest("No file uploaded.");
+
+            var command = new UploadConferenceDocumentCommand
+            {
+                ConferenceId = conferenceId,
+                File = request.File,
+                FileName = request.File.FileName,
+                Type = request.Type
+            };
+
+            var result = await _mediator.Send(command);
+            return Ok(result);
+        }
+
+        [HttpPost("{conferenceId}/review")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> ReviewConference(int conferenceId, [FromBody] ReviewConferenceCommand command)
+        {
+            if (conferenceId != command.ConferenceId)
+                return BadRequest("ID mismatch");
+
+            var result = await _mediator.Send(command);
+            return Ok(result);
+        }
+
+        //[HttpGet("{conferenceId}/download")]
+        //[Authorize(Roles = "Student,Admin")]
+        //public async Task<IActionResult> DownloadDocument(int conferenceId, int documentId)
+        //{
+        //    var command = new DownloadActivityDocumentQuery 
+        //    {
+        //        DocumentId = documentId,
+        //        ActivityId = conferenceId,
+        //        ActivityType = ActivityType.Conference
+        //    };
+        //    var result = await _mediator.Send(command);
+
+        //    return File(result.FileBytes, result.ContentType, result.FileName);
+        //}
+
+        [HttpGet("{conferenceId}/download")]
+        [Authorize(Roles = "Student,Admin")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> DownloadDocument(int conferenceId, int documentId)
+        {
+            try
+            {
+                var command = new DownloadActivityDocumentQuery
+                {
+                    DocumentId = documentId,
+                    ActivityId = conferenceId,
+                    ActivityType = ActivityType.Conference
+                };
+
+                var result = await _mediator.Send(command);
+
+                // Check if download was successful
+                if (!result.Success)
+                {
+                    return NotFound(new { message = result.Message });
+                }
+
+                // Return file for download
+                return File(result.FileBytes, result.ContentType, result.FileName);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = $"Error downloading document: {ex.Message}" });
+            }
+        }
+
+        [HttpDelete("{conferenceId}/delete")]
+        public async Task<IActionResult> DeleteDocument(int conferenceId, int documentId)
+        {
+            var command = new DeleteActivityDocumentCommand 
+            { 
+                ActivityDocumentId = documentId,
+                ActivityType = ActivityType.Conference,
+                ActivityId = conferenceId
+            };
+            var result = await _mediator.Send(command);
+            return Ok(new { message = "Document deleted successfully", success = result });
         }
     }
 }

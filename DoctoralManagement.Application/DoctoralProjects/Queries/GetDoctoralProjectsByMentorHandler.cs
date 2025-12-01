@@ -24,7 +24,6 @@ namespace DoctoralManagement.Application.DoctoralProjects.Queries
                 Status = project.Status.ToString(),
                 StudentName = project.Student?.FullName ?? "N/A",
                 MentorName = project.Mentor?.FullName ?? "N/A",
-                ProposalDocumentPath = project.ProposalDocumentPath,
                 CreatedAt = project.CreatedAt,
                 SubmittedAt = project.SubmittedAt
             });

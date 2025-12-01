@@ -33,10 +33,10 @@
         public DateTime? SubmittedAt { get; set; }
         public DateTime? DecisionAt { get; set; }
 
-        public string? ProposalDocumentPath { get; set; }
         public string? CommitteeNotes { get; set; }
 
         // Navigation
         public ICollection<ThesisDefense> Defenses { get; set; } = new List<ThesisDefense>();
+        public ICollection<ActivityDocument> Documents { get; set; } = new List<ActivityDocument>();
     }
 }

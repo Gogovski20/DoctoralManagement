@@ -12,6 +12,10 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
+using DoctoralManagement.Infrastructure.Files;
+using FluentValidation;
+using MediatR;
+using DoctoralManagement.Application.Common.Behaviours;
 
 namespace DoctoralManagement.API
 {
@@ -59,6 +63,9 @@ namespace DoctoralManagement.API
             builder.Services.AddScoped<IJwtService, JwtService>();
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+            builder.Services.AddScoped<IApplicationDocumentRepository, ApplicationDocumentRepository>();
+            builder.Services.AddScoped<IActivityDocumentRepository, ActivityDocumentRepository>();
+            builder.Services.AddScoped<IFileService, FileService>();
 
             builder.Services.AddScoped<EctsProgressService>();
 
@@ -96,6 +103,10 @@ namespace DoctoralManagement.API
 
             builder.Services.AddMediatR(cfg =>
                 cfg.RegisterServicesFromAssembly(typeof(CreateStudentCommand).Assembly));
+
+            builder.Services.AddValidatorsFromAssembly(typeof(CreateStudentCommand).Assembly);
+
+            builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
             var jwtSettingsSection = builder.Configuration.GetSection("JwtSettings");
             builder.Services.Configure<JwtSettings>(jwtSettingsSection);

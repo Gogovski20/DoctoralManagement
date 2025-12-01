@@ -15,5 +15,10 @@
         public bool IsIndexedInScopus { get; set; }
         public bool IsIndexedInThomsonReuters { get; set; }
         public int EctsPoints { get; set; } // ECTS awarded for this publication
+
+        public bool IsApproved { get; set; } = false;
+
+        public int? ActivityDocumentId { get; set; }
+        public ActivityDocument? Document { get; set; }
     }
 }

@@ -1,5 +1,7 @@
-﻿using DoctoralManagement.Application.Applications.Commands;
+﻿using DoctoralManagement.Application.ApplicationDocuments;
+using DoctoralManagement.Application.Applications.Commands;
 using DoctoralManagement.Application.Applications.Queries;
+using DoctoralManagement.Application.Dtos;
 using DoctoralManagement.Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -78,14 +80,29 @@ namespace DoctoralManagement.API.Controllers
             return Ok(result);
         }
 
+        [HttpPost("create-draft")]
+        [Authorize(Roles = "Student")]
+        public async Task<ActionResult<CreateApplicationResponse>> CreateApplicationDraft(CreateApplicationCommand command)
+        {
+            try
+            {
+                var result = await _mediator.Send(command);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         // POST: api/Applications
-        [HttpPost]
+        [HttpPost("submit")]
         [Authorize(Roles = "Student")]
         public async Task<ActionResult<SubmitApplicationResponse>> SubmitApplication(SubmitApplicationCommand command)
         {
             try
             {
-                var result = await _mediator.Send(command); 
+                var result = await _mediator.Send(command);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -117,7 +134,7 @@ namespace DoctoralManagement.API.Controllers
 
         // PUT: api/Applications/5/review
         [HttpPut("{id}/review")]
-        [Authorize(Roles = "Secretary,Committee,Mentor")]
+        [Authorize(Roles = "Admin,Secretary,Committee,Mentor")]
         public async Task<ActionResult<ReviewApplicationResponse>> ReviewApplication(int id, ReviewApplicationCommand command)
         {
             if (id != command.Id)
@@ -146,6 +163,88 @@ namespace DoctoralManagement.API.Controllers
                 var command = new DeleteApplicationCommand { Id = id };
                 await _mediator.Send(command);
                 return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("{id}/upload-document")]
+        [Authorize(Roles = "Student")]
+        [Consumes("multipart/form-data")]
+        public async Task<ActionResult<UploadApplicationDocumentResponse>> UploadApplicationDocument(
+            int id,
+            [FromForm] UploadApplicationDocumentDto request)
+        {
+            if (request.File == null || request.File.Length == 0)
+            {
+                return BadRequest("No file uploaded.");
+            }
+
+            var command = new UploadApplicationDocumentCommand
+            {
+                ApplicationId = id,
+                File = request.File,
+                FileName = request.FileName,
+                Type = request.Type
+            };
+
+            try
+            {
+                var result = await _mediator.Send(command);
+
+                if (!result.Success)
+                {
+                    return BadRequest(result);
+                }
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("{applicationId}/documents/{documentId}download")]
+        [Authorize(Roles = "Student,Admin")]
+        public async Task<IActionResult> DownloadApplicationDocument(int applicationId, int documentId)
+        {
+            var query = new DownloadApplicationDocumentQuery
+            {
+                ApplicationId = applicationId,
+                DocumentId = documentId
+            };
+
+            var response = await _mediator.Send(query);
+
+            if (response.FileBytes == null || response.FileBytes.Length == 0)
+            {
+                return NotFound("Document not found.");
+            }
+
+            return File(response.FileBytes, response.ContentType, response.FileName);
+        }
+
+        [HttpDelete("{applicationId}/documents/{documentId}")]
+        [Authorize(Roles = "Student")]
+        public async Task<IActionResult> DeleteApplicationDocument(int applicationId, int documentId)
+        {
+            var command = new DeleteApplicationDocumentCommand
+            {
+                ApplicationId = applicationId,
+                DocumentId = documentId
+            };
+            try
+            {
+                var result = await _mediator.Send(command);
+
+                if (!result)
+                {
+                    return BadRequest("Failed to delete document.");
+                }
+                return Ok("Document deleted successfully.");
             }
             catch (Exception ex)
             {

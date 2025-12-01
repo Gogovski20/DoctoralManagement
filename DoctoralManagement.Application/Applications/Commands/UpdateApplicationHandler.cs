@@ -45,9 +45,6 @@ namespace DoctoralManagement.Application.Applications.Commands
             }
 
             application.PrefferedMentorId = request.PreferredMentorId;
-            application.MotivationLetter = request.MotivationLetter;
-            application.ResearchProposal = request.ResearchProposal;
-            application.EnglishCertificatePath = request.EnglishCertificatePath;
 
             await _applicationRepository.UpdateAsync(application);
 
@@ -57,9 +54,6 @@ namespace DoctoralManagement.Application.Applications.Commands
                 StudentId = application.StudentId,
                 DoctoralProgramId = application.DoctoralProgramId,
                 PreferredMentorId = application.PrefferedMentorId,
-                MotivationLetter = application.MotivationLetter,
-                ResearchProposal = application.ResearchProposal,
-                EnglishCertificatePath = application.EnglishCertificatePath,
                 ApplicationStatus = application.ApplicationStatus,
                 ApplicationDate = application.ApplicationDate
             };

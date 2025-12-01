@@ -44,7 +44,7 @@ namespace DoctoralManagement.API.Controllers
 
         // POST: api/DoctoralPrograms
         [HttpPost]
-        [Authorize(Roles = "Secretary")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<CreateDoctoralProgramResponse>> CreateDoctoralProgram(CreateDoctoralProgramCommand command)
         {
             try
@@ -60,7 +60,7 @@ namespace DoctoralManagement.API.Controllers
 
         // PUT: api/DoctoralPrograms/5
         [HttpPut("{id}")]
-        [Authorize(Roles = "Secretary")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<UpdateDoctoralProgramResponse>> UpdateDoctoralProgram(int id, UpdateDoctoralProgramCommand command)
         {
             if (id != command.Id)
@@ -81,7 +81,7 @@ namespace DoctoralManagement.API.Controllers
 
         // DELETE: api/DoctoralPrograms/5
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Secretary")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult> DeleteDoctoralProgram(int id)
         {
             try

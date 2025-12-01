@@ -38,8 +38,6 @@ namespace DoctoralManagement.Application.Publications.Commands
                 throw new Exception("Student is not accepted to a doctoral program");
             }
 
-            int ectsPoints = CalculateEctsForPublication(request.IsIndexedInScopus, request.IsIndexedInThomsonReuters);
-
             var publication = new Publication
             {
                 StudentId = request.StudentId,
@@ -49,37 +47,30 @@ namespace DoctoralManagement.Application.Publications.Commands
                 Doi = request.Doi,
                 IsIndexedInScopus = request.IsIndexedInScopus,
                 IsIndexedInThomsonReuters = request.IsIndexedInThomsonReuters,
-                EctsPoints = ectsPoints
+                EctsPoints = request.PossibleEctsCredits
             };
 
             var created = await _publicationRepository.AddAsync(publication);
 
-            var ectsTracking = await _ectsRepository.GetByStudentIdAsync(request.StudentId);
-            if (ectsTracking != null)
-            {
-                ectsTracking.Publications += ectsPoints;
-                if (ectsTracking.Publications > 27)
-                {
-                    ectsTracking.Publications = 27;
-                }
-                await _ectsRepository.UpdateAsync(ectsTracking);
-                await _ectsProgressService.UpdateStudentSemesterAsync(request.StudentId, ectsTracking.TotalECTS);
-            }
+            //var ectsTracking = await _ectsRepository.GetByStudentIdAsync(request.StudentId);
+            //if (ectsTracking != null)
+            //{
+            //    ectsTracking.Publications += ectsPoints;
+            //    if (ectsTracking.Publications > 27)
+            //    {
+            //        ectsTracking.Publications = 27;
+            //    }
+            //    await _ectsRepository.UpdateAsync(ectsTracking);
+            //    await _ectsProgressService.UpdateStudentSemesterAsync(request.StudentId, ectsTracking.TotalECTS);
+            //}
 
             return new CreatePublicationResponse
             {
                 Id = created.Id,
                 StudentId = created.StudentId,
                 Title = created.Title,
-                EctsAwarded = ectsPoints
+                PossibleEctsCredits = created.EctsPoints
             };
-        }
-
-        private int CalculateEctsForPublication(bool isScopus, bool isThomson)
-        {
-            if (isScopus || isThomson)
-                return 7; // High-quality publication
-            return 3; // others
         }
     }
 }

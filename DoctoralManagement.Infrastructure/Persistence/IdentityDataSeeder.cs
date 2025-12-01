@@ -7,19 +7,32 @@ namespace DoctoralManagement.Infrastructure.Persistence
 {
     public static class IdentityDataSeeder
     {
+        private static readonly string[] Roles = { "Admin", "Student", "Mentor", "Committee", "Secretary" };
         public static async Task SeedAdminAsync(IServiceProvider serviceProvider)
         {
             using var scope = serviceProvider.CreateScope();
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
             var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<int>>>();
 
-            // Check if Admin Role exists
-            var adminRole = await roleManager.FindByNameAsync("Admin");
-            if (adminRole == null)
+            foreach (var roleName in Roles)
             {
-                adminRole = new IdentityRole<int> { Name = "Admin", NormalizedName = "ADMIN" };
-                await roleManager.CreateAsync(adminRole);
+                if (await roleManager.FindByNameAsync(roleName) == null)
+                {
+                    await roleManager.CreateAsync(new IdentityRole<int>
+                    {
+                        Name = roleName,
+                        NormalizedName = roleName.ToUpper()
+                    });
+                }
             }
+
+            // Check if Admin Role exists
+            //var adminRole = await roleManager.FindByNameAsync("Admin");
+            //if (adminRole == null)
+            //{
+            //    adminRole = new IdentityRole<int> { Name = "Admin", NormalizedName = "ADMIN" };
+            //    await roleManager.CreateAsync(adminRole);
+            //}
 
             // Check if Admin User exists
             var adminUser = await userManager.FindByEmailAsync("admin@dms.com");

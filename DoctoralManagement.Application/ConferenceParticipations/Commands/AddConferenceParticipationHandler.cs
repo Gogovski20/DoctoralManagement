@@ -33,43 +33,37 @@ namespace DoctoralManagement.Application.ConferenceParticipations.Commands
                 throw new Exception("Student is not accepted to a doctoral program");
             }
 
-            int ectsPoints = CalculateEctsForConference(request);
-
             var participation = new ConferenceParticipation 
             {
                 StudentId = request.StudentId,
                 ConferenceName = request.ConferenceName,
                 Date = request.Date,
                 Role = request.Role,
-                IsInternational = request.IsInternational
+                IsInternational = request.IsInternational,
+                EctsAwarded = request.PossibleEctsCredits
             };
 
             var created = await _conferenceParticipationRepository.AddAsync(participation);
 
-            var ectsTracking = await _ectsTrackingRepository.GetByStudentIdAsync(student.Id);
-            if (ectsTracking != null)
-            {
-                ectsTracking.TeachingActivities += ectsPoints;
-                if (ectsTracking.TeachingActivities > 18)
-                {
-                    ectsTracking.TeachingActivities = 18;
-                }
-                await _ectsTrackingRepository.UpdateAsync(ectsTracking);
-                await _ectsProgressService.UpdateStudentSemesterAsync(request.StudentId, ectsTracking.TotalECTS);
-            }
+            //var ectsTracking = await _ectsTrackingRepository.GetByStudentIdAsync(student.Id);
+            //if (ectsTracking != null)
+            //{
+            //    ectsTracking.TeachingActivities += ectsPoints;
+            //    if (ectsTracking.TeachingActivities > 18)
+            //    {
+            //        ectsTracking.TeachingActivities = 18;
+            //    }
+            //    await _ectsTrackingRepository.UpdateAsync(ectsTracking);
+            //    await _ectsProgressService.UpdateStudentSemesterAsync(request.StudentId, ectsTracking.TotalECTS);
+            //}
 
             return new AddConferenceParticipationResponse 
             {
                 Id = created.Id,
                 StudentId = created.StudentId,
                 ConferenceName = created.ConferenceName,
-                EctsAwarded = ectsPoints
+                PossibleEctsCredits = created.EctsAwarded
             };
-        }
-
-        private int CalculateEctsForConference(AddConferenceParticipationCommand request)
-        {
-            return request.IsInternational ? 3 : 1;
-        }
+        }       
     }
 }

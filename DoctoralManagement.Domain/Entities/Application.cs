@@ -11,9 +11,6 @@
         public DateTime? DecisionDate { get; set; }
 
         // UKIM Requirements
-        public string MotivationLetter { get; set; } = string.Empty;
-        public string ResearchProposal { get; set; } = string.Empty;
-        public string EnglishCertificatePath { get; set; } = string.Empty;
         public bool MeetsGradeRequirements { get; set; }
         public bool HasRequiredPublications { get; set; }
 
@@ -21,5 +18,7 @@
         public Student Student { get; set; } = null!;
         public DoctoralProgram DoctoralProgram { get; set; } = null!;
         public Mentor? PrefferedMentor { get; set; }
+
+        public ICollection<ApplicationDocument> Documents { get; set; } = new List<ApplicationDocument>();
     }
 }

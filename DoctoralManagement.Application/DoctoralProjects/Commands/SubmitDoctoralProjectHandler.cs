@@ -36,6 +36,13 @@ namespace DoctoralManagement.Application.DoctoralProjects.Commands
                 throw new Exception("Student is not admitted to a doctoral program");
             }
 
+            var hasProposal = project.Documents?.Any(d => d.DocumentType == ActivityDocumentType.DoctoralProjectReport) ?? false;
+            if (!hasProposal)
+            {
+                throw new Exception("Doctoral project proposal document is required for submission");
+            }
+
+
             project.Status = ProjectStatus.Submitted;
             project.SubmittedAt = DateTime.UtcNow;
 

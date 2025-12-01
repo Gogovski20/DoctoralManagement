@@ -87,7 +87,11 @@ namespace DoctoralManagement.Application.ThesisDefenseReviews
                         var ectsTracking = await _ectsTrackingRepo.GetByStudentIdAsync(student.Id);
                         if (ectsTracking != null)
                         {
-                            ectsTracking.ThesisDefence = 46;
+                            ectsTracking.ThesisDefence += 26;
+                            if (ectsTracking.ThesisDefence > 46)
+                            {
+                                ectsTracking.ThesisDefence = 46;
+                            }
                             await _ectsTrackingRepo.UpdateAsync(ectsTracking);
 
                             if (ectsTracking.TotalECTS < 180)

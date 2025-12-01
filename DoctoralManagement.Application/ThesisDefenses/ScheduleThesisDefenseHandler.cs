@@ -26,9 +26,9 @@ namespace DoctoralManagement.Application.ThesisDefenses
             var project = await _projectRepository.GetByIdAsync(request.ProjectId)
                 ?? throw new Exception("Project not found");
 
-            if (project.Status != ProjectStatus.Approved)
+            if (project.Status != ProjectStatus.DefenseUnderReview)
             {
-                throw new Exception("Project must be approved before scheduling defense");
+                throw new Exception("Thesis document must be reviewed and approved before scheduling defense.");
             }
 
             if (await _thesisDefenseRepository.ExistsForProjectAsync(request.ProjectId))
@@ -36,8 +36,25 @@ namespace DoctoralManagement.Application.ThesisDefenses
                 throw new Exception("A defense is already scheduled for this project");
             }
 
+            var thesisDoc = project.Documents?.FirstOrDefault(d =>
+                d.DocumentType == ActivityDocumentType.DefenseThesisDocument &&
+                d.Status == DocumentStatus.Approved);
+    
+            if (thesisDoc == null)
+            {
+                throw new Exception("Approved thesis document is required before scheduling defense.");
+            }
+
+
+
             var ectsTracking = await _ectsTrackingRepository.GetByStudentIdAsync(project.StudentId)
                 ?? throw new Exception("ECTS tracking not found for student.");
+
+            if (ectsTracking.ThesisDefence < 20)
+            {
+                throw new Exception($"Student must earn first 20 Thesis ECTS before defense scheduling. Current: {ectsTracking.ThesisDefence} ECTS.");
+            }
+
             int currentEcts = ectsTracking.TotalECTS;
             if (currentEcts < 134)
             {

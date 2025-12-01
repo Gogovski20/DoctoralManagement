@@ -31,7 +31,7 @@ namespace DoctoralManagement.Application.Publications.Commands
             publication.IsIndexedInScopus = request.IsIndexedInScopus;
             publication.IsIndexedInThomsonReuters = request.IsIndexedInThomsonReuters;
 
-            publication.EctsPoints = CalculateEctsForPublication(request.IsIndexedInScopus, request.IsIndexedInThomsonReuters);
+            publication.EctsPoints = request.EctsCredits;
 
             await _publicationRepository.UpdateAsync(publication);
 
@@ -47,13 +47,6 @@ namespace DoctoralManagement.Application.Publications.Commands
             }
 
             return new PublicationResponse { };
-        }
-
-        private int CalculateEctsForPublication(bool isScopus, bool isThomson)
-        {
-            if (isScopus || isThomson)
-                return 7;
-            return 3;
         }
     }
 }

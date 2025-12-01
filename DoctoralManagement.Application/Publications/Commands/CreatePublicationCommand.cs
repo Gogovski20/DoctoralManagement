@@ -11,6 +11,7 @@ namespace DoctoralManagement.Application.Publications.Commands
         public string Doi { get; set; } = string.Empty;
         public bool IsIndexedInScopus { get; set; }
         public bool IsIndexedInThomsonReuters { get; set; }
+        public int PossibleEctsCredits { get; set; }
     }
 
     public class CreatePublicationResponse
@@ -18,6 +19,6 @@ namespace DoctoralManagement.Application.Publications.Commands
         public int Id { get; set; }
         public int StudentId { get; set; }
         public string Title { get; set; } = string.Empty;
-        public int EctsAwarded { get; set; }
+        public int PossibleEctsCredits { get; set; }
     }
 }

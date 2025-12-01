@@ -31,7 +31,6 @@ namespace DoctoralManagement.Application.DoctoralProjects.Commands
             project.ResearchArea = request.ResearchArea;
             project.EctsCredits = request.EctsCredits;
             project.MentorId = request.MentorId;
-            project.ProposalDocumentPath = request.ProposalDocumentPath ?? project.ProposalDocumentPath;
 
             await _doctoralProjectRepository.UpdateAsync(project);
 
@@ -43,7 +42,6 @@ namespace DoctoralManagement.Application.DoctoralProjects.Commands
                 EctsCredits = project.EctsCredits,
                 Status = project.Status.ToString(),
                 MentorId = project.MentorId,
-                ProposalDocumentPath = project.ProposalDocumentPath,
                 CreatedAt = project.CreatedAt,
                 SubmittedAt = project.SubmittedAt
             };

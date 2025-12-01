@@ -39,9 +39,9 @@ namespace DoctoralManagement.Application.Applications.Commands
                 throw new UnauthorizedAccessException("You are not authorized to delete this application");
             }
 
-            if (application.ApplicationStatus != Domain.Entities.ApplicationStatus.Draft || application.ApplicationStatus != Domain.Entities.ApplicationStatus.Submitted)
+            if (application.ApplicationStatus != Domain.Entities.ApplicationStatus.Draft)
             {
-                throw new Exception("Only applications in 'Draft' or 'Submitted' status can be deleted.");
+                throw new Exception("Only applications in 'Draft' status can be deleted.");
             }
 
             await _applicationRepository.DeleteAsync(application);
