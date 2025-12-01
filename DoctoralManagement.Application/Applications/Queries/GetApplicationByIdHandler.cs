@@ -50,14 +50,20 @@ namespace DoctoralManagement.Application.Applications.Queries
                 ScientificArea = application.DoctoralProgram.ScientificArea,
                 PreferredMentorId = application.PrefferedMentorId,
                 PreferredMentorName = application.PrefferedMentor?.FullName,
-                MotivationLetter = application.MotivationLetter,
-                ResearchProposal = application.ResearchProposal,
-                EnglishCertificatePath = application.EnglishCertificatePath,
                 ApplicationStatus = application.ApplicationStatus,
                 ApplicationDate = application.ApplicationDate,
                 DecisionDate = application.DecisionDate,
                 MeetsGradeRequirements = application.MeetsGradeRequirements,
-                HasRequiredPublications = application.HasRequiredPublications
+                HasRequiredPublications = application.HasRequiredPublications,
+                Documents = application.Documents.Select(d => new Dtos.ApplicationDocumentDto
+                {
+                    Id = d.Id,
+                    DocumentType = d.DocumentType,
+                    FileName = d.FileName,
+                    FilePath = d.FilePath,
+                    ContentType = d.ContentType,
+                    UploadedAt = d.UploadedAt
+                }).ToList()
             };
         }
     }

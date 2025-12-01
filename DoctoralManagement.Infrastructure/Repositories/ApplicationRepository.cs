@@ -42,6 +42,7 @@ namespace DoctoralManagement.Infrastructure.Repositories
                 .Include(a => a.Student)
                 .Include(a => a.DoctoralProgram)
                 .Include(a => a.PrefferedMentor)
+                .Include(a => a.Documents)
                 .FirstOrDefaultAsync(a => a.Id == id);
         }
 

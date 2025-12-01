@@ -1,4 +1,6 @@
-﻿using DoctoralManagement.Application.ThesisDefenseReviews;
+﻿using DoctoralManagement.Application.ConferenceParticipations.Commands;
+using DoctoralManagement.Application.Dtos;
+using DoctoralManagement.Application.ThesisDefenseReviews;
 using DoctoralManagement.Application.ThesisDefenses;
 using DoctoralManagement.Domain.Interfaces;
 using MediatR;
@@ -64,6 +66,26 @@ namespace DoctoralManagement.API.Controllers
                 DefenseId = defenseId
             });
 
+            return Ok(result);
+        }
+
+        [HttpPost("{projectId}/upload-document")]
+        [Authorize(Roles = "Student")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UploadThesisDocument(int projectId, [FromForm] UploadActivityDocumentDto request)
+        {
+            if (request.File == null || request.File.Length == 0)
+                return BadRequest("No file uploaded.");
+
+            var command = new UploadThesisDocumentCommand
+            {
+                ProjectId = projectId,
+                File = request.File,
+                FileName = request.File.FileName,
+                DocumentType = request.Type
+            };
+
+            var result = await _mediator.Send(command);
             return Ok(result);
         }
     }

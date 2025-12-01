@@ -27,6 +27,7 @@
         public ICollection<DoctoralProject> DoctoralProjects { get; set; } = new List<DoctoralProject>();
         public ICollection<Publication> Publications { get; set; } = new List<Publication>();
         public ICollection<Mobility> Mobilities { get; set; } = new List<Mobility>();
+        public ICollection<ConferenceParticipation> ConferenceParticipations { get; set; } = new List<ConferenceParticipation>();
         public ICollection<Application> Applications { get; set; } = new List<Application>();
         public ECTSTracking? ECTSTracking { get; set; }
     }

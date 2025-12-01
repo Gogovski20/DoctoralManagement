@@ -28,6 +28,8 @@ namespace DoctoralManagement.Infrastructure.Persistence
         public DbSet<CommitteeReview> CommitteeReviews { get; set; }
         public DbSet<Course> Courses { get; set; }
         public DbSet<CourseEnrollment> CourseEnrollments { get; set; }
+        public DbSet<ApplicationDocument> ApplicationDocuments { get; set; }
+        public DbSet<ActivityDocument> ActivityDocuments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -48,6 +50,8 @@ namespace DoctoralManagement.Infrastructure.Persistence
             ConfigureCommitteeReview(modelBuilder);
             ConfigureCourse(modelBuilder);
             ConfigureCourseEnrollment(modelBuilder);
+            ConfigureApplicationDocument(modelBuilder);
+            ConfigureActivityDocument(modelBuilder);
         }
 
         private void ConfigureApplicationUser(ModelBuilder modelBuilder)
@@ -207,10 +211,6 @@ namespace DoctoralManagement.Infrastructure.Persistence
             {
                 entity.HasKey(a => a.Id);
 
-                entity.Property(a => a.MotivationLetter).HasMaxLength(4000);
-                entity.Property(a => a.ResearchProposal).HasMaxLength(4000);
-                entity.Property(a => a.EnglishCertificatePath).HasMaxLength(500);
-
                 // Relationships
                 entity.HasOne(a => a.Student)
                       .WithMany(s => s.Applications)
@@ -261,6 +261,11 @@ namespace DoctoralManagement.Infrastructure.Persistence
                       .HasForeignKey(dp => dp.MentorId)
                       .OnDelete(DeleteBehavior.Restrict);
 
+                entity.HasMany(dp => dp.Documents)
+                      .WithOne(d => d.DoctoralProject)
+                      .HasForeignKey(d => d.DoctoralProjectId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
                 entity.ToTable("DoctoralProjects");
             });
         }
@@ -273,6 +278,17 @@ namespace DoctoralManagement.Infrastructure.Persistence
                 entity.Property(p => p.Title).IsRequired().HasMaxLength(500);
                 entity.Property(p => p.Journal).IsRequired().HasMaxLength(200);
 
+                entity.HasOne(p => p.Student)
+                      .WithMany(s => s.Publications)
+                      .HasForeignKey(p => p.StudentId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                // ONE-TO-ONE with ActivityDocument
+                entity.HasOne(p => p.Document)
+                      .WithOne(d => d.Publication)
+                      .HasForeignKey<Publication>(p => p.ActivityDocumentId)
+                      .OnDelete(DeleteBehavior.SetNull);
+
                 entity.ToTable("Publications");
             });
         }
@@ -284,6 +300,17 @@ namespace DoctoralManagement.Infrastructure.Persistence
                 entity.HasKey(m => m.Id);
                 entity.Property(m => m.Institution).IsRequired().HasMaxLength(200);
                 entity.Property(m => m.Country).IsRequired().HasMaxLength(100);
+
+                entity.HasOne(m => m.Student)
+                      .WithMany(s => s.Mobilities)
+                      .HasForeignKey(m => m.StudentId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                // ONE-TO-ONE with ActivityDocument
+                entity.HasOne(m => m.Document)
+                      .WithOne(d => d.Mobility)
+                      .HasForeignKey<Mobility>(m => m.ActivityDocumentId)
+                      .OnDelete(DeleteBehavior.SetNull);
 
                 entity.ToTable("Mobilities");
             });
@@ -318,9 +345,14 @@ namespace DoctoralManagement.Infrastructure.Persistence
                 entity.HasKey(c => c.Id);
                 entity.Property(c => c.ConferenceName).IsRequired().HasMaxLength(300);
                 entity.HasOne(c => c.Student)
-                      .WithMany() // later we can create navigation property
+                      .WithMany(s => s.ConferenceParticipations) 
                       .HasForeignKey(c => c.StudentId)
                       .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(c => c.Document)
+                      .WithOne(d => d.Conference)
+                      .HasForeignKey<ConferenceParticipation>(c => c.ActivityDocumentId)
+                      .OnDelete(DeleteBehavior.SetNull);
 
                 entity.ToTable("ConferenceParticipations");
             });
@@ -420,6 +452,80 @@ namespace DoctoralManagement.Infrastructure.Persistence
                 entity.ToTable("CourseEnrollments");
             });
 
+        }
+
+        private void ConfigureApplicationDocument(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ApplicationDocument>(entity =>
+            {
+                entity.HasKey(d => d.Id);
+
+                entity.Property(d => d.DocumentType).IsRequired();
+                entity.Property(d => d.FileName).IsRequired().HasMaxLength(300);
+                entity.Property(d => d.FilePath).IsRequired().HasMaxLength(500);
+                entity.Property(d => d.FileSize).HasMaxLength(50);
+                entity.Property(d => d.ContentType).HasMaxLength(100);
+
+                entity.HasOne(d => d.Application)
+                    .WithMany(a => a.Documents)
+                    .HasForeignKey(d => d.ApplicationId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(d => new { d.ApplicationId, d.DocumentType }).IsUnique();
+
+                entity.ToTable("ApplicationDocuments");
+            });
+        }
+
+        private void ConfigureActivityDocument(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ActivityDocument>(entity =>
+            {
+                entity.HasKey(d => d.Id);
+
+                entity.Property(d => d.DocumentType).IsRequired();
+                entity.Property(d => d.Status).IsRequired().HasDefaultValue(DocumentStatus.Pending);
+                entity.Property(d => d.FileName).IsRequired().HasMaxLength(300);
+                entity.Property(d => d.FilePath).IsRequired().HasMaxLength(500);
+                entity.Property(d => d.FileSize).HasMaxLength(50);
+                entity.Property(d => d.ContentType).HasMaxLength(100);
+                entity.Property(d => d.ReviewComment).HasMaxLength(1000);
+
+                // ONE-TO-ONE relationships with activity entities
+                entity.HasOne(d => d.Publication)
+                    .WithOne(p => p.Document)
+                    .HasForeignKey<ActivityDocument>(d => d.PublicationId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.Mobility)
+                    .WithOne(m => m.Document)
+                    .HasForeignKey<ActivityDocument>(d => d.MobilityId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.Conference)
+                    .WithOne(c => c.Document)
+                    .HasForeignKey<ActivityDocument>(d => d.ConferenceId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.DoctoralProject)
+                    .WithMany(dp => dp.Documents)
+                    .HasForeignKey(d => d.DoctoralProjectId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(d => d.PublicationId)
+                    .IsUnique()
+                    .HasFilter("\"PublicationId\" IS NOT NULL");
+    
+                entity.HasIndex(d => d.MobilityId)
+                    .IsUnique()
+                    .HasFilter("\"MobilityId\" IS NOT NULL");
+
+                entity.HasIndex(d => d.ConferenceId)
+                    .IsUnique()
+                    .HasFilter("\"ConferenceId\" IS NOT NULL");
+
+                entity.ToTable("ActivityDocuments");
+            });
         }
 
     }

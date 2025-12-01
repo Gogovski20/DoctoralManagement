@@ -12,5 +12,9 @@
         public int EctsAwarded { get; set; } = 0;
         public string? EvidencePath { get; set; }
         public bool IsInternational { get; set; }
+
+        public bool IsApproved { get; set; } = false;
+        public int? ActivityDocumentId { get; set; }
+        public ActivityDocument? Document { get; set; }
     }
 }

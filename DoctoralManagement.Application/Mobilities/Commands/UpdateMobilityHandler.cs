@@ -23,22 +23,24 @@ namespace DoctoralManagement.Application.Mobilities.Commands
             if (mobility == null)
                 throw new Exception($"Mobility with ID {request.Id} not found.");
 
-            int oldEcts = CalculateEctsForMobility(mobility.StartDate, mobility.EndDate);
+            int oldEcts = mobility.EctsPoints;
 
             mobility.Institution = request.Institution;
             mobility.Country = request.Country;
             mobility.StartDate = request.StartDate;
             mobility.EndDate = request.EndDate;
 
+            mobility.EctsPoints = request.EctsCredits;
+
             await _mobilityRepository.UpdateAsync(mobility);
 
-            int newEcts = CalculateEctsForMobility(request.StartDate, request.EndDate);
+            
 
             // Update ECTS tracking
             var ectsTracking = await _ectsRepository.GetByStudentIdAsync(mobility.StudentId);
             if (ectsTracking != null)
             {
-                ectsTracking.InternationalMobility = ectsTracking.InternationalMobility - oldEcts + newEcts;
+                ectsTracking.InternationalMobility = ectsTracking.InternationalMobility - oldEcts + mobility.EctsPoints;
                 if (ectsTracking.InternationalMobility > 6)
                     ectsTracking.InternationalMobility = 6;
                 else if (ectsTracking.InternationalMobility < 0)
@@ -49,17 +51,6 @@ namespace DoctoralManagement.Application.Mobilities.Commands
             }
 
             return new PublicationResponse { };
-        }
-
-        private int CalculateEctsForMobility(DateTime start, DateTime end)
-        {
-            var totalMonths = (end - start).TotalDays / 30;
-            if (totalMonths >= 3)
-                return 6;
-            else if (totalMonths >= 1)
-                return 3;
-            else
-                return 0;
         }
     }
 }

@@ -38,50 +38,36 @@ namespace DoctoralManagement.Application.Mobilities.Commands
                 throw new Exception("Student is not accepted to a doctoral program");
             }
 
-
-            int ectsPoints = CalculateEctsForMobility(request.StartDate, request.EndDate);
-
             var mobility = new Mobility
             {
                 StudentId = request.StudentId,
                 Institution = request.Institution,
                 Country = request.Country,
                 StartDate = request.StartDate,
-                EndDate = request.EndDate
+                EndDate = request.EndDate,
+                EctsPoints = request.PossibleEctsCredits
             };
 
             var created = await _mobilityRepository.AddAsync(mobility);
 
-            var ectsTracking = await _ectsRepository.GetByStudentIdAsync(request.StudentId);
-            if (ectsTracking != null)
-            {
-                ectsTracking.InternationalMobility += ectsPoints;
-                if (ectsTracking.InternationalMobility > 6)
-                {
-                    ectsTracking.InternationalMobility = 6;
-                }
-                await _ectsRepository.UpdateAsync(ectsTracking);
-                await _ectsProgressService.UpdateStudentSemesterAsync(request.StudentId, ectsTracking.TotalECTS);
-            }
+            //var ectsTracking = await _ectsRepository.GetByStudentIdAsync(request.StudentId);
+            //if (ectsTracking != null)
+            //{
+            //    ectsTracking.InternationalMobility += ectsPoints;
+            //    if (ectsTracking.InternationalMobility > 6)
+            //    {
+            //        ectsTracking.InternationalMobility = 6;
+            //    }
+            //    await _ectsRepository.UpdateAsync(ectsTracking);
+            //    await _ectsProgressService.UpdateStudentSemesterAsync(request.StudentId, ectsTracking.TotalECTS);
+            //}
 
             return new AddMobilityResponse
             {
                 Id = created.Id,
                 StudentId = created.StudentId,
-                EctsAwarded = ectsPoints
+                PossibleEctsCredits = created.EctsPoints,
             };
-        }
-
-        private int CalculateEctsForMobility(DateTime start, DateTime end)
-        {
-            var totalMonths = (end - start).TotalDays / 30;
-
-            if (totalMonths >= 3)
-                return 6;
-            else if (totalMonths >= 1)
-                return 3;
-            else
-                return 0;
         }
     }
 }

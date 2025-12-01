@@ -45,7 +45,6 @@ namespace DoctoralManagement.Application.DoctoralProjects.Commands
                 ResearchArea = request.ResearchArea,
                 StudentId = request.StudentId,
                 MentorId = request.MentorId,
-                ProposalDocumentPath = request.ProposalDocumentPath,
                 Status = ProjectStatus.Draft,
                 CreatedAt = DateTime.UtcNow
             };
@@ -58,7 +57,6 @@ namespace DoctoralManagement.Application.DoctoralProjects.Commands
                 Title = created.Title,
                 ResearchArea = created.ResearchArea,
                 Status = created.Status.ToString(),
-                ProposalDocumentPath = created.ProposalDocumentPath,
                 CreatedAt = created.CreatedAt
             };
         }

@@ -1,4 +1,5 @@
-﻿using DoctoralManagement.Domain.Entities;
+﻿using DoctoralManagement.Application.Dtos;
+using DoctoralManagement.Domain.Entities;
 
 namespace DoctoralManagement.Application.Applications.Queries
 {
@@ -13,13 +14,11 @@ namespace DoctoralManagement.Application.Applications.Queries
         public string ScientificArea { get; set; } = string.Empty;
         public int? PreferredMentorId { get; set; }
         public string? PreferredMentorName { get; set; }
-        public string MotivationLetter { get; set; } = string.Empty;
-        public string ResearchProposal { get; set; } = string.Empty;
-        public string EnglishCertificatePath { get; set; } = string.Empty;
         public ApplicationStatus ApplicationStatus { get; set; }
         public DateTime ApplicationDate { get; set; }
         public DateTime? DecisionDate { get; set; }
         public bool MeetsGradeRequirements { get; set; }
         public bool HasRequiredPublications { get; set; }
+        public List<ApplicationDocumentDto> Documents { get; set; } = new();
     }
 }

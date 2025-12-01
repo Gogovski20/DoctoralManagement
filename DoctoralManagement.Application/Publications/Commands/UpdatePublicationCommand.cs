@@ -11,6 +11,7 @@ namespace DoctoralManagement.Application.Publications.Commands
         public string Doi { get; set; } = string.Empty;
         public bool IsIndexedInScopus { get; set; }
         public bool IsIndexedInThomsonReuters { get; set; }
+        public int EctsCredits { get; set; }
     }
 
     public class PublicationResponse { }

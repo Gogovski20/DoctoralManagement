@@ -29,7 +29,7 @@ namespace DoctoralManagement.Application.ConferenceParticipations.Commands
             conference.Role = request.Role;
             conference.IsInternational = request.IsInternational;
 
-            conference.EctsAwarded = CalculateEctsForConference(request);
+            conference.EctsAwarded = request.EctsCredits;
 
             await _conferenceParticipationRepository.UpdateAsync(conference);
 
@@ -45,11 +45,6 @@ namespace DoctoralManagement.Application.ConferenceParticipations.Commands
                 await _ectsProgressService.UpdateStudentSemesterAsync(conference.StudentId, ectsTracking.TotalECTS);
             }
             return new UpdateConferenceParticipationResponse { };
-        }
-
-        private int CalculateEctsForConference(UpdateConferenceParticipationCommand request)
-        {
-            return request.IsInternational ? 3 : 1;
         }
     }
 }

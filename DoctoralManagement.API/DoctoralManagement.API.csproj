@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+	<PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.0" />
 	<PackageReference Include="MediatR" Version="12.2.0" />
 	<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.9">
@@ -24,6 +25,10 @@
   <ItemGroup>
     <ProjectReference Include="..\DoctoralManagement.Application\DoctoralManagement.Application.csproj" />
     <ProjectReference Include="..\DoctoralManagement.Infrastructure\DoctoralManagement.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Uploads\" />
   </ItemGroup>
 
 </Project>

@@ -37,7 +37,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Secretary")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<MentorResponse>> Create([FromBody] CreateMentorCommand command)
         {
             var result = await _mediator.Send(command);
@@ -45,7 +45,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize(Roles = "Secretary")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<MentorResponse>> Update(int id, [FromBody] UpdateMentorCommand command)
         {
             if (id != command.Id)
@@ -57,7 +57,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Secretary")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             await _mediator.Send(new DeleteMentorCommand { Id = id });

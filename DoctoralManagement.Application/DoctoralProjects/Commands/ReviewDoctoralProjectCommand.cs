@@ -8,5 +8,8 @@ namespace DoctoralManagement.Application.DoctoralProjects.Commands
         public int ProjectId { get; set; }
         public ProjectStatus NewStatus { get; set; }
         public string? CommitteeNotes { get; set; }
+
+        public DocumentStatus? DocumentStatus { get; set; }
+        public string? ReviewComment { get; set; }
     }
 }

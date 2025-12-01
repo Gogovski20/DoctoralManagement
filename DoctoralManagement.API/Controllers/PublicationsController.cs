@@ -1,4 +1,6 @@
-﻿using DoctoralManagement.Application.Publications.Commands;
+﻿using DoctoralManagement.Application.ActivityDocuments;
+using DoctoralManagement.Application.Dtos;
+using DoctoralManagement.Application.Publications.Commands;
 using DoctoralManagement.Application.Publications.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -50,6 +52,99 @@ namespace DoctoralManagement.API.Controllers
         {
             await _mediator.Send(new DeletePublicationCommand { Id = id });
             return NoContent();
+        }
+
+        [HttpPost("{publicationId}/upload-document")]
+        [Authorize(Roles = "Student")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UploadPublicationDocument(int publicationId, [FromForm] UploadActivityDocumentDto request)
+        {
+            if (request.File == null || request.File.Length == 0)
+                return BadRequest("No file uploaded.");
+
+            var command = new UploadPublicationDocumentCommand
+            {
+                PublicationId = publicationId,
+                File = request.File,
+                FileName = request.File.FileName,
+                Type = request.Type
+            };
+
+            var result = await _mediator.Send(command);
+            return Ok(result);
+        }
+
+        [HttpPost("{publicationId}/review")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> ReviewPublication(int publicationId, [FromBody] ReviewPublicationCommand command)
+        {
+            if (publicationId != command.PublicationId)
+                return BadRequest("ID mismatch");
+
+            var result = await _mediator.Send(command);
+            return Ok(result);
+        }
+
+        //[HttpGet("{publicationId}/download")]
+        //[Authorize(Roles = "Student,Admin")]
+        //public async Task<IActionResult> DownloadDocument(int publicationId, int documentId)
+        //{
+        //    var command = new DownloadActivityDocumentQuery 
+        //    { 
+        //        DocumentId = documentId,
+        //        ActivityId = publicationId,
+        //        ActivityType = ActivityType.Publication
+        //    };
+        //    var result = await _mediator.Send(command);
+
+        //    return File(result.FileBytes, result.ContentType, result.FileName);
+        //}
+
+        [HttpGet("{publicationId}/download")]
+        [Authorize(Roles = "Student,Admin")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> DownloadDocument(int publicationId, int documentId)
+        {
+            try
+            {
+                var command = new DownloadActivityDocumentQuery
+                {
+                    DocumentId = documentId,
+                    ActivityId = publicationId,
+                    ActivityType = ActivityType.Publication
+                };
+
+                var result = await _mediator.Send(command);
+
+                // Check if download was successful
+                if (!result.Success)
+                {
+                    return NotFound(new { message = result.Message });
+                }
+
+                // Return file for download
+                return File(result.FileBytes, result.ContentType, result.FileName);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = $"Error downloading document: {ex.Message}" });
+            }
+        }
+
+        [HttpDelete("{publicationId}/delete")]
+        public async Task<IActionResult> DeleteDocument(int publicationId, int documentId)
+        {
+            var command = new DeleteActivityDocumentCommand 
+            { 
+                ActivityDocumentId = documentId,
+                ActivityType = ActivityType.Publication,
+                ActivityId = publicationId
+            };
+            var result = await _mediator.Send(command);
+            return Ok(result);
         }
     }
 }

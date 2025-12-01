@@ -9,6 +9,7 @@ namespace DoctoralManagement.Application.Mobilities.Commands
         public string Country { get; set; } = string.Empty;
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
+        public int EctsCredits { get; set; }
     }
 
     public class PublicationResponse { }

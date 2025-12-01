@@ -8,7 +8,6 @@
         public string Status { get; set; } = string.Empty;
         public string StudentName { get; set; } = string.Empty;
         public string MentorName { get; set; } = string.Empty;
-        public string? ProposalDocumentPath { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? SubmittedAt { get; set; }
     }

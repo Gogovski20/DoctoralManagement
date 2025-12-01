@@ -22,6 +22,91 @@ namespace DoctoralManagement.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("DoctoralManagement.Domain.Entities.ActivityDocument", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("ConferenceId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int?>("DoctoralProjectId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("DocumentType")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.Property<string>("FilePath")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("FileSize")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<int?>("MobilityId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("PublicationId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ReviewComment")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<DateTime?>("ReviewedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("ReviewedBy")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Status")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1);
+
+                    b.Property<DateTime>("UploadedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("UploadedBy")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ConferenceId")
+                        .IsUnique();
+
+                    b.HasIndex("DoctoralProjectId")
+                        .IsUnique();
+
+                    b.HasIndex("MobilityId")
+                        .IsUnique();
+
+                    b.HasIndex("PublicationId")
+                        .IsUnique();
+
+                    b.HasIndex("PublicationId", "MobilityId", "ConferenceId", "DoctoralProjectId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_ActivityDocument_OnePerEntity");
+
+                    b.ToTable("ActivityDocuments", (string)null);
+                });
+
             modelBuilder.Entity("DoctoralManagement.Domain.Entities.Application", b =>
                 {
                     b.Property<int>("Id")
@@ -42,29 +127,14 @@ namespace DoctoralManagement.Infrastructure.Migrations
                     b.Property<int>("DoctoralProgramId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("EnglishCertificatePath")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
                     b.Property<bool>("HasRequiredPublications")
                         .HasColumnType("boolean");
 
                     b.Property<bool>("MeetsGradeRequirements")
                         .HasColumnType("boolean");
 
-                    b.Property<string>("MotivationLetter")
-                        .IsRequired()
-                        .HasMaxLength(4000)
-                        .HasColumnType("character varying(4000)");
-
                     b.Property<int?>("PrefferedMentorId")
                         .HasColumnType("integer");
-
-                    b.Property<string>("ResearchProposal")
-                        .IsRequired()
-                        .HasMaxLength(4000)
-                        .HasColumnType("character varying(4000)");
 
                     b.Property<int>("StudentId")
                         .HasColumnType("integer");
@@ -78,6 +148,54 @@ namespace DoctoralManagement.Infrastructure.Migrations
                     b.HasIndex("StudentId");
 
                     b.ToTable("Applications", (string)null);
+                });
+
+            modelBuilder.Entity("DoctoralManagement.Domain.Entities.ApplicationDocument", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ApplicationId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("DocumentType")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.Property<string>("FilePath")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("FileSize")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTime>("UploadedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("UploadedBy")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApplicationId", "DocumentType")
+                        .IsUnique();
+
+                    b.ToTable("ApplicationDocuments", (string)null);
                 });
 
             modelBuilder.Entity("DoctoralManagement.Domain.Entities.CommitteeReview", b =>
@@ -120,6 +238,9 @@ namespace DoctoralManagement.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("ActivityDocumentId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("ConferenceName")
                         .IsRequired()
                         .HasMaxLength(300)
@@ -133,6 +254,9 @@ namespace DoctoralManagement.Infrastructure.Migrations
 
                     b.Property<string>("EvidencePath")
                         .HasColumnType("text");
+
+                    b.Property<bool>("IsApproved")
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("IsInternational")
                         .HasColumnType("boolean");
@@ -288,6 +412,9 @@ namespace DoctoralManagement.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("ActivityDocumentId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("CommitteeNotes")
                         .HasColumnType("text");
 
@@ -425,10 +552,16 @@ namespace DoctoralManagement.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("ActivityDocumentId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Country")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
+
+                    b.Property<int>("EctsPoints")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("timestamp with time zone");
@@ -437,6 +570,9 @@ namespace DoctoralManagement.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
+
+                    b.Property<bool>("IsApproved")
+                        .HasColumnType("boolean");
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("timestamp with time zone");
@@ -482,12 +618,18 @@ namespace DoctoralManagement.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("ActivityDocumentId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Doi")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("EctsPoints")
                         .HasColumnType("integer");
+
+                    b.Property<bool>("IsApproved")
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("IsIndexedInScopus")
                         .HasColumnType("boolean");
@@ -525,6 +667,9 @@ namespace DoctoralManagement.Infrastructure.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("ApplicationUserId")
+                        .HasColumnType("integer");
 
                     b.Property<int>("CurrentSemester")
                         .HasColumnType("integer");
@@ -849,6 +994,37 @@ namespace DoctoralManagement.Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("DoctoralManagement.Domain.Entities.ActivityDocument", b =>
+                {
+                    b.HasOne("DoctoralManagement.Domain.Entities.ConferenceParticipation", "Conference")
+                        .WithOne("Document")
+                        .HasForeignKey("DoctoralManagement.Domain.Entities.ActivityDocument", "ConferenceId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("DoctoralManagement.Domain.Entities.DoctoralProject", "DoctoralProject")
+                        .WithOne("Document")
+                        .HasForeignKey("DoctoralManagement.Domain.Entities.ActivityDocument", "DoctoralProjectId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("DoctoralManagement.Domain.Entities.Mobility", "Mobility")
+                        .WithOne("Document")
+                        .HasForeignKey("DoctoralManagement.Domain.Entities.ActivityDocument", "MobilityId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("DoctoralManagement.Domain.Entities.Publication", "Publication")
+                        .WithOne("Document")
+                        .HasForeignKey("DoctoralManagement.Domain.Entities.ActivityDocument", "PublicationId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("Conference");
+
+                    b.Navigation("DoctoralProject");
+
+                    b.Navigation("Mobility");
+
+                    b.Navigation("Publication");
+                });
+
             modelBuilder.Entity("DoctoralManagement.Domain.Entities.Application", b =>
                 {
                     b.HasOne("DoctoralManagement.Domain.Entities.DoctoralProgram", "DoctoralProgram")
@@ -875,6 +1051,17 @@ namespace DoctoralManagement.Infrastructure.Migrations
                     b.Navigation("Student");
                 });
 
+            modelBuilder.Entity("DoctoralManagement.Domain.Entities.ApplicationDocument", b =>
+                {
+                    b.HasOne("DoctoralManagement.Domain.Entities.Application", "Application")
+                        .WithMany("Documents")
+                        .HasForeignKey("ApplicationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Application");
+                });
+
             modelBuilder.Entity("DoctoralManagement.Domain.Entities.CommitteeReview", b =>
                 {
                     b.HasOne("DoctoralManagement.Domain.Entities.ThesisDefense", "ThesisDefense")
@@ -889,7 +1076,7 @@ namespace DoctoralManagement.Infrastructure.Migrations
             modelBuilder.Entity("DoctoralManagement.Domain.Entities.ConferenceParticipation", b =>
                 {
                     b.HasOne("DoctoralManagement.Domain.Entities.Student", "Student")
-                        .WithMany()
+                        .WithMany("ConferenceParticipations")
                         .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1010,19 +1197,15 @@ namespace DoctoralManagement.Infrastructure.Migrations
 
             modelBuilder.Entity("DoctoralManagement.Infrastructure.Auth.ApplicationUser", b =>
                 {
-                    b.HasOne("DoctoralManagement.Domain.Entities.Mentor", "Mentor")
+                    b.HasOne("DoctoralManagement.Domain.Entities.Mentor", null)
                         .WithMany()
                         .HasForeignKey("MentorId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("DoctoralManagement.Domain.Entities.Student", "Student")
+                    b.HasOne("DoctoralManagement.Domain.Entities.Student", null)
                         .WithMany()
                         .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Mentor");
-
-                    b.Navigation("Student");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
@@ -1076,6 +1259,16 @@ namespace DoctoralManagement.Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("DoctoralManagement.Domain.Entities.Application", b =>
+                {
+                    b.Navigation("Documents");
+                });
+
+            modelBuilder.Entity("DoctoralManagement.Domain.Entities.ConferenceParticipation", b =>
+                {
+                    b.Navigation("Document");
+                });
+
             modelBuilder.Entity("DoctoralManagement.Domain.Entities.Course", b =>
                 {
                     b.Navigation("Enrollments");
@@ -1093,6 +1286,8 @@ namespace DoctoralManagement.Infrastructure.Migrations
             modelBuilder.Entity("DoctoralManagement.Domain.Entities.DoctoralProject", b =>
                 {
                     b.Navigation("Defenses");
+
+                    b.Navigation("Document");
                 });
 
             modelBuilder.Entity("DoctoralManagement.Domain.Entities.Mentor", b =>
@@ -1102,9 +1297,21 @@ namespace DoctoralManagement.Infrastructure.Migrations
                     b.Navigation("DoctoralProjects");
                 });
 
+            modelBuilder.Entity("DoctoralManagement.Domain.Entities.Mobility", b =>
+                {
+                    b.Navigation("Document");
+                });
+
+            modelBuilder.Entity("DoctoralManagement.Domain.Entities.Publication", b =>
+                {
+                    b.Navigation("Document");
+                });
+
             modelBuilder.Entity("DoctoralManagement.Domain.Entities.Student", b =>
                 {
                     b.Navigation("Applications");
+
+                    b.Navigation("ConferenceParticipations");
 
                     b.Navigation("CourseEnrollments");
 

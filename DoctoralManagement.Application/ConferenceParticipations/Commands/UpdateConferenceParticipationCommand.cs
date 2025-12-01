@@ -9,6 +9,8 @@ namespace DoctoralManagement.Application.ConferenceParticipations.Commands
         public DateTime Date { get; set; }
         public string Role { get; set; } = string.Empty;
         public bool IsInternational { get; set; }
+        public int EctsCredits { get; set; }
+
     }
 
     public class UpdateConferenceParticipationResponse { }
