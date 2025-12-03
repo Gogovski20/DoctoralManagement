@@ -1,6 +1,8 @@
 ﻿using DoctoralManagement.Application.Common;
+using DoctoralManagement.Domain.Exceptions;
 using DoctoralManagement.Domain.Interfaces;
 using MediatR;
+using System.Net;
 
 namespace DoctoralManagement.Application.Applications.Commands
 {
@@ -23,7 +25,7 @@ namespace DoctoralManagement.Application.Applications.Commands
 
             if (application == null)
             {
-                throw new Exception($"Application with ID {request.Id} not found.");
+                throw new DoctoralManagementException($"Application with ID {request.Id} not found.", HttpStatusCode.NotFound);
             }
 
             var currentUserId = _currentUserService.UserId;
@@ -36,12 +38,12 @@ namespace DoctoralManagement.Application.Applications.Commands
 
             if (!isOwner && !isPrivileged)
             {
-                throw new UnauthorizedAccessException("You are not authorized to delete this application");
+                throw new DoctoralManagementException("You are not authorized to delete this application", HttpStatusCode.Forbidden);
             }
 
             if (application.ApplicationStatus != Domain.Entities.ApplicationStatus.Draft)
             {
-                throw new Exception("Only applications in 'Draft' status can be deleted.");
+                throw new DoctoralManagementException("Only applications in 'Draft' status can be deleted.", HttpStatusCode.BadRequest);
             }
 
             await _applicationRepository.DeleteAsync(application);

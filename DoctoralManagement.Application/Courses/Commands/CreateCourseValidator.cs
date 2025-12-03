@@ -16,7 +16,7 @@ namespace DoctoralManagement.Application.Courses.Commands
 
             RuleFor(x => x.EctsCredits)
                 .GreaterThan(0)
-                .LessThanOrEqualTo(30);
+                .LessThanOrEqualTo(6);
 
             RuleFor(x => x.InstructorName)
                 .NotEmpty()

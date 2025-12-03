@@ -22,10 +22,6 @@ namespace DoctoralManagement.Application.Mobilities.Commands
 
             RuleFor(x => x.EndDate)
                 .GreaterThan(x => x.StartDate);
-
-            RuleFor(x => x.PossibleEctsCredits)
-                .GreaterThanOrEqualTo(0)
-                .LessThanOrEqualTo(30);
         }
     }
 }

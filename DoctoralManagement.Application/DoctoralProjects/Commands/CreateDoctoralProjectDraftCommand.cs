@@ -8,6 +8,5 @@ namespace DoctoralManagement.Application.DoctoralProjects.Commands
         public int MentorId { get; set; }
         public string Title { get; set; } = string.Empty;
         public string ResearchArea { get; set; } = string.Empty;
-        public string? ProposalDocumentPath { get; set; }
     }
 }

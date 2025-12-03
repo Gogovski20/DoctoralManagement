@@ -1,6 +1,9 @@
-﻿using DoctoralManagement.Domain.Entities;
+﻿using DoctoralManagement.Application.Common;
+using DoctoralManagement.Domain.Entities;
+using DoctoralManagement.Domain.Exceptions;
 using DoctoralManagement.Domain.Interfaces;
 using MediatR;
+using System.Net;
 
 namespace DoctoralManagement.Application.ConferenceParticipations.Commands
 {
@@ -10,26 +13,40 @@ namespace DoctoralManagement.Application.ConferenceParticipations.Commands
         private readonly IFileService _fileService;
         private readonly IActivityDocumentRepository _activityDocumentRepository;
         private readonly IStudentRepository _studentRepository;
+        private readonly ICurrentUserService _currentUserService;
+        private readonly IAuthService _authService;
 
-        public UploadConferenceDocumentHandler(IConferenceParticipationRepository conferenceRepository, IFileService fileService, IActivityDocumentRepository activityDocumentRepository, IStudentRepository studentRepository)
+        public UploadConferenceDocumentHandler(IConferenceParticipationRepository conferenceRepository, IFileService fileService, IActivityDocumentRepository activityDocumentRepository, IStudentRepository studentRepository, ICurrentUserService currentUserService, IAuthService authService)
         {
             _conferenceRepository = conferenceRepository;
             _fileService = fileService;
             _activityDocumentRepository = activityDocumentRepository;
             _studentRepository = studentRepository;
+            _currentUserService = currentUserService;
+            _authService = authService;
         }
 
         public async Task<UploadConferenceDocumentResponse> Handle(UploadConferenceDocumentCommand request, CancellationToken cancellationToken)
         {
             var conference = await _conferenceRepository.GetByIdAsync(request.ConferenceId)
-                ?? throw new Exception("Conference participation not found.");
+                ?? throw new DoctoralManagementException("Conference participation not found.", HttpStatusCode.NotFound);
+
+            var currentUserId = _currentUserService.UserId;
+            var linkedStudentId = await _authService.GetLinkedStudentIdAsync(currentUserId);
+
+            if (linkedStudentId == null || linkedStudentId != conference.StudentId)
+            {
+                throw new DoctoralManagementException(
+                    "You can only upload documents for your own conference participations.",
+                    HttpStatusCode.Forbidden);
+            }
 
             var student = await _studentRepository.GetByIdAsync(conference.StudentId)
-                ?? throw new Exception("Student not found.");
+                ?? throw new DoctoralManagementException("Student not found.", HttpStatusCode.NotFound);
 
             if (conference.IsApproved == true)
             {
-                throw new Exception("Cannot upload document for an approved conference participation.");
+                throw new DoctoralManagementException("Cannot upload document for an approved conference participation.", HttpStatusCode.BadRequest);
             }
 
             var existingDocument = await _activityDocumentRepository.GetByConferenceIdAsync(request.ConferenceId);
@@ -45,7 +62,7 @@ namespace DoctoralManagement.Application.ConferenceParticipations.Commands
 
             if (request.Type != ActivityDocumentType.ConferenceProof)
             {
-                throw new Exception("Invalid document type for conference participation.");
+                throw new DoctoralManagementException("Invalid document type for conference participation.", HttpStatusCode.BadRequest);
             }
 
             string cleanFileName = Path.GetFileNameWithoutExtension(request.FileName);

@@ -1,4 +1,5 @@
 ﻿using DoctoralManagement.Application.ActivityDocuments;
+using DoctoralManagement.Application.ConferenceParticipations.Queries;
 using DoctoralManagement.Application.Dtos;
 using DoctoralManagement.Application.Publications.Commands;
 using DoctoralManagement.Application.Publications.Queries;
@@ -20,7 +21,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Student,Secretary")]
+        [Authorize(Roles = "Student,Admin")]
         public async Task<IActionResult> AddPublication([FromBody] CreatePublicationCommand command)
         {
             var result = await _mediator.Send(command);
@@ -28,7 +29,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpGet("student/{studentId}")]
-        [Authorize(Roles = "Student,Secretary")]
+        [Authorize(Roles = "Student,Admin,Mentor")]
         public async Task<IActionResult> GetStudentPublications(int studentId)
         {
             var query = new GetStudentPublicationsQuery { StudentId = studentId };
@@ -36,8 +37,16 @@ namespace DoctoralManagement.API.Controllers
             return Ok(result);
         }
 
+        [HttpGet("{id}")]
+        [Authorize(Roles = "Student,Admin,Mentor")]
+        public async Task<ActionResult<GetPublicationByIdResponse>> GetPublicationById(int id)
+        {
+            var result = await _mediator.Send(new GetPublicationByIdQuery { PublicationId = id });
+            return Ok(result);
+        }
+
         [HttpPut("{id}")]
-        [Authorize(Roles = "Student,Secretary")]
+        [Authorize(Roles = "Student,Admin")]
         public async Task<IActionResult> UpdatePublication(int id, [FromBody] UpdatePublicationCommand command)
         {
             if (id != command.Id) return BadRequest("ID mismatch");
@@ -47,7 +56,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Secretary")]
+        [Authorize(Roles = "Admin,Student")]
         public async Task<IActionResult> DeletePublication(int id)
         {
             await _mediator.Send(new DeletePublicationCommand { Id = id });
@@ -75,7 +84,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpPost("{publicationId}/review")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Mentor")]
         public async Task<IActionResult> ReviewPublication(int publicationId, [FromBody] ReviewPublicationCommand command)
         {
             if (publicationId != command.PublicationId)
@@ -101,7 +110,7 @@ namespace DoctoralManagement.API.Controllers
         //}
 
         [HttpGet("{publicationId}/download")]
-        [Authorize(Roles = "Student,Admin")]
+        [Authorize(Roles = "Student,Admin,Mentor")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -135,6 +144,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpDelete("{publicationId}/delete")]
+        [Authorize(Roles = "Admin,Student")]
         public async Task<IActionResult> DeleteDocument(int publicationId, int documentId)
         {
             var command = new DeleteActivityDocumentCommand 

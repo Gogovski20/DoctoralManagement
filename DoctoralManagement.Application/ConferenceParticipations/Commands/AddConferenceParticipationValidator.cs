@@ -19,10 +19,6 @@ namespace DoctoralManagement.Application.ConferenceParticipations.Commands
             RuleFor(x => x.Role)
                 .NotEmpty()
                 .MaximumLength(100);
-
-            RuleFor(x => x.PossibleEctsCredits)
-                .GreaterThanOrEqualTo(0)
-                .LessThanOrEqualTo(30);
         }
     }
 }

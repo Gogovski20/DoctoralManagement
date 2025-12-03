@@ -208,7 +208,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpGet("{applicationId}/documents/{documentId}download")]
-        [Authorize(Roles = "Student,Admin")]
+        [Authorize(Roles = "Student,Admin,Mentor")]
         public async Task<IActionResult> DownloadApplicationDocument(int applicationId, int documentId)
         {
             var query = new DownloadApplicationDocumentQuery
@@ -228,7 +228,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpDelete("{applicationId}/documents/{documentId}")]
-        [Authorize(Roles = "Student")]
+        [Authorize(Roles = "Student,Admin")]
         public async Task<IActionResult> DeleteApplicationDocument(int applicationId, int documentId)
         {
             var command = new DeleteApplicationDocumentCommand

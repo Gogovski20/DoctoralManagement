@@ -1,7 +1,9 @@
 ﻿using DoctoralManagement.Application.Common;
 using DoctoralManagement.Application.ECTS.Services;
+using DoctoralManagement.Domain.Exceptions;
 using DoctoralManagement.Domain.Interfaces;
 using MediatR;
+using System.Net;
 
 namespace DoctoralManagement.Application.Mobilities.Commands
 {
@@ -24,31 +26,32 @@ namespace DoctoralManagement.Application.Mobilities.Commands
 
         public async Task<ReviewMobilityResponse> Handle(ReviewMobilityCommand request, CancellationToken cancellationToken)
         {
+            var mobility = await _mobilityRepository.GetByIdAsync(request.MobilityId)
+                ?? throw new DoctoralManagementException("Mobility not found", HttpStatusCode.NotFound);
+
             var currentUserId = _currentUserService.UserId;
             var currentUserRole = _currentUserService.Role;
 
             if (currentUserRole != "Admin")
             {
-                throw new Exception("Only admins can review mobilities.");
+                throw new DoctoralManagementException("Only admins can review mobilities.", HttpStatusCode.Forbidden);
             }
-
-            var mobility = await _mobilityRepository.GetByIdAsync(request.MobilityId)
-                ?? throw new Exception("Mobility not found");
 
             if (mobility.IsApproved)
             {
-                throw new Exception("This mobility is already approved.");
+                throw new DoctoralManagementException("This mobility is already approved.", HttpStatusCode.BadRequest);
             }
 
             var mobilityDocument = await _activityDocumentRepository.GetByMobilityIdAsync(mobility.Id);
             if (mobilityDocument == null)
             {
-                throw new Exception("Mobility cannot be reviewed cause proof document is missing.");
+                throw new DoctoralManagementException("Mobility cannot be reviewed cause proof document is missing.", HttpStatusCode.BadRequest);
             }
 
             if (request.IsApproved)
             {
                 mobility.IsApproved = true;
+                mobility.EctsPoints = request.EctsAwarded;
                 mobilityDocument.Status = Domain.Entities.DocumentStatus.Approved;
                 mobilityDocument.ReviewComment = request.ReviewComments;
                 mobilityDocument.ReviewedAt = DateTime.UtcNow;
@@ -81,6 +84,7 @@ namespace DoctoralManagement.Application.Mobilities.Commands
             {
                 MobilityId = mobility.Id,
                 IsApproved = mobility.IsApproved,
+                EctsAwarded = mobility.EctsPoints,
                 Document = new Dtos.ActivityDocumentDto
                 {
                     Id = mobilityDocument.Id,

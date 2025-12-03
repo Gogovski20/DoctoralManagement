@@ -1,4 +1,5 @@
 ﻿using DoctoralManagement.Application.ActivityDocuments;
+using DoctoralManagement.Application.ConferenceParticipations.Queries;
 using DoctoralManagement.Application.DoctoralProjects.Commands;
 using DoctoralManagement.Application.DoctoralProjects.Queries;
 using DoctoralManagement.Application.Dtos;
@@ -37,10 +38,18 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpGet("all")]
-        [Authorize(Roles = "Secretary,Committee,Mentor")]
+        [Authorize(Roles = "Admin,Committee,Mentor")]
         public async Task<IActionResult> GetAll()
         {
             var result = await _mediator.Send(new GetAllDoctoralProjectsQuery());
+            return Ok(result);
+        }
+
+        [HttpGet("{id}")]
+        [Authorize(Roles = "Student,Admin,Mentor,Committee,Secretary")]
+        public async Task<ActionResult<GetDoctoralProjectByIdResponse>> GetDoctoralProjectById(int id)
+        {
+            var result = await _mediator.Send(new GetDoctoralProjectByIdQuery { DoctoralProjectId = id });
             return Ok(result);
         }
 
@@ -61,7 +70,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpPost("review")]
-        [Authorize(Roles = "Mentor,Committee")]
+        [Authorize(Roles = "Admin,Mentor,Committee,Secretary")]
         public async Task<IActionResult> Review([FromBody] ReviewDoctoralProjectCommand command)
         {
             var result = await _mediator.Send(command);
@@ -69,7 +78,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize(Roles = "Student,Mentor")]
+        [Authorize(Roles = "Admin,Student,Mentor")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateDoctoralProjectCommand command)
         {
             if (id != command.Id)
@@ -81,7 +90,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Secretary,Admin")]
+        [Authorize(Roles = "Mentor,Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             var ok = await _mediator.Send(new DeleteDoctoralProjectCommand { Id = id });
@@ -137,7 +146,7 @@ namespace DoctoralManagement.API.Controllers
         //}
 
         [HttpGet("{projectId}/download")]
-        [Authorize(Roles = "Student,Admin")]
+        [Authorize(Roles = "Student,Admin,Mentor,Secretary")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -171,6 +180,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpDelete("{projectId}/delete")]
+        [Authorize(Roles = "Admin,Student,Mentor")]
         public async Task<IActionResult> DeleteDocument(int projectId, int documentId)
         {
             var command = new DeleteActivityDocumentCommand 

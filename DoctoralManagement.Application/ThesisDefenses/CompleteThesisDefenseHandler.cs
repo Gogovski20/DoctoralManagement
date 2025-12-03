@@ -1,6 +1,10 @@
-﻿using DoctoralManagement.Domain.Entities;
+﻿using DoctoralManagement.Application.Common;
+using DoctoralManagement.Domain.Entities;
+using DoctoralManagement.Domain.Exceptions;
 using DoctoralManagement.Domain.Interfaces;
 using MediatR;
+using Microsoft.Extensions.Logging;
+using System.Net;
 
 namespace DoctoralManagement.Application.ThesisDefenses
 {
@@ -9,25 +13,37 @@ namespace DoctoralManagement.Application.ThesisDefenses
         private readonly IThesisDefenseRepository _thesisDefenseRepository;
         private readonly IDoctoralProjectRepository _projectRepository;
         private readonly IStudentRepository _studentRepository;
+        private readonly ICurrentUserService _currentUserService;
+        private readonly ILogger<CompleteThesisDefenseHandler> _logger;
 
-        public CompleteThesisDefenseHandler(IThesisDefenseRepository thesisDefenseRepository, IDoctoralProjectRepository projectRepository, IStudentRepository studentRepository)
+        public CompleteThesisDefenseHandler(IThesisDefenseRepository thesisDefenseRepository, IDoctoralProjectRepository projectRepository, IStudentRepository studentRepository, ICurrentUserService currentUserService, ILogger<CompleteThesisDefenseHandler> logger)
         {
             _thesisDefenseRepository = thesisDefenseRepository;
             _projectRepository = projectRepository;
             _studentRepository = studentRepository;
+            _currentUserService = currentUserService;
+            _logger = logger;
         }
 
         public async Task<CompleteThesisDefenseResponse> Handle(CompleteThesisDefenseCommand request, CancellationToken cancellationToken)
         {
+            var currentUserRole = _currentUserService.Role;
+            if (currentUserRole != "Admin")
+            {
+                throw new DoctoralManagementException(
+                    "Only admins can mark defense as complete.",
+                    HttpStatusCode.Forbidden);
+            }
+
             var defense = await _thesisDefenseRepository.GetByIdAsync(request.DefenseId)
-                ?? throw new Exception($"Defense with id {request.DefenseId} not found");
+                ?? throw new DoctoralManagementException($"Defense with id {request.DefenseId} not found", HttpStatusCode.NotFound);
 
             if (defense.Status != DefenseStatus.Scheduled)
-                throw new Exception("Only scheduled defenses can be completed.");
+                throw new DoctoralManagementException("Only scheduled defenses can be completed.", HttpStatusCode.BadRequest);
 
             if (DateTime.UtcNow < defense.ScheduledAt.AddMinutes(-5))
             {
-                throw new Exception($"Defense cannot be marked complete until scheduled time ({defense.ScheduledAt}).");
+                throw new DoctoralManagementException($"Defense cannot be marked complete until scheduled time ({defense.ScheduledAt}).", HttpStatusCode.BadRequest);
             }
 
             // Set defense as completed (NOT passed/failed yet)
@@ -41,6 +57,10 @@ namespace DoctoralManagement.Application.ThesisDefenses
                 : request.ArchiveNumber;
 
             await _thesisDefenseRepository.UpdateAsync(defense);
+
+            _logger.LogInformation(
+                "Thesis defense {DefenseId} marked as complete. Archive number: {ArchiveNumber}",
+                defense.Id, defense.ArchiveNumber);
 
             return new CompleteThesisDefenseResponse
             {

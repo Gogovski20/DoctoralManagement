@@ -1,6 +1,8 @@
 ﻿using DoctoralManagement.Application.Common;
+using DoctoralManagement.Domain.Exceptions;
 using DoctoralManagement.Domain.Interfaces;
 using MediatR;
+using System.Net;
 
 namespace DoctoralManagement.Application.Applications.Queries
 {
@@ -23,7 +25,7 @@ namespace DoctoralManagement.Application.Applications.Queries
 
             if (application == null)
             {
-                throw new Exception($"Application with ID {request.Id} not found.");
+                throw new DoctoralManagementException($"Application with ID {request.Id} not found.", HttpStatusCode.NotFound);
             }
 
             var currentUserId = _currentUserService.UserId;
@@ -36,7 +38,7 @@ namespace DoctoralManagement.Application.Applications.Queries
 
             if (!isOwner && !isPrivileged)
             {
-                throw new UnauthorizedAccessException("You are not authorized to view this application");
+                throw new DoctoralManagementException("You are not authorized to view this application", HttpStatusCode.Forbidden);
             }
 
             return new GetApplicationByIdResponse

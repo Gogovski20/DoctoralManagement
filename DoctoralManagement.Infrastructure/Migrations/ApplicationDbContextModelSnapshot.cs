@@ -89,20 +89,18 @@ namespace DoctoralManagement.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ConferenceId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("\"ConferenceId\" IS NOT NULL");
 
-                    b.HasIndex("DoctoralProjectId")
-                        .IsUnique();
+                    b.HasIndex("DoctoralProjectId");
 
                     b.HasIndex("MobilityId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("\"MobilityId\" IS NOT NULL");
 
                     b.HasIndex("PublicationId")
-                        .IsUnique();
-
-                    b.HasIndex("PublicationId", "MobilityId", "ConferenceId", "DoctoralProjectId")
                         .IsUnique()
-                        .HasDatabaseName("IX_ActivityDocument_OnePerEntity");
+                        .HasFilter("\"PublicationId\" IS NOT NULL");
 
                     b.ToTable("ActivityDocuments", (string)null);
                 });
@@ -412,9 +410,6 @@ namespace DoctoralManagement.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("ActivityDocumentId")
-                        .HasColumnType("integer");
-
                     b.Property<string>("CommitteeNotes")
                         .HasColumnType("text");
 
@@ -429,9 +424,6 @@ namespace DoctoralManagement.Infrastructure.Migrations
 
                     b.Property<int>("MentorId")
                         .HasColumnType("integer");
-
-                    b.Property<string>("ProposalDocumentPath")
-                        .HasColumnType("text");
 
                     b.Property<string>("ResearchArea")
                         .IsRequired()
@@ -1002,8 +994,8 @@ namespace DoctoralManagement.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("DoctoralManagement.Domain.Entities.DoctoralProject", "DoctoralProject")
-                        .WithOne("Document")
-                        .HasForeignKey("DoctoralManagement.Domain.Entities.ActivityDocument", "DoctoralProjectId")
+                        .WithMany("Documents")
+                        .HasForeignKey("DoctoralProjectId")
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("DoctoralManagement.Domain.Entities.Mobility", "Mobility")
@@ -1287,7 +1279,7 @@ namespace DoctoralManagement.Infrastructure.Migrations
                 {
                     b.Navigation("Defenses");
 
-                    b.Navigation("Document");
+                    b.Navigation("Documents");
                 });
 
             modelBuilder.Entity("DoctoralManagement.Domain.Entities.Mentor", b =>

@@ -1,7 +1,9 @@
 ﻿using DoctoralManagement.Application.Common;
 using DoctoralManagement.Application.ECTS.Services;
+using DoctoralManagement.Domain.Exceptions;
 using DoctoralManagement.Domain.Interfaces;
 using MediatR;
+using System.Net;
 
 namespace DoctoralManagement.Application.Publications.Commands
 {
@@ -29,26 +31,27 @@ namespace DoctoralManagement.Application.Publications.Commands
 
             if (currentUserRole != "Admin")
             {
-                throw new Exception("Only admins can review publications.");
+                throw new DoctoralManagementException("Only admins can review publications.", HttpStatusCode.Forbidden);
             }
 
             var publication = await _publicationRepository.GetByIdAsync(request.PublicationId)
-                ?? throw new Exception("Publication not found");
+                ?? throw new DoctoralManagementException("Publication not found", HttpStatusCode.NotFound);
 
             if (publication.IsApproved)
             {
-                throw new Exception("This publication is already approved.");
+                throw new DoctoralManagementException("This publication is already approved.", HttpStatusCode.BadRequest);
             }
 
             var publicationDocument = await _activityDocumentRepository.GetByPublicationIdAsync(publication.Id);
             if (publicationDocument == null) 
             {
-                throw new Exception("Publication cannot be reviewed cause proof document is missing.");
+                throw new DoctoralManagementException("Publication cannot be reviewed cause proof document is missing.", HttpStatusCode.BadRequest);
             }
 
             if (request.IsApproved)
             {
                 publication.IsApproved = true;
+                publication.EctsPoints = request.EctsAwarded;
                 publicationDocument.Status = Domain.Entities.DocumentStatus.Approved;
                 publicationDocument.ReviewComment = request.ReviewComments;
                 publicationDocument.ReviewedAt = DateTime.UtcNow;
@@ -81,6 +84,7 @@ namespace DoctoralManagement.Application.Publications.Commands
             {
                 PublicationId = publication.Id,
                 IsApproved = publication.IsApproved,
+                EctsAwarded = publication.EctsPoints,
                 Document = new Dtos.ActivityDocumentDto
                 {
                     Id = publicationDocument.Id,

@@ -8,6 +8,7 @@ namespace DoctoralManagement.Application.Mobilities.Commands
         public int MobilityId { get; set; }
         public string ReviewComments { get; set; } = string.Empty;
         public bool IsApproved { get; set; }
+        public int EctsAwarded { get; set; }
     }
 
     public class ReviewMobilityResponse
@@ -15,5 +16,6 @@ namespace DoctoralManagement.Application.Mobilities.Commands
         public int MobilityId { get; set; }
         public bool IsApproved { get; set; }
         public ActivityDocumentDto Document { get; set; } = new ActivityDocumentDto();
+        public int EctsAwarded { get; set; }
     }
 }

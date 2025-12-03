@@ -18,7 +18,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpGet("status")]
-        [Authorize(Roles = "Secretary,Student,Mentor")]
+        [Authorize(Roles = "Admin,Secretary,Student,Mentor")]
         public async Task<IActionResult> GetEctsStatus(int studentId)
         {
             var query = new GetStudentEctsStatusQuery { StudentId = studentId };
@@ -27,7 +27,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpGet("detailed")]
-        [Authorize(Roles = "Secretary,Student,Mentor")]
+        [Authorize(Roles = "Admin,Secretary,Student,Mentor")]
         public async Task<IActionResult> GetEctsDetailed(int studentId)
         {
             var query = new GetStudentEctsDetailedQuery { StudentId = studentId };

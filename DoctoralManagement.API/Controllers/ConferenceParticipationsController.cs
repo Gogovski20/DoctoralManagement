@@ -21,7 +21,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Student,Secretary")]
+        [Authorize(Roles = "Student,Admin")]
         public async Task<IActionResult> AddConferenceParticipation([FromBody] AddConferenceParticipationCommand command)
         {
             var result = await _mediator.Send(command);
@@ -29,7 +29,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpGet("student/{studentId}")]
-        [Authorize(Roles = "Student,Secretary")]
+        [Authorize(Roles = "Student,Admin,Mentor")]
         public async Task<IActionResult> GetStudentConferences(int studentId)
         {
             var query = new GetStudentConferencesQuery {StudentId = studentId};
@@ -37,8 +37,16 @@ namespace DoctoralManagement.API.Controllers
             return Ok(result);
         }
 
+        [HttpGet("{id}")]
+        [Authorize(Roles = "Student,Admin,Mentor")]
+        public async Task<ActionResult<GetConferenceParticipationByIdResponse>> GetConferenceById(int id)
+        {
+            var result = await _mediator.Send(new GetConferenceParticipationByIdQuery { ConferenceId = id });
+            return Ok(result);
+        }
+
         [HttpPut("{id}")]
-        [Authorize(Roles = "Student,Secretary")]
+        [Authorize(Roles = "Student,Admin")]
         public async Task<IActionResult> UpdateConferenceParticipation(int id, 
             [FromBody] UpdateConferenceParticipationCommand command)
         {
@@ -51,7 +59,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Secretary")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConferenceParticipation(int id)
         {
             await _mediator.Send(new DeleteConferenceParticipationCommand { Id = id });
@@ -79,7 +87,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpPost("{conferenceId}/review")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Mentor")]
         public async Task<IActionResult> ReviewConference(int conferenceId, [FromBody] ReviewConferenceCommand command)
         {
             if (conferenceId != command.ConferenceId)
@@ -105,7 +113,7 @@ namespace DoctoralManagement.API.Controllers
         //}
 
         [HttpGet("{conferenceId}/download")]
-        [Authorize(Roles = "Student,Admin")]
+        [Authorize(Roles = "Student,Admin,Mentor")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -139,6 +147,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpDelete("{conferenceId}/delete")]
+        [Authorize(Roles = "Admin,Student")]
         public async Task<IActionResult> DeleteDocument(int conferenceId, int documentId)
         {
             var command = new DeleteActivityDocumentCommand 

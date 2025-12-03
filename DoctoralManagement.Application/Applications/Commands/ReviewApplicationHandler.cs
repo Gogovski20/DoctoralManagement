@@ -1,6 +1,9 @@
-﻿using DoctoralManagement.Domain.Entities;
+﻿using DoctoralManagement.Application.Common;
+using DoctoralManagement.Domain.Entities;
+using DoctoralManagement.Domain.Exceptions;
 using DoctoralManagement.Domain.Interfaces;
 using MediatR;
+using System.Net;
 
 namespace DoctoralManagement.Application.Applications.Commands
 {
@@ -10,13 +13,17 @@ namespace DoctoralManagement.Application.Applications.Commands
         private readonly IDoctoralProgramRepository _doctoralProgramRepository;
         private readonly IStudentRepository _studentRepository;
         private readonly IEctsTrackingRepository _ectsTrackingRepository;
+        private readonly ICurrentUserService _currentUserService;
+        private readonly IAuthService _authService;
 
-        public ReviewApplicationHandler(IApplicationRepository applicationRepository, IDoctoralProgramRepository doctoralProgramRepository, IStudentRepository studentRepository, IEctsTrackingRepository ectsTrackingRepository)
+        public ReviewApplicationHandler(IApplicationRepository applicationRepository, IDoctoralProgramRepository doctoralProgramRepository, IStudentRepository studentRepository, IEctsTrackingRepository ectsTrackingRepository, ICurrentUserService currentUserService, IAuthService authService)
         {
             _applicationRepository = applicationRepository;
             _doctoralProgramRepository = doctoralProgramRepository;
             _studentRepository = studentRepository;
             _ectsTrackingRepository = ectsTrackingRepository;
+            _currentUserService = currentUserService;
+            _authService = authService;
         }
 
         public async Task<ReviewApplicationResponse> Handle(ReviewApplicationCommand request, CancellationToken cancellationToken)
@@ -25,12 +32,19 @@ namespace DoctoralManagement.Application.Applications.Commands
 
             if (application == null)
             {
-                throw new Exception($"Application with ID: {request.Id} not found");
+                throw new DoctoralManagementException($"Application with ID: {request.Id} not found", HttpStatusCode.NotFound);
+            }
+
+            var currentUserRole = _currentUserService.Role;
+            
+            if (currentUserRole != "Admin")
+            {
+                throw new DoctoralManagementException("Only admin can review the applications.");
             }
 
             if (!IsValidStatusTransition(application.ApplicationStatus, request.NewStatus))
             {
-                throw new Exception($"Invalid status transition from {application.ApplicationStatus} to {request.NewStatus}");
+                throw new DoctoralManagementException($"Invalid status transition from {application.ApplicationStatus} to {request.NewStatus}", HttpStatusCode.BadRequest);
             }
 
             if (request.NewStatus == ApplicationStatus.FinalAccepted)
@@ -39,7 +53,7 @@ namespace DoctoralManagement.Application.Applications.Commands
                 
                 if (program.CurrentStudentsCount >= program.AvailableSlots)
                 {
-                    throw new Exception($"Cannot accept application - program '{program.Name}' is full. Current: {program.CurrentStudentsCount}/{program.AvailableSlots}");
+                    throw new DoctoralManagementException($"Cannot accept application - program '{program.Name}' is full. Current: {program.CurrentStudentsCount}/{program.AvailableSlots}", HttpStatusCode.BadRequest);
                 }
 
                 var student = await _studentRepository.GetByIdAsync(application.StudentId);
