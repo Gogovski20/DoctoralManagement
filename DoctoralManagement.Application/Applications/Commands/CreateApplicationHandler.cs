@@ -1,7 +1,10 @@
 ﻿using DoctoralManagement.Application.Common;
 using DoctoralManagement.Domain.Entities;
+using DoctoralManagement.Domain.Exceptions;
 using DoctoralManagement.Domain.Interfaces;
 using MediatR;
+using Microsoft.Extensions.Logging;
+using System.Net;
 
 namespace DoctoralManagement.Application.Applications.Commands
 {
@@ -12,14 +15,16 @@ namespace DoctoralManagement.Application.Applications.Commands
         private readonly IDoctoralProgramRepository _doctoralProgramRepository;
         private readonly ICurrentUserService _currentUserService;
         private readonly IAuthService _authService;
+        private readonly ILogger<CreateApplicationHandler> _logger;
 
-        public CreateApplicationHandler(IApplicationRepository applicationRepository, IStudentRepository studentRepository, IDoctoralProgramRepository doctoralProgramRepository, ICurrentUserService currentUserService, IAuthService authService)
+        public CreateApplicationHandler(IApplicationRepository applicationRepository, IStudentRepository studentRepository, IDoctoralProgramRepository doctoralProgramRepository, ICurrentUserService currentUserService, IAuthService authService, ILogger<CreateApplicationHandler> logger)
         {
             _applicationRepository = applicationRepository;
             _studentRepository = studentRepository;
             _doctoralProgramRepository = doctoralProgramRepository;
             _currentUserService = currentUserService;
             _authService = authService;
+            _logger = logger;
         }
 
         public async Task<CreateApplicationResponse> Handle(CreateApplicationCommand request, CancellationToken cancellationToken)
@@ -28,7 +33,7 @@ namespace DoctoralManagement.Application.Applications.Commands
 
             if (student == null)
             {
-                throw new Exception($"Student with ID: {request.StudentId} not found");
+                throw new DoctoralManagementException($"Student with ID: {request.StudentId} not found", HttpStatusCode.NotFound);
             }
 
             var currentUserId = _currentUserService.UserId;
@@ -37,24 +42,24 @@ namespace DoctoralManagement.Application.Applications.Commands
 
             if (linkedStudentId == null)
             {
-                throw new UnauthorizedAccessException("Current user is not linked to a student record");
+                throw new DoctoralManagementException("Current user is not linked to a student record", HttpStatusCode.Forbidden);
             }
 
             if (request.StudentId != linkedStudentId)
             {
-                throw new UnauthorizedAccessException("You can only submit your own application");
+                throw new DoctoralManagementException("You can only submit your own application", HttpStatusCode.Forbidden);
             }
 
             var program = await _doctoralProgramRepository.GetByIdAsync(request.DoctoralProgramId);
 
             if (program == null)
             {
-                throw new Exception($"Doctoral Program with ID: {request.DoctoralProgramId} not found");
+                throw new DoctoralManagementException($"Doctoral Program with ID: {request.DoctoralProgramId} not found", HttpStatusCode.NotFound);
             }
 
             if (program.CurrentStudentsCount >= program.AvailableSlots)
             {
-                throw new Exception($"Program '{program.Name}' has no available slots. Current: {program.CurrentStudentsCount}/{program.AvailableSlots}");
+                throw new DoctoralManagementException($"Program '{program.Name}' has no available slots. Current: {program.CurrentStudentsCount}/{program.AvailableSlots}", HttpStatusCode.BadRequest);
             }
 
             var meetsGradeRequirements = student.GPA >= 8.00m;
@@ -62,17 +67,17 @@ namespace DoctoralManagement.Application.Applications.Commands
 
             if (!meetsGradeRequirements)
             {
-                throw new Exception("GPA must be at least 8.00 for doctoral studies!");
+                throw new DoctoralManagementException("GPA must be at least 8.00 for doctoral studies!", HttpStatusCode.BadRequest);
             }
 
             if (!hasRequiredCredits)
             {
-                throw new Exception("Student must have at least 300 ECTS credits from previous studies!");
+                throw new DoctoralManagementException("Student must have at least 300 ECTS credits from previous studies!", HttpStatusCode.BadRequest);
             }
 
             if (await _applicationRepository.HasActiveApplicationAsync(request.StudentId, request.DoctoralProgramId))
             {
-                throw new Exception("Student already has an active application for this program");
+                throw new DoctoralManagementException("Student already has an active application for this program", HttpStatusCode.BadRequest);
             }
 
             var application = new Domain.Entities.Application
@@ -87,6 +92,8 @@ namespace DoctoralManagement.Application.Applications.Commands
             };
 
             var createdApplication = await _applicationRepository.AddAsync(application);
+
+            _logger.LogInformation("Application created");
 
             return new CreateApplicationResponse
             {

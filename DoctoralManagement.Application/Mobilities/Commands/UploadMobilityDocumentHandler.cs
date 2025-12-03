@@ -1,7 +1,10 @@
-﻿using DoctoralManagement.Application.Publications.Commands;
+﻿using DoctoralManagement.Application.Common;
+using DoctoralManagement.Application.Publications.Commands;
 using DoctoralManagement.Domain.Entities;
+using DoctoralManagement.Domain.Exceptions;
 using DoctoralManagement.Domain.Interfaces;
 using MediatR;
+using System.Net;
 
 namespace DoctoralManagement.Application.Mobilities.Commands
 {
@@ -11,26 +14,40 @@ namespace DoctoralManagement.Application.Mobilities.Commands
         private readonly IFileService _fileService;
         private readonly IActivityDocumentRepository _activityDocumentRepository;
         private readonly IStudentRepository _studentRepository;
+        private readonly ICurrentUserService _currentUserService;
+        private readonly IAuthService _authService;
 
-        public UploadMobilityDocumentHandler(IMobilityRepository mobilityRepository, IFileService fileService, IActivityDocumentRepository activityDocumentRepository, IStudentRepository studentRepository)
+        public UploadMobilityDocumentHandler(IMobilityRepository mobilityRepository, IFileService fileService, IActivityDocumentRepository activityDocumentRepository, IStudentRepository studentRepository, ICurrentUserService currentUserService, IAuthService authService)
         {
             _mobilityRepository = mobilityRepository;
             _fileService = fileService;
             _activityDocumentRepository = activityDocumentRepository;
             _studentRepository = studentRepository;
+            _currentUserService = currentUserService;
+            _authService = authService;
         }
 
         public async Task<UploadMobilityDocumentResponse> Handle(UploadMobilityDocumentCommand request, CancellationToken cancellationToken)
         {
             var mobility = await _mobilityRepository.GetByIdAsync(request.MobilityId)
-                ?? throw new Exception("Mobility not found");
+                ?? throw new DoctoralManagementException("Mobility not found", HttpStatusCode.NotFound);
+
+            var currentUserId = _currentUserService.UserId;
+            var linkedStudentId = await _authService.GetLinkedStudentIdAsync(currentUserId);
+
+            if (linkedStudentId == null || linkedStudentId != mobility.StudentId)
+            {
+                throw new DoctoralManagementException(
+                    "You can only upload documents for your own conference participations.",
+                    HttpStatusCode.Forbidden);
+            }
 
             var student = await _studentRepository.GetByIdAsync(mobility.StudentId)
-                ?? throw new Exception("Student not found");
+                ?? throw new DoctoralManagementException("Student not found", HttpStatusCode.NotFound);
 
             if (mobility.IsApproved)
             {
-                throw new Exception("Cannot upload document to an approved mobility");
+                throw new DoctoralManagementException("Cannot upload document to an approved mobility", HttpStatusCode.BadRequest);
             }
 
             var existingDocument = await _activityDocumentRepository.GetByMobilityIdAsync(request.MobilityId);
@@ -46,7 +63,7 @@ namespace DoctoralManagement.Application.Mobilities.Commands
 
             if (request.Type != ActivityDocumentType.MobilityProof)
             {
-                throw new Exception("Invalid document type for mobility");
+                throw new DoctoralManagementException("Invalid document type for mobility", HttpStatusCode.BadRequest);
             }
             string cleanFileName = Path.GetFileNameWithoutExtension(request.FileName);
             var uploadedFileName = _fileService.UploadFile(request.File, cleanFileName);

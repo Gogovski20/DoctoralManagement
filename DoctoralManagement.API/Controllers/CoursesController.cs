@@ -18,7 +18,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Secretary")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateCourse([FromBody] CreateCourseCommand command)
         {
             var result = await _mediator.Send(command);

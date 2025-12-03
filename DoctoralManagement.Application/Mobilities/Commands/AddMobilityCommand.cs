@@ -9,13 +9,11 @@ namespace DoctoralManagement.Application.Mobilities.Commands
         public string Country { get; set; } = string.Empty;
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
-        public int PossibleEctsCredits { get; set; }
     }
 
     public class AddMobilityResponse
     {
         public int Id { get; set; }
         public int StudentId { get; set; }
-        public int PossibleEctsCredits { get; set; }
     }
 }

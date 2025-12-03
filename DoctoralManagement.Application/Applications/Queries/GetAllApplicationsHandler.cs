@@ -1,20 +1,31 @@
-﻿using DoctoralManagement.Domain.Interfaces;
+﻿using DoctoralManagement.Application.Common;
+using DoctoralManagement.Domain.Exceptions;
+using DoctoralManagement.Domain.Interfaces;
 using MediatR;
+using System.Net;
 
 namespace DoctoralManagement.Application.Applications.Queries
 {
     public class GetAllApplicationsHandler : IRequestHandler<GetAllApplicationsQuery, IEnumerable<GetAllApplicationResponse>>
     {
         private readonly IApplicationRepository _applicationRepository;
+        private readonly ICurrentUserService _currentUserService;
 
-        public GetAllApplicationsHandler(IApplicationRepository applicationRepository)
+        public GetAllApplicationsHandler(IApplicationRepository applicationRepository, ICurrentUserService currentUserService)
         {
             _applicationRepository = applicationRepository;
+            _currentUserService = currentUserService;
         }
 
         public async Task<IEnumerable<GetAllApplicationResponse>> Handle(GetAllApplicationsQuery request, CancellationToken cancellationToken)
         {
             IEnumerable<Domain.Entities.Application> applications;
+
+            var currentUserRole = _currentUserService.Role;
+            if (currentUserRole != "Admin" && currentUserRole != "Secretary")
+            {
+                throw new DoctoralManagementException("You can't do this.", HttpStatusCode.Forbidden);
+            }
 
             if (request.StudentId.HasValue && request.ProgramId.HasValue)
             {

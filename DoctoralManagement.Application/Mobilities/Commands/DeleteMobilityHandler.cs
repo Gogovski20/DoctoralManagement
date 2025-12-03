@@ -1,6 +1,9 @@
-﻿using DoctoralManagement.Application.ECTS.Services;
+﻿using DoctoralManagement.Application.Common;
+using DoctoralManagement.Application.ECTS.Services;
+using DoctoralManagement.Domain.Exceptions;
 using DoctoralManagement.Domain.Interfaces;
 using MediatR;
+using System.Net;
 
 namespace DoctoralManagement.Application.Mobilities.Commands
 {
@@ -9,21 +12,34 @@ namespace DoctoralManagement.Application.Mobilities.Commands
         private readonly IMobilityRepository _mobilityRepository;
         private readonly IEctsTrackingRepository _ectsRepository;
         private readonly EctsProgressService _ectsProgressService;
+        private readonly ICurrentUserService _currentUserService;
+        private readonly IAuthService _authService;
 
-        public DeleteMobilityHandler(IMobilityRepository mobilityRepository, IEctsTrackingRepository ectsRepository, EctsProgressService ectsProgressService)
+        public DeleteMobilityHandler(IMobilityRepository mobilityRepository, IEctsTrackingRepository ectsRepository, EctsProgressService ectsProgressService, ICurrentUserService currentUserService, IAuthService authService)
         {
             _mobilityRepository = mobilityRepository;
             _ectsRepository = ectsRepository;
             _ectsProgressService = ectsProgressService;
+            _currentUserService = currentUserService;
+            _authService = authService;
         }
 
         public async Task<bool> Handle(DeleteMobilityCommand request, CancellationToken cancellationToken)
         {
             var mobility = await _mobilityRepository.GetByIdAsync(request.Id);
             if (mobility == null)
-                throw new Exception($"Mobility with ID {request.Id} not found.");
+                throw new DoctoralManagementException($"Mobility with ID {request.Id} not found.", HttpStatusCode.NotFound);
 
-            int ectsPoints = CalculateEctsForMobility(mobility.StartDate, mobility.EndDate);
+            var currentUserId = _currentUserService.UserId;
+
+            var linkedStudentId = await _authService.GetLinkedStudentIdAsync(currentUserId);
+
+            if (linkedStudentId == null || linkedStudentId != mobility.StudentId)
+            {
+                throw new DoctoralManagementException("You can only delete mobility for your own account.", HttpStatusCode.Forbidden);
+            }
+
+            int ectsPoints = mobility.EctsPoints;
             int studentId = mobility.StudentId;
 
             await _mobilityRepository.DeleteAsync(request.Id);
@@ -41,17 +57,6 @@ namespace DoctoralManagement.Application.Mobilities.Commands
             }
 
             return true;
-        }
-
-        private int CalculateEctsForMobility(DateTime start, DateTime end)
-        {
-            var totalMonths = (end - start).TotalDays / 30;
-            if (totalMonths >= 3)
-                return 6;
-            else if (totalMonths >= 1)
-                return 3;
-            else
-                return 0;
         }
     }
 }

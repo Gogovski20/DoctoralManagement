@@ -16,6 +16,7 @@ using DoctoralManagement.Infrastructure.Files;
 using FluentValidation;
 using MediatR;
 using DoctoralManagement.Application.Common.Behaviours;
+using DoctoralManagement.API.Middleware;
 
 namespace DoctoralManagement.API
 {
@@ -108,6 +109,8 @@ namespace DoctoralManagement.API
 
             builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
+            builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
+
             var jwtSettingsSection = builder.Configuration.GetSection("JwtSettings");
             builder.Services.Configure<JwtSettings>(jwtSettingsSection);
 
@@ -150,6 +153,7 @@ namespace DoctoralManagement.API
                 app.UseSwaggerUI();
             }
 
+            app.UseMiddleware<ExceptionHandlingMiddleware>();
             app.UseAuthentication();
             app.UseAuthorization();
 

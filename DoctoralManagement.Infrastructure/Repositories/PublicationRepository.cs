@@ -44,7 +44,7 @@ namespace DoctoralManagement.Infrastructure.Repositories
         public async Task<Publication?> GetByIdAsync(int id)
         {
             return await _context.Publications
-                .AsNoTracking()
+                .Include(p => p.Document)
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 

@@ -1,6 +1,8 @@
 ﻿using DoctoralManagement.Application.ECTS.Services;
+using DoctoralManagement.Domain.Exceptions;
 using DoctoralManagement.Domain.Interfaces;
 using MediatR;
+using System.Net;
 
 namespace DoctoralManagement.Application.Courses.Commands
 {
@@ -22,19 +24,19 @@ namespace DoctoralManagement.Application.Courses.Commands
         public async Task<bool> Handle(CompleteCourseEnrollmentCommand request, CancellationToken cancellationToken)
         {
             var enrollment = await _courseEnrollmentRepository.GetByIdAsync(request.EnrollmentId)
-                ?? throw new Exception($"Enrollment with id {request.EnrollmentId} not found");
+                ?? throw new DoctoralManagementException($"Enrollment with id {request.EnrollmentId} not found", HttpStatusCode.NotFound);
 
             if (enrollment.StudentId != request.StudentId) 
             {
-                throw new Exception("Student ID mismatch");
+                throw new DoctoralManagementException("Student ID mismatch", HttpStatusCode.BadRequest);
             }
 
             var course = await _courseRepository.GetByIdAsync(enrollment.CourseId)
-                ?? throw new Exception("Course not found");
+                ?? throw new DoctoralManagementException("Course not found", HttpStatusCode.NotFound);
 
             if (request.Grade < 6.0m || request.Grade > 10.0m)
             {
-                throw new Exception("Grade must be between 6.0 and 10.0");
+                throw new DoctoralManagementException("Grade must be between 6.0 and 10.0", HttpStatusCode.BadRequest);
             }
 
             enrollment.Completed = true;

@@ -18,7 +18,9 @@ namespace DoctoralManagement.Infrastructure.Repositories
         }
 
         public async Task<ConferenceParticipation?> GetByIdAsync(int id) =>
-            await _context.ConferenceParticipations.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id);
+            await _context.ConferenceParticipations
+                .Include(c => c.Document)
+                .FirstOrDefaultAsync(c => c.Id == id);
 
         public async Task<IEnumerable<ConferenceParticipation>> GetByStudentIdAsync(int studentId) =>
             await _context.ConferenceParticipations

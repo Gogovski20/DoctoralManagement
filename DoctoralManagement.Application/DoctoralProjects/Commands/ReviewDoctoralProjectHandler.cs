@@ -1,8 +1,11 @@
 ﻿using DoctoralManagement.Application.Common;
 using DoctoralManagement.Application.ECTS.Services;
 using DoctoralManagement.Domain.Entities;
+using DoctoralManagement.Domain.Exceptions;
 using DoctoralManagement.Domain.Interfaces;
 using MediatR;
+using Microsoft.Extensions.Logging;
+using System.Net;
 
 namespace DoctoralManagement.Application.DoctoralProjects.Commands
 {
@@ -12,47 +15,54 @@ namespace DoctoralManagement.Application.DoctoralProjects.Commands
         private readonly IEctsTrackingRepository _ectsTrackingRepository;
         private readonly EctsProgressService _ectsProgressService;
         private readonly ICurrentUserService _currentUserService;
+        private readonly IAuthService _authService;
+        private readonly ILogger<ReviewDoctoralProjectHandler> _logger;
 
-        public ReviewDoctoralProjectHandler(IDoctoralProjectRepository projectRepository, IEctsTrackingRepository ectsTrackingRepository, EctsProgressService ectsProgressService, ICurrentUserService currentUserService)
+        public ReviewDoctoralProjectHandler(IDoctoralProjectRepository projectRepository, IEctsTrackingRepository ectsTrackingRepository, EctsProgressService ectsProgressService, ICurrentUserService currentUserService, IAuthService authService, ILogger<ReviewDoctoralProjectHandler> logger)
         {
             _projectRepository = projectRepository;
             _ectsTrackingRepository = ectsTrackingRepository;
             _ectsProgressService = ectsProgressService;
             _currentUserService = currentUserService;
+            _authService = authService;
+            _logger = logger;
         }
 
         public async Task<ReviewDoctoralProjectResponse> Handle(ReviewDoctoralProjectCommand request, CancellationToken cancellationToken)
         {
             var currentUserId = _currentUserService.UserId;
             var currentUserRole = _currentUserService.Role;
+            var allowedRoles = new[] { "Admin", "Committee", "Mentor", "Secretary" };
 
-            if (currentUserRole != "Admin" && currentUserRole != "Committee" && currentUserRole != "Mentor")
+            if (!allowedRoles.Contains(currentUserRole))
             {
-                throw new Exception("Only users with Admin, Committee, or Mentor roles can review doctoral projects.");
+                throw new DoctoralManagementException(
+                    "Only admins, committee members, mentors, or secretaries can review doctoral projects.",
+                    HttpStatusCode.Forbidden);
             }
 
             var project = await _projectRepository.GetByIdAsync(request.ProjectId)
-                ?? throw new Exception($"Doctoral project with id {request.ProjectId} not found.");
+                ?? throw new DoctoralManagementException($"Doctoral project with id {request.ProjectId} not found.", HttpStatusCode.NotFound);
 
             if (project.Status != ProjectStatus.Submitted && project.Status != ProjectStatus.UnderReview && project.Status != ProjectStatus.ChangesRequested)
             {
-                throw new Exception("Only projects in status: Submitted, UnderReview, ChangesRequested can be reviewed.");
+                throw new DoctoralManagementException("Only projects in status: Submitted, UnderReview, ChangesRequested can be reviewed.", HttpStatusCode.BadRequest);
             }
 
             if (!IsValidTransition(project.Status, request.NewStatus))
             {
-                throw new Exception($"Invalid status transition from {project.Status} to {request.NewStatus}.");
+                throw new DoctoralManagementException($"Invalid status transition from {project.Status} to {request.NewStatus}.", HttpStatusCode.BadRequest);
             }
 
             var proposalDoc = project.Documents?.FirstOrDefault(d => d.DocumentType == ActivityDocumentType.DoctoralProjectReport);
             if (proposalDoc == null)
             {
-                throw new Exception("Doctoral project proposal document is missing.");
+                throw new DoctoralManagementException("Doctoral project proposal document is missing.", HttpStatusCode.BadRequest);
             }
 
             if (request.NewStatus == ProjectStatus.Approved && proposalDoc.Status != DocumentStatus.Approved)
             {
-                throw new Exception("Cannot approve project — proposal document must be approved first.");
+                throw new DoctoralManagementException("Cannot approve project — proposal document must be approved first.", HttpStatusCode.BadRequest);
             }
 
             if (request.DocumentStatus.HasValue)
@@ -61,7 +71,6 @@ namespace DoctoralManagement.Application.DoctoralProjects.Commands
                 proposalDoc.ReviewComment = request.ReviewComment;
                 proposalDoc.ReviewedAt = DateTime.UtcNow;
                 proposalDoc.ReviewedBy = currentUserId;
-                await _projectRepository.UpdateAsync(project);
             }
 
             project.Status = request.NewStatus;
@@ -78,18 +87,22 @@ namespace DoctoralManagement.Application.DoctoralProjects.Commands
                 var ectsTracking = await _ectsTrackingRepository.GetByStudentIdAsync(project.StudentId);
                 if (ectsTracking != null)
                 {
-                    ectsTracking.IndependentResearchProject = 14;
+                    ectsTracking.IndependentResearchProject += 14;
                     await _ectsTrackingRepository.UpdateAsync(ectsTracking);
 
                     await _ectsProgressService.UpdateStudentSemesterAsync(project.StudentId, ectsTracking.TotalECTS);
                 }
                 else
                 {
-                    throw new Exception("ECTS tracking record not found for this student");
+                    throw new DoctoralManagementException("ECTS tracking record not found for this student", HttpStatusCode.NotFound);
                 }
             }
 
             await _projectRepository.UpdateAsync(project);
+
+            _logger.LogInformation(
+                "Doctoral project {ProjectId} reviewed by {Role} {UserId}. New status: {Status}",
+                project.Id, currentUserRole, currentUserId, request.NewStatus);
 
             return new ReviewDoctoralProjectResponse
             {
@@ -106,7 +119,7 @@ namespace DoctoralManagement.Application.DoctoralProjects.Commands
             var valid = new Dictionary<ProjectStatus, List<ProjectStatus>>
             {
                 [ProjectStatus.Submitted] = new() { ProjectStatus.UnderReview, ProjectStatus.Rejected },
-                [ProjectStatus.UnderReview] = new() { ProjectStatus.Approved, ProjectStatus.ChangesRequested, ProjectStatus.Rejected },
+                [ProjectStatus.UnderReview] = new() { ProjectStatus.UnderReview, ProjectStatus.Approved, ProjectStatus.ChangesRequested, ProjectStatus.Rejected },
                 [ProjectStatus.ChangesRequested] = new() { ProjectStatus.UnderReview, ProjectStatus.Approved, ProjectStatus.Rejected }
             };
 

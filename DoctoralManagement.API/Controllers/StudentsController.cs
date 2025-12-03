@@ -30,7 +30,7 @@ namespace DoctoralManagement.API.Controllers
 
         // GET: api/Students/5
         [HttpGet("{id}")]
-        [Authorize(Roles = "Admin,Secretary,Mentor")]
+        [Authorize(Roles = "Admin,Secretary,Mentor,Student")]
         public async Task<ActionResult<GetStudentByIdResponse>> GetStudentById(int id)
         {
             var query = new GetStudentByIdQuery { Id = id };
@@ -83,7 +83,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpPut("{studentId}/semester")]
-        [Authorize(Roles = "Secretary")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AdvanceStudentSemester(int studentId,
             [FromBody] AdvanceStudentSemesterCommand command)
         {

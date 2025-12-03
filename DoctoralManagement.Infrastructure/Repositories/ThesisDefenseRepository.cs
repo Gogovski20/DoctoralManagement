@@ -42,6 +42,16 @@ namespace DoctoralManagement.Infrastructure.Repositories
                 .FirstOrDefaultAsync(d => d.DoctoralProjectId == projectId);
         }
 
+        public async Task<IEnumerable<ThesisDefense>> GetByStatusAsync(DefenseStatus status)
+        {
+            return await _context.ThesisDefenses
+                .Include(d => d.DoctoralProject)
+                .ThenInclude(p => p.Student)
+                .Where(d => d.Status == status)
+                .OrderBy(d => d.ScheduledAt)
+                .ToListAsync();
+        }
+
         public async Task UpdateAsync(ThesisDefense defense)
         {
             _context.ThesisDefenses.Update(defense);

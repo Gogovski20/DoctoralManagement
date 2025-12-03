@@ -1,4 +1,5 @@
 ﻿using DoctoralManagement.Application.ActivityDocuments;
+using DoctoralManagement.Application.ConferenceParticipations.Queries;
 using DoctoralManagement.Application.Dtos;
 using DoctoralManagement.Application.Mobilities.Commands;
 using DoctoralManagement.Application.Mobilities.Queries;
@@ -21,7 +22,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Student,Secretary")]
+        [Authorize(Roles = "Student,Admin")]
         public async Task<IActionResult> AddMobility([FromBody] AddMobilityCommand command)
         {
             var result = await _mediator.Send(command);
@@ -29,7 +30,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpGet("student/{studentId}")]
-        [Authorize(Roles = "Student,Secretary")]
+        [Authorize(Roles = "Student,Admin,Mentor")]
         public async Task<IActionResult> GetStudentMobilities(int studentId)
         {
             var query = new GetStudentMobilitiesQuery { StudentId = studentId };
@@ -37,8 +38,16 @@ namespace DoctoralManagement.API.Controllers
             return Ok(result);
         }
 
+        [HttpGet("{id}")]
+        [Authorize(Roles = "Student,Admin,Mentor")]
+        public async Task<ActionResult<GetMobilityByIdResponse>> GetMobilityById(int id)
+        {
+            var result = await _mediator.Send(new GetMobilityByIdQuery { MobilityId = id });
+            return Ok(result);
+        }
+
         [HttpPut("{id}")]
-        [Authorize(Roles = "Student,Secretary")]
+        [Authorize(Roles = "Student,Admin")]
         public async Task<IActionResult> UpdateMobility(int id, [FromBody] UpdateMobilityCommand command)
         {
             if (id != command.Id) return BadRequest("ID mismatch");
@@ -48,7 +57,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Secretary")]
+        [Authorize(Roles = "Admin,Student")]
         public async Task<IActionResult> DeleteMobility(int id)
         {
             await _mediator.Send(new DeleteMobilityCommand { Id = id });
@@ -76,7 +85,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpPost("{mobilityId}/review")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Mentor")]
         public async Task<IActionResult> ReviewMobility(int mobilityId, [FromBody] ReviewMobilityCommand command)
         {
             if (mobilityId != command.MobilityId)
@@ -102,7 +111,7 @@ namespace DoctoralManagement.API.Controllers
         //}
 
         [HttpGet("{mobilityId}/download")]
-        [Authorize(Roles = "Student,Admin")]
+        [Authorize(Roles = "Student,Admin,Mentor")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -159,6 +168,7 @@ namespace DoctoralManagement.API.Controllers
 
 
         [HttpDelete("{mobilityId}/delete")]
+        [Authorize(Roles = "Student,Admin")]
         public async Task<IActionResult> DeleteDocument(int mobilityId, int documentId)
         {
             var command = new DeleteActivityDocumentCommand 

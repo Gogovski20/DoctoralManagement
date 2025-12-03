@@ -1,5 +1,7 @@
-﻿using DoctoralManagement.Domain.Interfaces;
+﻿using DoctoralManagement.Domain.Exceptions;
+using DoctoralManagement.Domain.Interfaces;
 using MediatR;
+using System.Net;
 
 namespace DoctoralManagement.Application.Courses.Queries
 {
@@ -15,7 +17,7 @@ namespace DoctoralManagement.Application.Courses.Queries
         public async Task<GetCourseByIdResponse> Handle(GetCourseByIdQuery request, CancellationToken cancellationToken)
         {
             var course = await _courseRepository.GetByIdAsync(request.Id)
-                ?? throw new Exception($"Course with id {request.Id} not found");
+                ?? throw new DoctoralManagementException($"Course with id {request.Id} not found", HttpStatusCode.NotFound);
 
             return new GetCourseByIdResponse
             {

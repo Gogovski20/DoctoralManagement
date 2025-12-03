@@ -53,6 +53,7 @@ namespace DoctoralManagement.Infrastructure.Repositories
             return await _context.DoctoralProjects
                 .Include(p => p.Student)
                 .Include(p => p.Mentor)
+                .Include(p => p.Documents)
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 

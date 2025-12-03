@@ -1,6 +1,10 @@
-﻿using DoctoralManagement.Domain.Entities;
+﻿using DoctoralManagement.Application.Common;
+using DoctoralManagement.Domain.Entities;
+using DoctoralManagement.Domain.Exceptions;
 using DoctoralManagement.Domain.Interfaces;
 using MediatR;
+using Microsoft.Extensions.Logging;
+using System.Net;
 
 namespace DoctoralManagement.Application.Applications.Commands
 {
@@ -9,22 +13,38 @@ namespace DoctoralManagement.Application.Applications.Commands
         private readonly IApplicationRepository _applicationRepository;
         private readonly IFileService _fileService;
         private IApplicationDocumentRepository _applicationDocumentRepository;
+        private readonly ICurrentUserService _currentUserService;
+        private readonly IAuthService _authService;
+        private readonly ILogger<UploadApplicationDocumentHandler> _logger;
 
-        public UploadApplicationDocumentHandler(IApplicationRepository applicationRepository, IFileService fileService, IApplicationDocumentRepository applicationDocumentRepository)
+        public UploadApplicationDocumentHandler(IApplicationRepository applicationRepository, IFileService fileService, IApplicationDocumentRepository applicationDocumentRepository, ICurrentUserService currentUserService, IAuthService authService, ILogger<UploadApplicationDocumentHandler> logger)
         {
             _applicationRepository = applicationRepository;
             _fileService = fileService;
             _applicationDocumentRepository = applicationDocumentRepository;
+            _currentUserService = currentUserService;
+            _authService = authService;
+            _logger = logger;
         }
 
         public async Task<UploadApplicationDocumentResponse> Handle(UploadApplicationDocumentCommand request, CancellationToken cancellationToken)
         {
             var application = await _applicationRepository.GetByIdAsync(request.ApplicationId)
-                ?? throw new Exception("Application not found.");
+                ?? throw new DoctoralManagementException("Application not found.", HttpStatusCode.NotFound);
 
             if (application.ApplicationStatus != ApplicationStatus.Draft)
             {
                 throw new Exception("Documents can only be uploaded for applications in Draft status.");
+            }
+
+            var currentUserId = _currentUserService.UserId;
+            var linkedStudentId = await _authService.GetLinkedStudentIdAsync(currentUserId);
+
+            if (linkedStudentId == null || linkedStudentId != application.StudentId)
+            {
+                throw new DoctoralManagementException(
+                    "You can only upload documents for your own application.",
+                    HttpStatusCode.Forbidden);
             }
 
             var existingDocument = await _applicationDocumentRepository.GetByApplicationAndTypeAsync(request.ApplicationId, request.Type);

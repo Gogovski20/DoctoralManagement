@@ -1,7 +1,11 @@
-﻿using DoctoralManagement.Application.ECTS.Services;
+﻿using DoctoralManagement.Application.Common;
+using DoctoralManagement.Application.ECTS.Services;
 using DoctoralManagement.Domain.Entities;
+using DoctoralManagement.Domain.Exceptions;
 using DoctoralManagement.Domain.Interfaces;
 using MediatR;
+using Microsoft.Extensions.Logging;
+using System.Net;
 
 namespace DoctoralManagement.Application.ThesisDefenseReviews
 {
@@ -14,6 +18,8 @@ namespace DoctoralManagement.Application.ThesisDefenseReviews
         private readonly IStudentRepository _studentRepo;
         private readonly IEctsTrackingRepository _ectsTrackingRepo;
         private readonly EctsProgressService _ectsProgressService;
+        private readonly ICurrentUserService _currentUserService;
+        private readonly ILogger<FinalizeCommitteeReviewsHandler> _logger;
 
         public FinalizeCommitteeReviewsHandler(
             IThesisDefenseRepository defenseRepo,
@@ -21,7 +27,9 @@ namespace DoctoralManagement.Application.ThesisDefenseReviews
             IDoctoralProjectRepository projectRepo,
             IStudentRepository studentRepo,
             IEctsTrackingRepository ectsTrackingRepo,
-            EctsProgressService ectsProgressService)
+            EctsProgressService ectsProgressService,
+            ICurrentUserService currentUserService,
+            ILogger<FinalizeCommitteeReviewsHandler> logger)
         {
             _defenseRepo = defenseRepo;
             _reviewRepo = reviewRepo;
@@ -29,26 +37,36 @@ namespace DoctoralManagement.Application.ThesisDefenseReviews
             _studentRepo = studentRepo;
             _ectsTrackingRepo = ectsTrackingRepo;
             _ectsProgressService = ectsProgressService;
+            _currentUserService = currentUserService;
+            _logger = logger;
         }
 
         public async Task<FinalizeCommitteeReviewsResponse> Handle(
             FinalizeCommitteeReviewsCommand request,
             CancellationToken cancellationToken)
         {
+            var currentUserRole = _currentUserService.Role;
+            if (currentUserRole != "Admin")
+            {
+                throw new DoctoralManagementException(
+                    "Only admins can finalize committee reviews.",
+                    HttpStatusCode.Forbidden);
+            }
+
             var defense = await _defenseRepo.GetByIdAsync(request.DefenseId)
                 ?? throw new Exception("Defense not found");
 
             if (defense.Status != DefenseStatus.Completed)
-                throw new Exception("Defense must be completed BEFORE finalizing committee reviews.");
+                throw new DoctoralManagementException("Defense must be completed BEFORE finalizing committee reviews.", HttpStatusCode.NotFound);
 
             var reviews = await _reviewRepo.GetByDefenseIdAsync(defense.Id);
 
             if (!reviews.Any())
-                throw new Exception("Cannot finalize — no committee reviews submitted.");
+                throw new DoctoralManagementException("Cannot finalize — no committee reviews submitted.", HttpStatusCode.BadRequest);
 
             if (reviews.Count() < defense.CommitteeMemberIds.Count())
             {
-                throw new Exception($"Not all committee members have submitted reviews. Expected: {defense.CommitteeMemberIds.Count()}, Received: {reviews.Count()}");
+                throw new DoctoralManagementException($"Not all committee members have submitted reviews. Expected: {defense.CommitteeMemberIds.Count()}, Received: {reviews.Count()}", HttpStatusCode.BadRequest);
             }
 
             CommitteeApprovalStatus finalDecision;
@@ -62,7 +80,9 @@ namespace DoctoralManagement.Application.ThesisDefenseReviews
             else
                 finalDecision = CommitteeApprovalStatus.Approved;
 
-            var project = defense.DoctoralProject;
+            var project = defense.DoctoralProject ?? throw new DoctoralManagementException(
+                    "Doctoral project not found for this defense.",
+                    HttpStatusCode.NotFound);
 
             switch (finalDecision)
             {
@@ -81,10 +101,14 @@ namespace DoctoralManagement.Application.ThesisDefenseReviews
                     defense.Status = DefenseStatus.Passed;
                     defense.ResultNotes = "Thesis defense successful";
 
-                    var student = defense.DoctoralProject.Student;
+                    var student = defense.DoctoralProject.Student ?? throw new DoctoralManagementException(
+                            "Student not found for this project.",
+                            HttpStatusCode.NotFound);
                     if (student != null)
                     {
-                        var ectsTracking = await _ectsTrackingRepo.GetByStudentIdAsync(student.Id);
+                        var ectsTracking = await _ectsTrackingRepo.GetByStudentIdAsync(student.Id) ?? throw new DoctoralManagementException(
+                            "ECTS tracking record not found for student.",
+                            HttpStatusCode.NotFound);
                         if (ectsTracking != null)
                         {
                             ectsTracking.ThesisDefence += 26;
@@ -103,6 +127,8 @@ namespace DoctoralManagement.Application.ThesisDefenseReviews
 
                         student.Status = StudentStatus.Graduated;
                         await _studentRepo.UpdateAsync(student);
+
+                        _logger.LogInformation("Student {StudentId} graduated successfully", student.Id);
                     }
 
                     break;
@@ -110,6 +136,10 @@ namespace DoctoralManagement.Application.ThesisDefenseReviews
 
             await _projectRepo.UpdateAsync(project);
             await _defenseRepo.UpdateAsync(defense);
+
+            _logger.LogInformation(
+                "Committee reviews finalized for defense {DefenseId}. Final decision: {Decision}",
+                defense.Id, finalDecision);
 
             return new FinalizeCommitteeReviewsResponse
             {

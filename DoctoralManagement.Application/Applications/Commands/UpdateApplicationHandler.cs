@@ -1,6 +1,9 @@
 ﻿using DoctoralManagement.Application.Common;
+using DoctoralManagement.Domain.Exceptions;
 using DoctoralManagement.Domain.Interfaces;
 using MediatR;
+using Microsoft.Extensions.Logging;
+using System.Net;
 
 namespace DoctoralManagement.Application.Applications.Commands
 {
@@ -9,12 +12,14 @@ namespace DoctoralManagement.Application.Applications.Commands
         private readonly IApplicationRepository _applicationRepository;
         private readonly ICurrentUserService _currentUserService;
         private readonly IAuthService _authService;
+        private readonly ILogger<UpdateApplicationHandler> _logger;
 
-        public UpdateApplicationHandler(IApplicationRepository applicationRepository, ICurrentUserService currentUserService, IAuthService authService)
+        public UpdateApplicationHandler(IApplicationRepository applicationRepository, ICurrentUserService currentUserService, IAuthService authService, ILogger<UpdateApplicationHandler> logger)
         {
             _applicationRepository = applicationRepository;
             _currentUserService = currentUserService;
             _authService = authService;
+            _logger = logger;
         }
 
         public async Task<UpdateApplicationResponse> Handle(UpdateApplicationCommand request, CancellationToken cancellationToken)
@@ -23,7 +28,7 @@ namespace DoctoralManagement.Application.Applications.Commands
 
             if (application == null)
             {
-                throw new Exception($"Application with ID {request.Id} not found.");
+                throw new DoctoralManagementException($"Application with ID {request.Id} not found.", HttpStatusCode.NotFound);
             }
 
             var currentUserId = _currentUserService.UserId;
@@ -36,17 +41,21 @@ namespace DoctoralManagement.Application.Applications.Commands
 
             if (!isOwner && !isPrivileged)
             {
-                throw new UnauthorizedAccessException("You are not authorized to update this application");
+                throw new DoctoralManagementException("You are not authorized to update this application", HttpStatusCode.Forbidden);
             }
 
             if (application.ApplicationStatus != Domain.Entities.ApplicationStatus.Draft)
             {
-                throw new Exception("Only applications in 'Draft' status can be updated.");
+                throw new DoctoralManagementException("Only applications in 'Draft' status can be updated.", HttpStatusCode.BadRequest);
             }
 
             application.PrefferedMentorId = request.PreferredMentorId;
 
             await _applicationRepository.UpdateAsync(application);
+
+            _logger.LogInformation(
+                "Application {ApplicationId} updated by {UserRole} {UserId}. Preferred mentor: {MentorId}",
+                application.Id, currentUserRole, currentUserId, request.PreferredMentorId);
 
             return new UpdateApplicationResponse
             {

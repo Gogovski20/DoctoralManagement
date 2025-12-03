@@ -22,8 +22,23 @@ namespace DoctoralManagement.API.Controllers
             _committeeReviewRepository = committeeReviewRepository;
         }
 
+        [HttpGet("{id}")]
+        [Authorize(Roles = "Student,Mentor,Admin,Committee,Secretary")]
+        public async Task<ActionResult<GetDefenseByIdResponse>> GetDefenseById(int defenseId)
+        {
+            var result = await _mediator.Send(new GetDefenseByIdQuery { DefenseId = defenseId });
+            return Ok(result);
+        }
+
+        [HttpGet("scheduled")]
+        public async Task<ActionResult<IEnumerable<ScheduledDefenseResponse>>> GetScheduledDefenses()
+        {
+            var result = await _mediator.Send(new GetScheduledDefensesQuery());
+            return Ok(result);
+        }
+
         [HttpPost("schedule")]
-        [Authorize(Roles = "Mentor,Secretary")]
+        [Authorize(Roles = "Mentor,Admin")]
         public async Task<IActionResult> Schedule([FromBody] ScheduleThesisDefenseCommand command)
         {
             var result = await _mediator.Send(command);
@@ -31,7 +46,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpPost("complete")]
-        [Authorize(Roles = "Secretary")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Complete([FromBody] CompleteThesisDefenseCommand command)
         {
             var result = await _mediator.Send(command);
@@ -58,7 +73,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpPost("{defenseId}/finalize-reviews")]
-        [Authorize(Roles = "Secretary")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> FinalizeReviews(int defenseId)
         {
             var result = await _mediator.Send(new FinalizeCommitteeReviewsCommand
@@ -88,5 +103,15 @@ namespace DoctoralManagement.API.Controllers
             var result = await _mediator.Send(command);
             return Ok(result);
         }
+
+        [HttpPost("{documentId}/review-document")]
+        [Authorize(Roles = "Admin,Mentor,Secretary,Committee")]
+        public async Task<IActionResult> ReviewThesisDocument([FromBody] ReviewThesisDocumentCommand command)
+        {
+            var result = await _mediator.Send(command);
+            return Ok(result);
+        }
+
+
     }
 }

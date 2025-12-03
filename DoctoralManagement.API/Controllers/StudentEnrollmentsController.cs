@@ -18,7 +18,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpPost("courses/{courseId}")]
-        [Authorize(Roles = "Secretary")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> EnrollInCourse(int studentId, int courseId)
         {
             var command = new EnrollStudentInCourseCommand { StudentId = studentId, CourseId = courseId };
@@ -27,7 +27,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Student,Secretary,Mentor")]
+        [Authorize(Roles = "Admin,Student,Secretary,Mentor")]
         public async Task<IActionResult> GetEnrollments(int studentId)
         {
             var query = new GetStudentEnrollmentsQuery { StudentId = studentId };
@@ -36,7 +36,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpPut("{enrollmentId}/complete")]
-        [Authorize(Roles = "Secretary")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CompleteCourse(int studentId, int enrollmentId,
             [FromBody] CompleteCourseEnrollmentCommand command)
         {

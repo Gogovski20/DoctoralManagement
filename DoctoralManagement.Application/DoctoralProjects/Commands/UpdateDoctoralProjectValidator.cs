@@ -22,9 +22,6 @@ namespace DoctoralManagement.Application.DoctoralProjects.Commands
 
             RuleFor(x => x.MentorId)
                 .GreaterThan(0);
-
-            RuleFor(x => x.ProposalDocumentPath)
-                .MaximumLength(500);
         }
     }
 }

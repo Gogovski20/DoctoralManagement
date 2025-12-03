@@ -25,7 +25,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpGet("{id}")]
-        [Authorize(Roles = "Secretary,Mentor")]
+        [Authorize(Roles = "Admin,Mentor")]
         public async Task<ActionResult<GetMentorResponse>> GetById(int id)
         {
             var mentor = await _mediator.Send(new GetMentorByIdQuery { Id = id });

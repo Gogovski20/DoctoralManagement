@@ -19,9 +19,6 @@ namespace DoctoralManagement.Application.DoctoralProjects.Commands
             RuleFor(x => x.ResearchArea)
                 .NotEmpty()
                 .MaximumLength(300);
-
-            RuleFor(x => x.ProposalDocumentPath)
-                .MaximumLength(500);
         }
     }
 }

@@ -2,8 +2,10 @@
 using DoctoralManagement.Application.Dtos;
 using DoctoralManagement.Application.ECTS.Services;
 using DoctoralManagement.Domain.Entities;
+using DoctoralManagement.Domain.Exceptions;
 using DoctoralManagement.Domain.Interfaces;
 using MediatR;
+using System.Net;
 
 namespace DoctoralManagement.Application.ConferenceParticipations.Commands
 {
@@ -14,6 +16,7 @@ namespace DoctoralManagement.Application.ConferenceParticipations.Commands
         private readonly IEctsTrackingRepository _ectsTrackingRepository;
         private readonly ICurrentUserService _currentUserService;
         private readonly EctsProgressService _ectsProgressService;
+
 
         public ReviewConferenceHandler(IConferenceParticipationRepository conferenceRepository, IActivityDocumentRepository activityDocumentRepository, IEctsTrackingRepository ectsTrackingRepository, ICurrentUserService currentUserService, EctsProgressService ectsProgressService)
         {
@@ -31,26 +34,27 @@ namespace DoctoralManagement.Application.ConferenceParticipations.Commands
 
             if (currentUserRole != "Admin")
             {
-                throw new Exception("Only admins can review mobilities.");
+                throw new DoctoralManagementException("Only admins can review conference participations.", HttpStatusCode.Forbidden);
             }
 
             var conference = await _conferenceRepository.GetByIdAsync(request.ConferenceId)
-                ?? throw new Exception("Conference participation not found.");
+                ?? throw new DoctoralManagementException("Conference participation not found.", HttpStatusCode.NotFound);
 
             if (conference.IsApproved)
             {
-                throw new Exception("Conference participation has already been reviewed.");
+                throw new DoctoralManagementException("Conference participation has already been reviewed.", HttpStatusCode.BadRequest);
             }
 
             var conferenceDocument = await _activityDocumentRepository.GetByConferenceIdAsync(request.ConferenceId);
             if (conferenceDocument == null)
             {
-                throw new Exception("No document found for the specified conference participation.");
+                throw new DoctoralManagementException("No document found for the specified conference participation.", HttpStatusCode.NotFound);
             }
 
             if (request.IsApproved)
             {
                 conference.IsApproved = true;
+                conference.EctsAwarded = request.EctsAwarded;
                 conferenceDocument.Status = DocumentStatus.Approved;
                 conferenceDocument.ReviewComment = request.ReviewComments;
                 conferenceDocument.ReviewedAt = DateTime.UtcNow;
@@ -83,6 +87,7 @@ namespace DoctoralManagement.Application.ConferenceParticipations.Commands
             {
                 ConferenceId = conference.Id,
                 IsApproved = conference.IsApproved,
+                EctsAwarded = conference.EctsAwarded,
                 Document = new ActivityDocumentDto
                 {
                     Id = conferenceDocument.Id,

@@ -9,7 +9,6 @@ namespace DoctoralManagement.Application.ConferenceParticipations.Commands
         public DateTime Date { get; set; }
         public string Role { get; set; } = string.Empty; 
         public bool IsInternational { get; set; }
-        public int PossibleEctsCredits { get; set; }
     }
 
     public class AddConferenceParticipationResponse
@@ -17,6 +16,5 @@ namespace DoctoralManagement.Application.ConferenceParticipations.Commands
         public int Id { get; set; }
         public int StudentId { get; set; }
         public string ConferenceName { get; set; } = string.Empty;
-        public int PossibleEctsCredits { get; set; }
     }
 }

@@ -1,6 +1,9 @@
 ﻿using DoctoralManagement.Domain.Entities;
+using DoctoralManagement.Domain.Exceptions;
 using DoctoralManagement.Domain.Interfaces;
 using MediatR;
+using System.Net;
+
 
 namespace DoctoralManagement.Application.Courses.Commands
 {
@@ -17,12 +20,12 @@ namespace DoctoralManagement.Application.Courses.Commands
         {
             if (request.Semester < 1 || request.Semester > 6)
             {
-                throw new Exception("Semester must be between 1 and 6");
+                throw new DoctoralManagementException("Semester must be between 1 and 6", HttpStatusCode.BadRequest);
             }
 
             if (request.EctsCredits < 1 || request.EctsCredits > 6)
             {
-                throw new Exception("ECTS credits must be between 1 and 6");
+                throw new DoctoralManagementException("ECTS credits must be between 1 and 6", HttpStatusCode.BadRequest);
             }
 
             var course = new Course 
