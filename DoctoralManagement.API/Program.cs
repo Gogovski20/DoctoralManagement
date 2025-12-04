@@ -67,6 +67,7 @@ namespace DoctoralManagement.API
             builder.Services.AddScoped<IApplicationDocumentRepository, ApplicationDocumentRepository>();
             builder.Services.AddScoped<IActivityDocumentRepository, ActivityDocumentRepository>();
             builder.Services.AddScoped<IFileService, FileService>();
+            builder.Services.AddScoped<IUserService, UserService>();
 
             builder.Services.AddScoped<EctsProgressService>();
 
