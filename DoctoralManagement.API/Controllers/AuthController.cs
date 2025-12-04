@@ -1,5 +1,7 @@
 ﻿using DoctoralManagement.Application.Authentication.Commands;
+using DoctoralManagement.Application.Authentication.Queries;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DoctoralManagement.API.Controllers
@@ -38,6 +40,24 @@ namespace DoctoralManagement.API.Controllers
                 return Unauthorized(result);
             }
 
+            return Ok(result);
+        }
+
+        [HttpGet("users")]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<IEnumerable<GetAllUsersResponse>>> GetAllUsers()
+        {
+            var query = new GetAllUsersQuery();
+            var result = await _mediator.Send(query);
+            return Ok(result);
+        }
+
+        [HttpGet("{userId}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<GetUserByIdResponse>> GetUserById(int userId)
+        {
+            var query = new GetUserByIdQuery { UserId = userId };
+            var result = await _mediator.Send(query);
             return Ok(result);
         }
     }

@@ -19,8 +19,4 @@
     <ProjectReference Include="..\DoctoralManagement.Domain\DoctoralManagement.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Authentication\Queries\" />
-  </ItemGroup>
-
 </Project>
