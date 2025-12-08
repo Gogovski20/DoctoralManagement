@@ -7,6 +7,7 @@ namespace DoctoralManagement.Domain.Interfaces
         Task<Student> GetByIdAsync(int id);
         Task<Student> GetByEmailAsync(string email);
         Task<Student> GetByIndexNumberAsync(string indexNumber);
+        Task<Student?> GetByUserIdAsync(int UserId);
         Task<IEnumerable<Student>> GetAllAsync();
         Task<Student> AddAsync(Student student);
         Task UpdateAsync(Student student);

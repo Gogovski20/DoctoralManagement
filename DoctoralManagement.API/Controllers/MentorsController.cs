@@ -48,11 +48,10 @@ namespace DoctoralManagement.API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<MentorResponse>> Update(int id, [FromBody] UpdateMentorCommand command)
         {
-            if (id != command.Id)
-            {
-                return BadRequest("ID in URL does not match ID in body.");
-            }
+            command.Id = id;
+
             var result = await _mediator.Send(command);
+
             return Ok(result);
         }
 

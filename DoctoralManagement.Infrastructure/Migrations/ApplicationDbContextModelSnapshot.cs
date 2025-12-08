@@ -498,6 +498,9 @@ namespace DoctoralManagement.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("ApplicationUserId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Department")
                         .IsRequired()
                         .HasMaxLength(100)

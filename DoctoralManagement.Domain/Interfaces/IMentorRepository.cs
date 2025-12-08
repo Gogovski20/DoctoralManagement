@@ -6,6 +6,7 @@ namespace DoctoralManagement.Domain.Interfaces
     {
         Task<Mentor?> GetByIdAsync(int id);
         Task<Mentor?> GetByEmailAsync(string email);
+        Task<Mentor?> GetByUserIdAsync(int UserId);
         Task<IEnumerable<Mentor>> GetAllAsync();
         Task<Mentor> AddAsync(Mentor mentor);
         Task UpdateAsync(Mentor mentor);

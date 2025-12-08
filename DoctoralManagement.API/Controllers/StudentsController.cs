@@ -4,6 +4,7 @@ using DoctoralManagement.Application.Students.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace DoctoralManagement.API.Controllers
 {
@@ -43,18 +44,30 @@ namespace DoctoralManagement.API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateStudent(int id, [FromBody] UpdateStudentCommand command)
         {
-            if (id != command.Id)
-            {
-                return BadRequest("ID in the URL does not match ID in the body.");
-            }
+            command.Id = id;
 
             var result = await _mediator.Send(command);
 
             return Ok(result);
         }
 
-        // POST: api/Students
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        //// POST: api/Students
+        //// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        //[HttpPost]
+        //[Authorize(Roles = "Admin")]
+        //public async Task<ActionResult<CreateStudentResponse>> CreateStudent(CreateStudentCommand command)
+        //{
+        //    try
+        //    {
+        //        var result = await _mediator.Send(command);
+        //        return Ok(result);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return BadRequest(ex.Message);
+        //    }
+        //}
+
         [HttpPost]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<CreateStudentResponse>> CreateStudent(CreateStudentCommand command)
@@ -64,9 +77,15 @@ namespace DoctoralManagement.API.Controllers
                 var result = await _mediator.Send(command);
                 return Ok(result);
             }
+            catch (DbUpdateException dbEx)
+            {
+                // Log the inner exception for database errors
+                var innerException = dbEx.InnerException?.Message ?? dbEx.Message;
+                return BadRequest(new { message = $"Database error: {innerException}", details = dbEx.Message });
+            }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new { message = ex.Message, type = ex.GetType().Name });
             }
         }
 

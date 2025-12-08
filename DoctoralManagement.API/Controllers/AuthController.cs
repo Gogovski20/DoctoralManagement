@@ -60,5 +60,14 @@ namespace DoctoralManagement.API.Controllers
             var result = await _mediator.Send(query);
             return Ok(result);
         }
+
+        [HttpGet("me")]
+        [Authorize]
+        public async Task<ActionResult<GetMyProfileResponse>> GetMyProfile()
+        {
+            var query = new GetMyProfileQuery();
+            var result = await _mediator.Send(query);
+            return Ok(result);
+        }
     }
 }

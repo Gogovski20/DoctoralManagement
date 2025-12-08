@@ -1,9 +1,11 @@
 ﻿using DoctoralManagement.Application.ActivityDocuments;
+using DoctoralManagement.Application.Common;
 using DoctoralManagement.Application.ConferenceParticipations.Queries;
 using DoctoralManagement.Application.Dtos;
 using DoctoralManagement.Application.Mobilities.Commands;
 using DoctoralManagement.Application.Mobilities.Queries;
 using DoctoralManagement.Application.Publications.Commands;
+using DoctoralManagement.Domain.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,10 +17,14 @@ namespace DoctoralManagement.API.Controllers
     public class MobilitiesController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly ICurrentUserService _currenUserService;
+        private readonly IStudentRepository _studentRepository;
 
-        public MobilitiesController(IMediator mediator)
+        public MobilitiesController(IMediator mediator, ICurrentUserService currenUserService, IStudentRepository studentRepository)
         {
             _mediator = mediator;
+            _currenUserService = currenUserService;
+            _studentRepository = studentRepository;
         }
 
         [HttpPost]
@@ -35,6 +41,24 @@ namespace DoctoralManagement.API.Controllers
         {
             var query = new GetStudentMobilitiesQuery { StudentId = studentId };
             var result = await _mediator.Send(query);
+            return Ok(result);
+        }
+
+        [HttpGet("my")]
+        [Authorize(Roles = "Student")]
+        public async Task<ActionResult<IEnumerable<MobilityResponse>>> GetMyMobilities()
+        {
+            var userId = _currenUserService.UserId;
+            var student = await _studentRepository.GetByUserIdAsync(userId);
+
+            if (student == null)
+            {
+                return NotFound("Student not found");
+            }
+
+            var query = new GetStudentMobilitiesQuery { StudentId = student.Id };
+            var result = await _mediator.Send(query);
+
             return Ok(result);
         }
 
