@@ -52,6 +52,11 @@ namespace DoctoralManagement.Infrastructure.Repositories
                 .FirstOrDefaultAsync(m => m.Id == id);
         }
 
+        public async Task<Mentor?> GetByUserIdAsync(int UserId)
+        {
+            return await _context.Mentors.FirstOrDefaultAsync(m => m.ApplicationUserId == UserId);
+        }
+
         public async Task<bool> IsAvailableForNewStudentAsync(int mentorId)
         {
             var mentor = await _context.Mentors

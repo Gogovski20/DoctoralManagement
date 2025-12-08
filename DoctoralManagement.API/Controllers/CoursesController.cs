@@ -1,5 +1,6 @@
 ﻿using DoctoralManagement.Application.Courses.Commands;
 using DoctoralManagement.Application.Courses.Queries;
+using DoctoralManagement.Application.Students.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -25,6 +26,14 @@ namespace DoctoralManagement.API.Controllers
             return Ok(result);
         }
 
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<GetAllCoursesResponse>>> GetCourses()
+        {
+            var query = new GetAllCoursesQuery();
+            var result = await _mediator.Send(query);
+            return Ok(result);
+        }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetCourse(int id)
         {
@@ -39,6 +48,28 @@ namespace DoctoralManagement.API.Controllers
             var query = new GetCoursesBySemesterQuery { Semester = semester };
             var result = await _mediator.Send(query);
             return Ok(result);
+        }
+
+        [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> UpdateCourse(int id, [FromBody] UpdateCourseCommand command)
+        {
+            command.Id = id;
+
+            var result = await _mediator.Send(command);
+
+            return Ok(result);
+        }
+
+        [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> DeleteCourse(int id)
+        {
+            var command = new DeleteCourseCommand { Id = id };
+
+            await _mediator.Send(command);
+
+            return NoContent();
         }
     }
 }

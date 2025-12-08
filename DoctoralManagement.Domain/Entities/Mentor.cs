@@ -11,6 +11,9 @@
         public bool IsActive { get; set; } = true; // Indicates if the mentor is currently active
         public List<string> ResearchAreas { get; set; } = new(); // Areas of expertise
 
+        public int? ApplicationUserId { get; set; }
+
+
         // Navigation
         public ICollection<DoctoralProject> DoctoralProjects { get; set; } = new List<DoctoralProject>();
         public ICollection<ProgramMentor> DoctoralPrograms { get; set; } = new List<ProgramMentor>();

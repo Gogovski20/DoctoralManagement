@@ -49,11 +49,13 @@ namespace DoctoralManagement.Application.ConferenceParticipations.Commands
                 throw new DoctoralManagementException("You must be accepted to a doctoral program before registering conference participation.", HttpStatusCode.BadRequest);
             }
 
+            var dateUtc = DateTime.SpecifyKind(request.Date, DateTimeKind.Utc);
+
             var participation = new ConferenceParticipation 
             {
                 StudentId = request.StudentId,
                 ConferenceName = request.ConferenceName,
-                Date = request.Date,
+                Date = dateUtc,
                 Role = request.Role,
                 IsInternational = request.IsInternational,
             };

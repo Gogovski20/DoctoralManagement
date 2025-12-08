@@ -28,6 +28,17 @@ namespace DoctoralManagement.API
 
             // Add services to the container.
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowFrontend", policy =>
+                {
+                    policy.WithOrigins("http://localhost:5173")
+                          .AllowAnyMethod()
+                          .AllowAnyHeader()
+                          .AllowCredentials();
+                });
+            });
+
             builder.Services.AddControllers()
                 .AddJsonOptions(options => 
                 {
@@ -155,9 +166,9 @@ namespace DoctoralManagement.API
             }
 
             app.UseMiddleware<ExceptionHandlingMiddleware>();
+            app.UseCors("AllowFrontend");
             app.UseAuthentication();
             app.UseAuthorization();
-
 
             app.MapControllers();
 

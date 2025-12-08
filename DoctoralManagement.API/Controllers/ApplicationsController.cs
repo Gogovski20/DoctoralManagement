@@ -1,8 +1,10 @@
 ﻿using DoctoralManagement.Application.ApplicationDocuments;
 using DoctoralManagement.Application.Applications.Commands;
 using DoctoralManagement.Application.Applications.Queries;
+using DoctoralManagement.Application.Common;
 using DoctoralManagement.Application.Dtos;
 using DoctoralManagement.Domain.Entities;
+using DoctoralManagement.Domain.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,10 +16,14 @@ namespace DoctoralManagement.API.Controllers
     public class ApplicationsController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly ICurrentUserService _currentUserService;
+        private readonly IStudentRepository _studentRepository;
 
-        public ApplicationsController(IMediator mediator)
+        public ApplicationsController(IMediator mediator, ICurrentUserService currentUserService, IStudentRepository studentRepository)
         {
             _mediator = mediator;
+            _currentUserService = currentUserService;
+            _studentRepository = studentRepository;
         }
 
         // GET: api/Applications
@@ -54,6 +60,25 @@ namespace DoctoralManagement.API.Controllers
                 return NotFound(ex.Message);
             }
         }
+
+        [HttpGet("my")]
+        [Authorize(Roles = "Student")]
+        public async Task<ActionResult<IEnumerable<GetStudentApplicationsResponse>>> GetMyApplications()
+        {
+            var userId = _currentUserService.UserId;
+            var student = await _studentRepository.GetByUserIdAsync(userId);
+
+            if (student == null)
+            {
+                return NotFound("Student not found");
+            }
+
+            var query = new GetStudentApplicationsQuery { StudentId = student.Id };
+            var result = await _mediator.Send(query);
+
+            return Ok(result);
+        }
+
 
         // GET: api/Applications/student/5
         [HttpGet("student/{studentId}")]

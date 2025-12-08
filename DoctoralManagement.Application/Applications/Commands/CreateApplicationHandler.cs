@@ -37,11 +37,14 @@ namespace DoctoralManagement.Application.Applications.Commands
             }
 
             var currentUserId = _currentUserService.UserId;
+            _logger.LogInformation($"Current User ID from service: {currentUserId}");
 
             var linkedStudentId = await _authService.GetLinkedStudentIdAsync(currentUserId);
+            _logger.LogInformation($"Linked Student ID for User {currentUserId}: {linkedStudentId}");
 
             if (linkedStudentId == null)
             {
+                _logger.LogWarning($"No student link found for user {currentUserId}");
                 throw new DoctoralManagementException("Current user is not linked to a student record", HttpStatusCode.Forbidden);
             }
 

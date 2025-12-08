@@ -63,20 +63,11 @@ namespace DoctoralManagement.API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<UpdateDoctoralProgramResponse>> UpdateDoctoralProgram(int id, UpdateDoctoralProgramCommand command)
         {
-            if (id != command.Id)
-            {
-                return BadRequest("ID mismatch");
-            }
+            command.Id = id;
 
-            try
-            {
-                var result = await _mediator.Send(command);
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var result = await _mediator.Send(command);
+
+            return Ok(result);
         }
 
         // DELETE: api/DoctoralPrograms/5

@@ -106,6 +106,11 @@ namespace DoctoralManagement.Infrastructure.Repositories
                 .FirstOrDefaultAsync(s => s.IndexNumber == indexNumber);
         }
 
+        public async Task<Student?> GetByUserIdAsync(int UserId)
+        {
+            return await _context.Students.FirstOrDefaultAsync(s => s.ApplicationUserId == UserId);
+        }
+
         public async Task UpdateAsync(Student student)
         {
             var existing = await _context.Students.FindAsync(student.Id);
