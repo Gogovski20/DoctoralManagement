@@ -315,6 +315,47 @@ export default function StudentDashboard() {
                               Upload Docs
                             </Link>
                           )}
+                          {(app.applicationStatus === 'Draft' || app.applicationStatus === 0 || app.applicationStatus === 'Submitted' || app.applicationStatus === 1) && (
+                            <>
+                            <Link to={`/applications/${app.id}/edit`}
+                            style={{
+                              backgroundColor: '#f59e0b',
+                              color: 'white',
+                              padding: '0.5rem 1rem',
+                              borderRadius: '0.5rem',
+                              textDecoration: 'none',
+                              fontWeight: '500',
+                              fontSize: '0.875rem',
+                            }}
+                            >
+                              Edit
+                            </Link>
+                            <button
+                              onClick={async () => {
+                                if (!window.confirm('Are you sure you want to delete this application?')) return;
+                                try {
+                                  await studentService.deleteApplication(app.id);
+                                  await fetchApplications(); // refresh list
+                                } catch (err) {
+                                  console.error('Failed to delete application:', err);
+                                  alert(err.response?.data || err.message || 'Failed to delete application');
+                                }
+                              }}
+                              style={{
+                                backgroundColor: '#ef4444',
+                                color: 'white',
+                                padding: '0.5rem 1rem',
+                                borderRadius: '0.5rem',
+                                border: 'none',
+                                cursor: 'pointer',
+                                fontWeight: '500',
+                                fontSize: '0.875rem',
+                              }}
+                              >
+                                Delete
+                              </button>
+                              </>
+                          )}
                         </div>
                       </td>
                     </tr>

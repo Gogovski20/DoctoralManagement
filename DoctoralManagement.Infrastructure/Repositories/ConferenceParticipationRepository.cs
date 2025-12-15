@@ -19,17 +19,23 @@ namespace DoctoralManagement.Infrastructure.Repositories
 
         public async Task<ConferenceParticipation?> GetByIdAsync(int id) =>
             await _context.ConferenceParticipations
+                .Include(c => c.Student)
                 .Include(c => c.Document)
                 .FirstOrDefaultAsync(c => c.Id == id);
 
         public async Task<IEnumerable<ConferenceParticipation>> GetByStudentIdAsync(int studentId) =>
             await _context.ConferenceParticipations
+                .Include(c => c.Document)
                 .Where(c => c.StudentId == studentId)
                 .AsNoTracking()
                 .ToListAsync();
 
         public async Task<IEnumerable<ConferenceParticipation>> GetAllAsync() =>
-            await _context.ConferenceParticipations.AsNoTracking().ToListAsync();
+            await _context.ConferenceParticipations
+                .Include(c => c.Student)
+                .Include(c => c.Document)
+                .AsNoTracking()
+                .ToListAsync();
 
         public async Task UpdateAsync(ConferenceParticipation participation)
         {

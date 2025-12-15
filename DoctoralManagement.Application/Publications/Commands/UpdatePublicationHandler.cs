@@ -46,29 +46,16 @@ namespace DoctoralManagement.Application.Publications.Commands
                     HttpStatusCode.BadRequest);
             }
 
-            int oldEcts = publication.EctsPoints;
+            var dateUtc = DateTime.SpecifyKind(request.PublishedOn, DateTimeKind.Utc);
 
             publication.Title = request.Title;
             publication.Journal = request.Journal;
-            publication.PublishedOn = request.PublishedOn;
+            publication.PublishedOn = dateUtc;
             publication.Doi = request.Doi;
             publication.IsIndexedInScopus = request.IsIndexedInScopus;
             publication.IsIndexedInThomsonReuters = request.IsIndexedInThomsonReuters;
 
-            publication.EctsPoints = request.EctsCredits;
-
             await _publicationRepository.UpdateAsync(publication);
-
-            var ectsTracking = await _ectsRepository.GetByStudentIdAsync(publication.StudentId);
-            if (ectsTracking != null)
-            {
-                ectsTracking.Publications = ectsTracking.Publications - oldEcts + publication.EctsPoints;
-                if (ectsTracking.Publications > 27)
-                    ectsTracking.Publications = 27;
-
-                await _ectsRepository.UpdateAsync(ectsTracking);
-                await _progressService.UpdateStudentSemesterAsync(publication.StudentId, ectsTracking.TotalECTS);
-            }
 
             return new PublicationResponse { };
         }

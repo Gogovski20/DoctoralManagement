@@ -232,7 +232,7 @@ namespace DoctoralManagement.API.Controllers
             }
         }
 
-        [HttpGet("{applicationId}/documents/{documentId}download")]
+        [HttpGet("{applicationId}/documents/{documentId}/download")]
         [Authorize(Roles = "Student,Admin,Mentor")]
         public async Task<IActionResult> DownloadApplicationDocument(int applicationId, int documentId)
         {

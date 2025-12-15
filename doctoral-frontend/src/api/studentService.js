@@ -56,6 +56,37 @@ export const studentService = {
     return response.data;
   },
 
+  downloadApplicationDocument: async (applicationId, documentId, fileName) => {
+    const response = await apiClient.get(
+      `/Applications/${applicationId}/documents/${documentId}/download`,
+      { responseType: 'blob' }
+    );
+
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', fileName);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  },
+
+  // Update application
+  updateApplication: async (id, payload) => {
+    const response = await apiClient.put(`/Applications/${id}`, {
+      id,
+      ...payload, // e.g. { preferredMentorId: 5 }
+    });
+    return response.data;
+  },
+
+  // Delete application
+  deleteApplication: async (id) => {
+    const response = await apiClient.delete(`/Applications/${id}`);
+    return response.data;
+  },
+
 
   // Doctoral Project
   getDoctoralProjects: async (studentId) => {
@@ -202,6 +233,11 @@ export const studentService = {
     return response.data;
   },
 
+  updateConferenceParticipation: async (payload) => {
+    const response = await apiClient.put(`/ConferenceParticipations/${payload.id}`, payload);
+    return response.data;
+  },
+
   // Admin endpoints
   createStudent: async (studentData) => {
     const response = await apiClient.post('/Students', studentData);
@@ -341,18 +377,284 @@ export const studentService = {
     return response.data;
   },
 
-  downloadConferenceDocument: async (filePath, fileName) => {
-    const response = await apiClient.get(`/ConferenceParticipations/download/${filePath}`, {
-      responseType: 'blob',
-    });
-    // Create a download link
+  downloadConferenceDocument: async (conferenceId, documentId, fileName) => {
+    const response = await apiClient.get(
+      `/ConferenceParticipations/${conferenceId}/download`,
+      {
+        params: { documentId: documentId },
+        responseType: 'blob'
+      }
+    );
+
     const url = window.URL.createObjectURL(new Blob([response.data]));
     const link = document.createElement('a');
     link.href = url;
     link.setAttribute('download', fileName);
     document.body.appendChild(link);
     link.click();
-    link.parentElement.removeChild(link);
+    link.remove();
     window.URL.revokeObjectURL(url);
+  },
+
+
+  // Publications
+  getMyPublications: async () => {
+    const response = await apiClient.get('/Publications/my');
+    return response.data;
+  },
+
+  addPublication: async (data) => {
+    // data is plain JS object, NOT FormData
+    const response = await apiClient.post('/Publications', data);
+    return response.data;
+  },
+
+  updatePublication: async (payload) => {
+    const response = await apiClient.put(`/Publications/${payload.id}`, payload);
+    return response.data;
+  },
+
+  uploadPublicationDocument: async (publicationId, file, fileName, type) => {
+    const formData = new FormData();
+    formData.append('File', file);
+    formData.append('FileName', fileName || file.name);
+    formData.append('Type', type); // 1 = PublicationProof
+
+    const response = await apiClient.post(
+      `/Publications/${publicationId}/upload-document`,
+      formData,
+      {
+        headers: { 
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+    return response.data;
+  },
+
+  getPublicationById: async (publicationId) => {
+    const response = await apiClient.get(`/Publications/${publicationId}`);
+    return response.data;
+  },
+
+  downloadPublicationDocument: async (publicationId, documentId, fileName) => {
+    const response = await apiClient.get(
+      `/Publications/${publicationId}/download`,
+      {
+        params: { documentId: documentId },
+        responseType: 'blob'
+      }
+    );
+
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', fileName);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  },
+
+  deletePublication: async (publicationId) => {
+    const response = await apiClient.delete(`/Publications/${publicationId}`);
+    return response.data;
+  },
+
+  // Mobilities
+  getMyMobilities: async () => {
+    const response = await apiClient.get('/Mobilities/my');
+    return response.data;
+  },
+
+  addMobility: async (data) => {
+    // data is plain JS object, NOT FormData
+    const response = await apiClient.post('/Mobilities', data);
+    return response.data;
+  },
+
+  updateMobility: async (payload) => {
+    const response = await apiClient.put(`/Mobilities/${payload.id}`, payload);
+    return response.data;
+  },
+
+  uploadMobilityDocument: async (mobilityId, file, fileName, type) => {
+    const formData = new FormData();
+    formData.append('File', file);
+    formData.append('FileName', fileName || file.name);
+    formData.append('Type', type); // 2 = MobilityProof
+
+    const response = await apiClient.post(
+      `/Mobilities/${mobilityId}/upload-document`,
+      formData,
+      {
+        headers: { 
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+    return response.data;
+  },
+
+  getMobilityById: async (mobilityId) => {
+    const response = await apiClient.get(`/Mobilities/${mobilityId}`);
+    return response.data;
+  },
+
+  downloadMobilityDocument: async (mobilityId, documentId, fileName) => {
+    const response = await apiClient.get(
+      `/Mobilities/${mobilityId}/download`,
+      {
+        params: { documentId: documentId },
+        responseType: 'blob'
+      }
+    );
+
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', fileName);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  },
+
+  deleteMobility: async (mobilityId) => {
+    const response = await apiClient.delete(`/Mobilities/${mobilityId}`);
+    return response.data;
+  },
+
+  // Admin - Get all activities
+  getAllConferences: async () => {
+    const response = await apiClient.get('/ConferenceParticipations');
+    return response.data;
+  },
+
+  reviewConference: async (conferenceId, data) => {
+    const response = await apiClient.post(`/ConferenceParticipations/${conferenceId}/review`, data);
+    return response.data;
+  },
+
+  getAllMobilities: async () => {
+    const response = await apiClient.get('/Mobilities');
+    return response.data;
+  },
+
+  getAllPublications: async () => {
+    const response = await apiClient.get('/Publications');
+    return response.data;
+  },
+
+  reviewMobility: async (mobilityId, data) => {
+    const response = await apiClient.post(`/Mobilities/${mobilityId}/review`, data);
+    return response.data;
+  },
+
+  reviewPublication: async (publicationId, data) => {
+    const response = await apiClient.post(`/Publications/${publicationId}/review`, data);
+    return response.data;
+  },
+
+  // Search students
+  searchStudents: async (searchTerm) => {
+    const response = await apiClient.get(`/Students/search`, {
+      params: { query: searchTerm }
+    });
+    return response.data;
+  },
+
+  // Get course by ID
+  getCourseById: async (courseId) => {
+    const response = await apiClient.get(`/Courses/${courseId}`);
+    return response.data;
+  },
+
+  // Enroll student
+  enrollStudentInCourse: async (studentId, courseId) => {
+    const response = await apiClient.post(
+      `/students/${studentId}/studentenrollments/courses/${courseId}`
+    );
+    return response.data;
+  },
+
+  getAllEnrollments: async () => {
+    const response = await apiClient.get(`/StudentEnrollments/all`);
+    return response.data;
+  },
+
+  completeCourseEnrollment: async (studentId, enrollmentId, payload) => {
+    return apiClient.put(
+      `/students/${studentId}/studentenrollments/${enrollmentId}/complete`,
+      payload
+    );
+  },
+
+  getMyEnrollments: async () => {
+    const response = await apiClient.get('/students/${studentId}/studentenrollments/my');
+    return response.data;
+  },
+
+  getAllDefenses: async () => {
+    const response = await apiClient.get('/ThesisDefenses');
+    return response.data;
+  },
+
+  scheduleThesisDefense: async (payload) => {
+    const response = await apiClient.post(
+      "/ThesisDefenses/schedule",
+      payload
+    );
+    return response.data;
+  },
+
+  uploadThesisDocument: async (projectId, formData) => {
+    const response = await apiClient.post(
+      `/ThesisDefenses/${projectId}/upload-document`,
+      formData,
+      { headers: { 'Content-Type': 'multipart/form-data' } }
+    );
+    return response.data;
+  },
+
+  downloadThesisDocument: async (projectId, documentId, fileName) => {
+    const response = await apiClient.get(
+      `/DoctoralProjects/${projectId}/download`,
+      {
+        params: { documentId: documentId },
+        responseType: 'blob'
+      }
+    );
+
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', fileName);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  },
+
+  reviewThesisDocument: async (documentId, payload) => {
+    const response = await apiClient.post(
+      `/ThesisDefenses/${documentId}/review-document`,
+      {
+        documentId,
+        newStatus: payload.newStatus,
+        reviewComment: payload.reviewComment
+      }
+    );
+    return response.data;
+  },
+
+  getDefenseEligibleProjects: async () => {
+    const res = await apiClient.get("/DoctoralProjects/defense-eligible");
+    return res.data;
+  },
+
+  getMentors: async () => {
+    const res = await apiClient.get("/Mentors/mentors");
+    return res.data;
   },
 };

@@ -111,6 +111,39 @@ namespace DoctoralManagement.Infrastructure.Repositories
             return await _context.Students.FirstOrDefaultAsync(s => s.ApplicationUserId == UserId);
         }
 
+        public async Task<List<StudentSearchDto>> SearchStudentsAsync(string searchTerm)
+        {
+            if (string.IsNullOrWhiteSpace(searchTerm))
+                return new List<StudentSearchDto>();
+
+            var searchTermLower = searchTerm.ToLower().Trim();
+
+            var results = await _context.Students
+                .Join(
+                    _context.Users,
+                    student => student.ApplicationUserId,
+                    user => user.Id,
+                    (student, user) => new { student, user }
+                )
+                .Where(x =>
+                    x.student.IndexNumber.ToLower().Contains(searchTermLower) ||
+                    x.user.FullName.ToLower().Contains(searchTermLower) ||
+                    x.user.Email.ToLower().Contains(searchTermLower)
+                )
+                .Select(x => new StudentSearchDto
+                {
+                    Id = x.student.Id,
+                    StudentIndex = x.student.IndexNumber,
+                    FullName = x.user.FullName ?? "Unknown",
+                    Email = x.user.Email ?? string.Empty,
+                    CreatedAt = x.student.EnrollmentDate
+                })
+                .OrderBy(s => s.StudentIndex)
+                .ToListAsync();
+
+            return results;
+        }
+
         public async Task UpdateAsync(Student student)
         {
             var existing = await _context.Students.FindAsync(student.Id);

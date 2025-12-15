@@ -1,4 +1,6 @@
-﻿using MediatR;
+﻿using DoctoralManagement.Application.Dtos;
+using DoctoralManagement.Domain.Entities;
+using MediatR;
 
 namespace DoctoralManagement.Application.ConferenceParticipations.Queries
 {
@@ -14,5 +16,6 @@ namespace DoctoralManagement.Application.ConferenceParticipations.Queries
         public System.DateTime Date { get; set; }
         public string Role { get; set; } = string.Empty;
         public bool IsInternational { get; set; }
+        public DocumentDto? Document { get; set; }
     }
 }

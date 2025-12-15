@@ -34,26 +34,29 @@ namespace DoctoralManagement.Application.Courses.Commands
             var course = await _courseRepository.GetByIdAsync(enrollment.CourseId)
                 ?? throw new DoctoralManagementException("Course not found", HttpStatusCode.NotFound);
 
-            if (request.Grade < 6.0m || request.Grade > 10.0m)
+            if (request.Grade < 5.0m || request.Grade > 10.0m)
             {
-                throw new DoctoralManagementException("Grade must be between 6.0 and 10.0", HttpStatusCode.BadRequest);
+                throw new DoctoralManagementException("Grade must be between 5.0 and 10.0", HttpStatusCode.BadRequest);
             }
 
             enrollment.Completed = true;
             enrollment.Grade = request.Grade;
             await _courseEnrollmentRepository.UpdateAsync(enrollment);
 
-            var ectsTracking = await _ectsTrackingRepository.GetByStudentIdAsync(request.StudentId);
-            if (ectsTracking != null) 
+            if (request.Grade > 5.0m)
             {
-                ectsTracking.OrganizedAcademicTraining += course.EctsCredits;
-                if (ectsTracking.OrganizedAcademicTraining > 42)
+                var ectsTracking = await _ectsTrackingRepository.GetByStudentIdAsync(request.StudentId);
+                if (ectsTracking != null)
                 {
-                    ectsTracking.OrganizedAcademicTraining = 42;
-                }
-                await _ectsTrackingRepository.UpdateAsync(ectsTracking);
+                    ectsTracking.OrganizedAcademicTraining += course.EctsCredits;
+                    if (ectsTracking.OrganizedAcademicTraining > 42)
+                    {
+                        ectsTracking.OrganizedAcademicTraining = 42;
+                    }
+                    await _ectsTrackingRepository.UpdateAsync(ectsTracking);
 
-                await _progressService.UpdateStudentSemesterAsync(request.StudentId, ectsTracking.TotalECTS);
+                    await _progressService.UpdateStudentSemesterAsync(request.StudentId, ectsTracking.TotalECTS);
+                }
             }
             return true;
         }

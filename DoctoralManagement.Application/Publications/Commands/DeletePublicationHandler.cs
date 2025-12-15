@@ -30,6 +30,11 @@ namespace DoctoralManagement.Application.Publications.Commands
             if (publication == null)
                 throw new DoctoralManagementException($"Publication with ID {request.Id} not found.", HttpStatusCode.NotFound);
 
+            if (publication.IsApproved == true)
+            {
+                throw new DoctoralManagementException("You can't delete approved publications.", HttpStatusCode.BadRequest);
+            }
+
             var currentUserId = _currentUserService.UserId;
 
             var linkedStudentId = await _authService.GetLinkedStudentIdAsync(currentUserId);
@@ -39,22 +44,7 @@ namespace DoctoralManagement.Application.Publications.Commands
                 throw new DoctoralManagementException("You can only delete publication for your own account.", HttpStatusCode.Forbidden);
             }
 
-            int ectsPoints = publication.EctsPoints;
-            int studentId = publication.StudentId;
-
             await _publicationRepository.DeleteAsync(request.Id);
-
-            // Update ECTS tracking
-            var ectsTracking = await _ectsRepository.GetByStudentIdAsync(publication.StudentId);
-            if (ectsTracking != null)
-            {
-                ectsTracking.Publications -= ectsPoints;
-                if (ectsTracking.Publications < 0)
-                    ectsTracking.Publications = 0;
-
-                await _ectsRepository.UpdateAsync(ectsTracking);
-                await _progressService.UpdateStudentSemesterAsync(studentId, ectsTracking.TotalECTS);
-            }
 
             return true;
         }

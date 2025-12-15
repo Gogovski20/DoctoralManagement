@@ -74,6 +74,7 @@ namespace DoctoralManagement.Application.ConferenceParticipations.Queries
                 Date = conference.Date,
                 Role = conference.Role,
                 IsInternational = conference.IsInternational,
+                IsApproved = conference.IsApproved,
                 Document = documentDto
             };
         }

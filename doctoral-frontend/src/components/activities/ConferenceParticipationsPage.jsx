@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { studentService } from '../../api/studentService';
 import ConferenceDetailModal from './ConferenceDetailModal';
+import EditConferenceModal from '../student/EditConferenceModal';
+
 
 export default function ConferenceParticipationsPage() {
   const [conferences, setConferences] = useState([]);
@@ -18,6 +20,8 @@ export default function ConferenceParticipationsPage() {
   const [fileByConference, setFileByConference] = useState({});
   const [studentId, setStudentId] = useState(null);
   const [selectedConferenceForView, setSelectedConferenceForView] = useState(null);
+  const [selectedConferenceForEdit, setSelectedConferenceForEdit] = useState(null);
+
 
   // Load student profile to get studentId
   useEffect(() => {
@@ -33,11 +37,13 @@ export default function ConferenceParticipationsPage() {
     fetchStudentProfile();
   }, []);
 
+
   // Load conferences
   useEffect(() => {
     if (!studentId) return;
     fetchConferences();
   }, [studentId]);
+
 
   const fetchConferences = async () => {
     try {
@@ -52,6 +58,7 @@ export default function ConferenceParticipationsPage() {
     }
   };
 
+
   // Add conference – JSON body (fixes 415)
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -59,6 +66,7 @@ export default function ConferenceParticipationsPage() {
       setError('Student ID not found. Please log in again.');
       return;
     }
+
 
     try {
       setError('');
@@ -69,6 +77,7 @@ export default function ConferenceParticipationsPage() {
         role: formData.role,
         isInternational: formData.isInternational,
       };
+
 
       const result = await studentService.addConferenceParticipation(payload);
       setConferences([
@@ -84,12 +93,14 @@ export default function ConferenceParticipationsPage() {
         ...conferences,
       ]);
 
+
       setShowForm(false);
       setFormData({ conferenceName: '', date: '', role: '', isInternational: false });
     } catch (err) {
       setError(`Failed to add conference: ${err.response?.data?.message || err.message || 'Unknown error'}`);
     }
   };
+
 
   // Handle file selection
   const handleFileChange = (conferenceId, file) => {
@@ -99,6 +110,7 @@ export default function ConferenceParticipationsPage() {
     }));
   };
 
+
   // Upload proof document (separate endpoint, multipart/form-data)
   const handleFileUpload = async (conferenceId) => {
     const file = fileByConference[conferenceId];
@@ -106,6 +118,7 @@ export default function ConferenceParticipationsPage() {
       alert('Please select a file first.');
       return;
     }
+
 
     try {
       setUploadingDocId(conferenceId);
@@ -123,6 +136,7 @@ export default function ConferenceParticipationsPage() {
     }
   };
 
+
   const handleDelete = async (conferenceId) => {
     if (!window.confirm('Are you sure you want to delete this conference participation?')) return;
     try {
@@ -132,6 +146,7 @@ export default function ConferenceParticipationsPage() {
       alert(`Delete failed: ${err.response?.data?.message || err.message}`);
     }
   };
+
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
@@ -146,6 +161,7 @@ export default function ConferenceParticipationsPage() {
       return 'Invalid Date';
     }
   };
+
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb', padding: '2rem' }}>
@@ -193,6 +209,7 @@ export default function ConferenceParticipationsPage() {
           </div>
         </div>
 
+
         {/* Error banner */}
         {error && (
           <div
@@ -208,6 +225,7 @@ export default function ConferenceParticipationsPage() {
             {error}
           </div>
         )}
+
 
         {/* Add form */}
         {showForm && (
@@ -245,6 +263,7 @@ export default function ConferenceParticipationsPage() {
                   }}
                 />
               </div>
+
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 <div>
@@ -288,6 +307,7 @@ export default function ConferenceParticipationsPage() {
                 </div>
               </div>
 
+
               <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: '500', color: '#374151' }}>
                 <input
                   type="checkbox"
@@ -296,6 +316,7 @@ export default function ConferenceParticipationsPage() {
                 />
                 International Conference
               </label>
+
 
               <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
                 <button
@@ -333,6 +354,7 @@ export default function ConferenceParticipationsPage() {
           </div>
         )}
 
+
         {/* Loading */}
         {loading && (
           <div style={{ textAlign: 'center', color: '#6b7280', padding: '3rem' }}>
@@ -341,6 +363,7 @@ export default function ConferenceParticipationsPage() {
           </div>
         )}
 
+
         {/* Empty State - Loading student */}
         {!loading && !studentId && (
           <div style={{ textAlign: 'center', color: '#6b7280', padding: '3rem' }}>
@@ -348,6 +371,7 @@ export default function ConferenceParticipationsPage() {
             <p>Loading student profile...</p>
           </div>
         )}
+
 
         {/* Empty State - No conferences */}
         {!loading && studentId && conferences.length === 0 && !showForm && (
@@ -370,6 +394,7 @@ export default function ConferenceParticipationsPage() {
             </button>
           </div>
         )}
+
 
         {/* Conferences List Table */}
         {!loading && studentId && conferences.length > 0 && (
@@ -403,6 +428,7 @@ export default function ConferenceParticipationsPage() {
                 </button>
               </div>
             </div>
+
 
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -462,29 +488,40 @@ export default function ConferenceParticipationsPage() {
                             📎 {conf.document.fileName}
                           </span>
                         ) : (
-                          <div style={{ display: 'flex', gap: '0.5rem', flexDirection: 'column' }}>
+                          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                             <input
                               type="file"
-                              onChange={(e) => {
-                                if (e.target.files[0]) {
-                                  handleFileChange(conf.id, e.target.files[0]);
-                                }
-                              }}
-                              style={{ fontSize: '0.75rem' }}
+                              id={`file-${conf.id}`}
+                              onChange={(e) => handleFileChange(conf.id, e.target.files[0])}
+                              style={{ display: 'none' }}
                             />
+                            <label
+                              htmlFor={`file-${conf.id}`}
+                              style={{
+                                backgroundColor: '#e5e7eb',
+                                color: '#374151',
+                                padding: '0.35rem 0.5rem',
+                                borderRadius: '0.35rem',
+                                fontSize: '0.7rem',
+                                fontWeight: '500',
+                                cursor: 'pointer',
+                              }}
+                            >
+                              Choose
+                            </label>
                             {fileByConference[conf.id] && (
                               <button
                                 onClick={() => handleFileUpload(conf.id)}
                                 disabled={uploadingDocId === conf.id}
                                 style={{
-                                  backgroundColor: uploadingDocId === conf.id ? '#6b7280' : '#f97316',
+                                  backgroundColor: uploadingDocId === conf.id ? '#9ca3af' : '#10b981',
                                   color: 'white',
-                                  padding: '0.5rem 1rem',
-                                  borderRadius: '0.5rem',
+                                  padding: '0.35rem 0.5rem',
+                                  borderRadius: '0.35rem',
                                   border: 'none',
-                                  cursor: uploadingDocId === conf.id ? 'not-allowed' : 'pointer',
-                                  fontSize: '0.875rem',
+                                  fontSize: '0.7rem',
                                   fontWeight: '500',
+                                  cursor: uploadingDocId === conf.id ? 'not-allowed' : 'pointer',
                                 }}
                               >
                                 {uploadingDocId === conf.id ? 'Uploading...' : 'Upload'}
@@ -493,6 +530,8 @@ export default function ConferenceParticipationsPage() {
                           </div>
                         )}
                       </td>
+
+
                       <td style={{ padding: '1rem' }}>
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
                           <button
@@ -511,15 +550,18 @@ export default function ConferenceParticipationsPage() {
                             View
                           </button>
                           <button
+                            onClick={() => setSelectedConferenceForEdit(conf.id)}
+                            disabled={conf.isApproved}
                             style={{
-                              backgroundColor: '#f59e0b',
+                              backgroundColor: conf.isApproved ? '#9ca3af' : '#f59e0b',
                               color: 'white',
                               padding: '0.5rem 0.75rem',
                               borderRadius: '0.5rem',
                               border: 'none',
-                              cursor: 'pointer',
+                              cursor: conf.isApproved ? 'not-allowed' : 'pointer',
                               fontSize: '0.75rem',
                               fontWeight: '500',
+                              opacity: conf.isApproved ? 0.6 : 1,
                             }}
                           >
                             Edit
@@ -549,11 +591,24 @@ export default function ConferenceParticipationsPage() {
           </div>
         )}
 
+
         {/* Detail Modal */}
         {selectedConferenceForView && (
           <ConferenceDetailModal
             conferenceId={selectedConferenceForView}
             onClose={() => setSelectedConferenceForView(null)}
+          />
+        )}
+
+        {/* Edit Modal */}
+        {selectedConferenceForEdit && (
+          <EditConferenceModal
+            conferenceId={selectedConferenceForEdit}
+            onClose={() => setSelectedConferenceForEdit(null)}
+            onSuccess={() => {
+              fetchConferences();
+              setSelectedConferenceForEdit(null);
+            }}
           />
         )}
       </div>

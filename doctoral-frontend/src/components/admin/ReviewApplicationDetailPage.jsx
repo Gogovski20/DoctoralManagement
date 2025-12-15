@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { studentService } from '../../api/studentService';
 
+
 export default function ReviewApplicationDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -9,15 +10,18 @@ export default function ReviewApplicationDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [reviewing, setReviewing] = useState(false);
+  const [downloadingDocId, setDownloadingDocId] = useState(null);
   const [formData, setFormData] = useState({
     newStatus: '',
     reviewComments: '',
     hasRequiredPublications: false,
   });
 
+
   useEffect(() => {
     fetchApplication();
   }, [id]);
+
 
   const fetchApplication = async () => {
     try {
@@ -38,6 +42,7 @@ export default function ReviewApplicationDetailPage() {
       setLoading(false);
     }
   };
+
 
   const getStatusColor = (status) => {
     if (!status) return '#6b7280';
@@ -63,6 +68,7 @@ export default function ReviewApplicationDetailPage() {
     }
   };
 
+
   const getStatusLabel = (status) => {
     if (!status) return 'Draft';
     return status
@@ -71,6 +77,7 @@ export default function ReviewApplicationDetailPage() {
       .trim()
       .replace(/\b\w/g, l => l.toUpperCase());
   };
+
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
@@ -86,8 +93,10 @@ export default function ReviewApplicationDetailPage() {
     }
   };
 
+
   const isReviewable = application && 
     ['Submitted', 'UnderReview', 'PreliminaryAccepted'].includes(application.applicationStatus);
+
 
   const getValidNextStatuses = () => {
     if (!application) return [];
@@ -101,6 +110,7 @@ export default function ReviewApplicationDetailPage() {
     return transitions[application.applicationStatus] || [];
   };
 
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData({
@@ -109,18 +119,35 @@ export default function ReviewApplicationDetailPage() {
     });
   };
 
+
+  const handleDownloadDocument = async (doc) => {
+    try {
+      setDownloadingDocId(doc.id);
+      await studentService.downloadApplicationDocument(id, doc.id, doc.fileName);
+    } catch (err) {
+      console.error('Failed to download document:', err);
+      setError(`Failed to download ${doc.fileName}`);
+    } finally {
+      setDownloadingDocId(null);
+    }
+  };
+
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
 
     if (!formData.newStatus) {
       setError('Please select a new status');
       return;
     }
 
+
     if (!formData.reviewComments.trim()) {
       setError('Review comments are required');
       return;
     }
+
 
     try {
       setReviewing(true);
@@ -133,6 +160,7 @@ export default function ReviewApplicationDetailPage() {
         hasRequiredPublications: formData.hasRequiredPublications,
       };
 
+
       const result = await studentService.reviewApplication(id, reviewData);
       alert('Application reviewed successfully');
       navigate('/admin/applications');
@@ -144,31 +172,39 @@ export default function ReviewApplicationDetailPage() {
     }
   };
 
+
   if (loading) {
     return (
-      <div style={{ padding: '2rem', textAlign: 'center' }}>
-        <p>Loading application details...</p>
+      <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb', padding: '2rem' }}>
+        <div style={{ maxWidth: '1000px', margin: '0 auto', textAlign: 'center', paddingTop: '3rem' }}>
+          <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>⏳</div>
+          <p style={{ color: '#6b7280' }}>Loading application details...</p>
+        </div>
       </div>
     );
   }
 
+
   if (!application) {
     return (
-      <div style={{ padding: '2rem', textAlign: 'center' }}>
-        <p>Application not found</p>
-        <Link to="/admin/applications" style={{ color: '#0d9488' }}>
-          Back to Applications
-        </Link>
+      <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb', padding: '2rem' }}>
+        <div style={{ maxWidth: '1000px', margin: '0 auto', textAlign: 'center', paddingTop: '3rem' }}>
+          <p style={{ color: '#6b7280', marginBottom: '1rem' }}>Application not found</p>
+          <Link to="/admin/applications" style={{ color: '#0d9488', fontWeight: '500' }}>
+            ← Back to Applications
+          </Link>
+        </div>
       </div>
     );
   }
+
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb', padding: '2rem' }}>
       <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
         {/* Header */}
         <div style={{ marginBottom: '2rem' }}>
-          <Link to="/admin/applications" style={{ color: '#0d9488', marginBottom: '1rem', display: 'inline-block' }}>
+          <Link to="/admin/applications" style={{ color: '#0d9488', marginBottom: '1rem', display: 'inline-block', fontWeight: '500' }}>
             ← Back to Applications
           </Link>
           <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#1f2937', margin: '0.5rem 0 0 0' }}>
@@ -178,6 +214,7 @@ export default function ReviewApplicationDetailPage() {
             Application ID: {application.id}
           </p>
         </div>
+
 
         {error && (
           <div style={{
@@ -192,6 +229,7 @@ export default function ReviewApplicationDetailPage() {
           </div>
         )}
 
+
         {!isReviewable && (
           <div style={{
             backgroundColor: '#fef3c7',
@@ -204,6 +242,7 @@ export default function ReviewApplicationDetailPage() {
             ⚠️ This application cannot be reviewed. Only applications in Submitted, Under Review, or Preliminary Accepted status can be reviewed.
           </div>
         )}
+
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
           {/* Application Details */}
@@ -218,6 +257,7 @@ export default function ReviewApplicationDetailPage() {
               Student Information
             </h2>
 
+
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div>
                 <p style={{ color: '#6b7280', fontSize: '0.875rem', margin: 0 }}>Name</p>
@@ -226,12 +266,14 @@ export default function ReviewApplicationDetailPage() {
                 </p>
               </div>
 
+
               <div>
                 <p style={{ color: '#6b7280', fontSize: '0.875rem', margin: 0 }}>Email</p>
                 <p style={{ fontWeight: '500', color: '#1f2937', margin: '0.25rem 0 0 0' }}>
                   {application.studentEmail}
                 </p>
               </div>
+
 
               <div>
                 <p style={{ color: '#6b7280', fontSize: '0.875rem', margin: 0 }}>Meets Grade Requirements</p>
@@ -246,6 +288,7 @@ export default function ReviewApplicationDetailPage() {
             </div>
           </div>
 
+
           {/* Program & Status */}
           <div style={{
             backgroundColor: 'white',
@@ -258,6 +301,7 @@ export default function ReviewApplicationDetailPage() {
               Program & Status
             </h2>
 
+
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div>
                 <p style={{ color: '#6b7280', fontSize: '0.875rem', margin: 0 }}>Program</p>
@@ -268,6 +312,7 @@ export default function ReviewApplicationDetailPage() {
                   {application.scientificArea}
                 </p>
               </div>
+
 
               <div>
                 <p style={{ color: '#6b7280', fontSize: '0.875rem', margin: 0 }}>Current Status</p>
@@ -285,6 +330,7 @@ export default function ReviewApplicationDetailPage() {
                 </span>
               </div>
 
+
               <div>
                 <p style={{ color: '#6b7280', fontSize: '0.875rem', margin: 0 }}>Applied Date</p>
                 <p style={{ fontWeight: '500', color: '#1f2937', margin: '0.25rem 0 0 0' }}>
@@ -294,6 +340,7 @@ export default function ReviewApplicationDetailPage() {
             </div>
           </div>
         </div>
+
 
         {/* Documents Section */}
         {application.documents && application.documents.length > 0 && (
@@ -309,6 +356,7 @@ export default function ReviewApplicationDetailPage() {
               Submitted Documents
             </h2>
 
+
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               {application.documents.map((doc) => (
                 <div key={doc.id} style={{
@@ -318,36 +366,41 @@ export default function ReviewApplicationDetailPage() {
                   padding: '1rem',
                   border: '1px solid #e5e7eb',
                   borderRadius: '0.5rem',
+                  backgroundColor: '#fafafa',
                 }}>
-                  <div>
+                  <div style={{ flex: 1 }}>
                     <p style={{ fontWeight: '500', color: '#1f2937', margin: 0 }}>
                       {doc.documentType?.replace(/([A-Z])/g, ' $1').trim()}
                     </p>
                     <p style={{ color: '#6b7280', fontSize: '0.875rem', margin: '0.25rem 0 0 0' }}>
-                      {doc.fileName}
+                      📄 {doc.fileName}
                     </p>
                   </div>
-                  <a
-                    href={doc.filePath}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <button
+                    onClick={() => handleDownloadDocument(doc)}
+                    disabled={downloadingDocId === doc.id}
                     style={{
-                      backgroundColor: '#0d9488',
+                      backgroundColor: downloadingDocId === doc.id ? '#9ca3af' : '#0d9488',
                       color: 'white',
                       padding: '0.5rem 1rem',
                       borderRadius: '0.5rem',
+                      border: 'none',
                       textDecoration: 'none',
                       fontWeight: '500',
                       fontSize: '0.875rem',
+                      cursor: downloadingDocId === doc.id ? 'not-allowed' : 'pointer',
+                      whiteSpace: 'nowrap',
+                      marginLeft: '1rem',
                     }}
                   >
-                    View
-                  </a>
+                    {downloadingDocId === doc.id ? '⬇ Downloading...' : '⬇ Download'}
+                  </button>
                 </div>
               ))}
             </div>
           </div>
         )}
+
 
         {/* Review Form */}
         {isReviewable && (
@@ -362,10 +415,11 @@ export default function ReviewApplicationDetailPage() {
               Application Review
             </h2>
 
+
             <form onSubmit={handleSubmit}>
               {/* New Status */}
               <div style={{ marginBottom: '1.5rem' }}>
-                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.5rem' }}>
+                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', color: '#374151', marginBottom: '0.5rem' }}>
                   New Status *
                 </label>
                 <select
@@ -390,18 +444,22 @@ export default function ReviewApplicationDetailPage() {
                     </option>
                   ))}
                 </select>
+                <p style={{ fontSize: '0.75rem', color: '#6b7280', margin: '0.5rem 0 0 0' }}>
+                  Select the new status for this application after review
+                </p>
               </div>
+
 
               {/* Review Comments */}
               <div style={{ marginBottom: '1.5rem' }}>
-                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.5rem' }}>
+                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', color: '#374151', marginBottom: '0.5rem' }}>
                   Review Comments *
                 </label>
                 <textarea
                   name="reviewComments"
                   value={formData.reviewComments}
                   onChange={handleChange}
-                  placeholder="Enter your review comments..."
+                  placeholder="Enter your review comments and feedback..."
                   rows="5"
                   required
                   style={{
@@ -415,12 +473,17 @@ export default function ReviewApplicationDetailPage() {
                     resize: 'vertical',
                   }}
                 />
+                <p style={{ fontSize: '0.75rem', color: '#6b7280', margin: '0.5rem 0 0 0' }}>
+                  Provide detailed feedback on the application, include reasons for acceptance or rejection
+                </p>
               </div>
 
+
               {/* Has Required Publications */}
-              <div style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center' }}>
+              <div style={{ marginBottom: '2rem', display: 'flex', alignItems: 'center', padding: '1rem', backgroundColor: '#f3f4f6', borderRadius: '0.5rem' }}>
                 <input
                   type="checkbox"
+                  id="hasPublications"
                   name="hasRequiredPublications"
                   checked={formData.hasRequiredPublications}
                   onChange={handleChange}
@@ -431,28 +494,31 @@ export default function ReviewApplicationDetailPage() {
                     marginRight: '0.75rem',
                   }}
                 />
-                <label style={{ fontSize: '0.875rem', fontWeight: '500', color: '#374151', cursor: 'pointer' }}>
-                  Candidate has required publications
+                <label htmlFor="hasPublications" style={{ fontSize: '0.875rem', fontWeight: '500', color: '#374151', cursor: 'pointer', margin: 0 }}>
+                  ✓ Candidate has required publications
                 </label>
               </div>
 
+
               {/* Submit Button */}
-              <div style={{ display: 'flex', gap: '1rem' }}>
+              <div style={{ display: 'flex', gap: '1rem', borderTop: '1px solid #e5e7eb', paddingTop: '1.5rem' }}>
                 <button
                   type="submit"
                   disabled={reviewing}
                   style={{
-                    backgroundColor: '#0d9488',
+                    backgroundColor: reviewing ? '#9ca3af' : '#0d9488',
                     color: 'white',
                     padding: '0.75rem 1.5rem',
                     borderRadius: '0.5rem',
                     border: 'none',
                     cursor: reviewing ? 'not-allowed' : 'pointer',
-                    fontWeight: '500',
-                    opacity: reviewing ? 0.5 : 1,
+                    fontWeight: '600',
+                    fontSize: '0.95rem',
+                    transition: 'opacity 0.2s ease',
+                    opacity: reviewing ? 0.6 : 1,
                   }}
                 >
-                  {reviewing ? 'Submitting Review...' : 'Submit Review'}
+                  {reviewing ? '⏳ Submitting Review...' : '✓ Submit Review'}
                 </button>
                 <Link
                   to="/admin/applications"
@@ -462,10 +528,14 @@ export default function ReviewApplicationDetailPage() {
                     padding: '0.75rem 1.5rem',
                     borderRadius: '0.5rem',
                     textDecoration: 'none',
-                    fontWeight: '500',
+                    fontWeight: '600',
+                    fontSize: '0.95rem',
                     display: 'inline-flex',
                     alignItems: 'center',
+                    transition: 'background-color 0.2s ease',
                   }}
+                  onMouseEnter={(e) => e.target.style.backgroundColor = '#d1d5db'}
+                  onMouseLeave={(e) => e.target.style.backgroundColor = '#e5e7eb'}
                 >
                   Cancel
                 </Link>

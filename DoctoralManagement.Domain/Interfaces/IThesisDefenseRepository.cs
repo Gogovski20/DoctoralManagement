@@ -10,5 +10,7 @@ namespace DoctoralManagement.Domain.Interfaces
         Task<ThesisDefense?> GetByIdAsync(int id);
         Task UpdateAsync(ThesisDefense defense);
         Task<IEnumerable<ThesisDefense>> GetByStatusAsync(DefenseStatus status);
+        Task<IEnumerable<ThesisDefense>> GetAllAsync();
+        Task<IEnumerable<ThesisDefense>> GetStudentDefenses(int studentId);
     }
 }

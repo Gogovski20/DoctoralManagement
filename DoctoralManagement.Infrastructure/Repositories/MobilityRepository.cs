@@ -19,17 +19,23 @@ namespace DoctoralManagement.Infrastructure.Repositories
 
         public async Task<Mobility?> GetByIdAsync(int id) =>
             await _context.Mobilities
+                .Include(m => m.Student)
                 .Include(m => m.Document)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
         public async Task<IEnumerable<Mobility>> GetByStudentIdAsync(int studentId) =>
             await _context.Mobilities
+                .Include(m => m.Document)
                 .Where(m => m.StudentId == studentId)
                 .AsNoTracking()
                 .ToListAsync();
 
         public async Task<IEnumerable<Mobility>> GetAllAsync() =>
-            await _context.Mobilities.AsNoTracking().ToListAsync();
+            await _context.Mobilities
+                .Include(m => m.Student)
+                .Include(m => m.Document)
+                .AsNoTracking()
+                .ToListAsync();
 
         public async Task UpdateAsync(Mobility mobility)
         {

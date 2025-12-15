@@ -31,7 +31,24 @@ import AdminReviewDoctoralProjectPage from './components/admin/AdminReviewDoctor
 import CompleteDoctoralProjectPage from './components/CompleteDoctoralProjectPage';
 import ActivitiesPage from './components/activities/ActivitiesPage';
 import ConferenceParticipationsPage from './components/activities/ConferenceParticipationsPage';
+import PublicationsPage from './components/activities/PublicationsPage';
+import MobilitiesPage from './components/activities/MobilitiesPage';
+import AdminConferencesPage from './components/admin/AdminConferencesPage';
+import AdminReviewConferencePage from './components/admin/AdminReviewConferencePage';
+import AdminMobilitiesPage from './components/admin/AdminMobilitiesPage';
+import AdminPublicationsPage from './components/admin/AdminPublicationsPage';
+import AdminReviewMobilityPage from './components/admin/AdminReviewMobilityPage';
+import AdminReviewPublicationPage from './components/admin/AdminReviewPublicationPage';
 import { useAuth } from './context/AuthContext';
+import AdminEnrollStudentPage from './components/admin/AdminEnrollStudentPage';
+import AdminCourseEnrollmentsPage from './components/admin/AdminCourseEnrollmentsPage';
+import StudentCoursesPage from './components/student/StudentCoursesPage';
+import EditApplicationPage from './components/student/EditApplicationPage';
+import AdminThesisDefenses from './components/admin/AdminThesisDefenses';
+import AdminScheduleThesisDefense from './components/admin/AdminScheduleThesisDefense';
+import StudentUploadThesisDocument from './components/student/StudentUploadThesisDocument';
+import AdminDoctoralProjectPage from './components/admin/AdminDoctoralProjectPage';
+import AdminReviewThesisDocumentPage from './components/admin/AdminReviewThesisDocumentPage';
 
 function App() {
   const { user } = useAuth();
@@ -216,8 +233,58 @@ function App() {
         />
         <Route path="/activities" element={<ActivitiesPage />} />
         <Route path="/activities/conferences" element={<ConferenceParticipationsPage />} />
+        <Route path="/activities/publications" element={<PublicationsPage />} />
+        <Route path="/activities/mobilities" element={<MobilitiesPage />} />
+        <Route path="/admin/conferences" element={<AdminConferencesPage />} />
+        <Route path="/admin/conferences/:conferenceId/review" element={<AdminReviewConferencePage />} />
+        <Route path="/admin/mobilities" element={<AdminMobilitiesPage />} />
+        <Route path="/admin/publications" element={<AdminPublicationsPage />} />
+        <Route path="/admin/mobilities/:mobilityId/review" element={<AdminReviewMobilityPage />} />
+        <Route path="/admin/publications/:publicationId/review" element={<AdminReviewPublicationPage />} />
+        <Route path="/admin/courses/:courseId/enroll" element={<AdminEnrollStudentPage />} />
+        <Route path="/admin/enrollments" element={<AdminCourseEnrollmentsPage />} />
+        <Route 
+          path="/courses" 
+          element={
+            isAuthenticated && role === 'Student' ? (
+              <StudentCoursesPage />
+            ) : (
+              <Navigate to="/login" />
+            )
+          } 
+        />
+        <Route
+          path="/applications/:id/edit"
+          element={
+            isAuthenticated && role === 'Student' ? (
+              <EditApplicationPage />
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
+        />
+        <Route path="/admin/thesis-defenses" element={<AdminThesisDefenses />} />
+        <Route
+          path="/admin/thesis-defenses/schedule"
+          element={
+            isAuthenticated && role === 'Admin' ? (
+              <AdminScheduleThesisDefense />
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
+        />
+        <Route
+          path="/doctoral-project/:projectId/upload-thesis"
+          element={
+            isAuthenticated && role === 'Student'
+              ? <StudentUploadThesisDocument />
+              : <Navigate to="/login" />
+          }
+        />
+        <Route path="/admin/doctoral-projects/:id" element={<AdminDoctoralProjectPage />} />
+        <Route path="/admin/thesis-review/:projectId/:documentId" element={<AdminReviewThesisDocumentPage />} />
       </Routes>
-      
     </Router>
   );
 }

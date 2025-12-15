@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { studentService } from '../../api/studentService';
 
+
 export default function ConferenceDetailModal({ conferenceId, onClose }) {
   const [conference, setConference] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [downloading, setDownloading] = useState(false);
 
+
   useEffect(() => {
     fetchConference();
   }, [conferenceId]);
+
 
   const fetchConference = async () => {
     try {
@@ -24,6 +27,7 @@ export default function ConferenceDetailModal({ conferenceId, onClose }) {
     }
   };
 
+
   const handleDownload = async () => {
     if (!conference?.document) {
       alert('No document available for download.');
@@ -33,8 +37,9 @@ export default function ConferenceDetailModal({ conferenceId, onClose }) {
     try {
       setDownloading(true);
       await studentService.downloadConferenceDocument(
-        conference.document.filePath,
-        conference.document.fileName
+        conference.id,             
+        conference.document.id,    
+        conference.document.fileName 
       );
     } catch (err) {
       alert(`Download failed: ${err.message}`);
@@ -42,6 +47,8 @@ export default function ConferenceDetailModal({ conferenceId, onClose }) {
       setDownloading(false);
     }
   };
+
+
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
@@ -56,6 +63,7 @@ export default function ConferenceDetailModal({ conferenceId, onClose }) {
       return 'Invalid Date';
     }
   };
+
 
   const formatDateTime = (dateString) => {
     if (!dateString) return 'N/A';
@@ -72,6 +80,7 @@ export default function ConferenceDetailModal({ conferenceId, onClose }) {
       return 'Invalid Date';
     }
   };
+
 
   return (
     <div
@@ -122,6 +131,7 @@ export default function ConferenceDetailModal({ conferenceId, onClose }) {
           </button>
         </div>
 
+
         {error && (
           <div
             style={{
@@ -136,6 +146,7 @@ export default function ConferenceDetailModal({ conferenceId, onClose }) {
             {error}
           </div>
         )}
+
 
         {loading ? (
           <div style={{ textAlign: 'center', padding: '2rem', color: '#6b7280' }}>
@@ -154,6 +165,7 @@ export default function ConferenceDetailModal({ conferenceId, onClose }) {
               </p>
             </div>
 
+
             {/* Student Name */}
             <div style={{ marginBottom: '1.5rem' }}>
               <label style={{ display: 'block', fontWeight: '600', color: '#6b7280', fontSize: '0.875rem', marginBottom: '0.5rem' }}>
@@ -163,6 +175,7 @@ export default function ConferenceDetailModal({ conferenceId, onClose }) {
                 {conference.studentName}
               </p>
             </div>
+
 
             {/* Date */}
             <div style={{ marginBottom: '1.5rem' }}>
@@ -174,6 +187,7 @@ export default function ConferenceDetailModal({ conferenceId, onClose }) {
               </p>
             </div>
 
+
             {/* Role */}
             <div style={{ marginBottom: '1.5rem' }}>
               <label style={{ display: 'block', fontWeight: '600', color: '#6b7280', fontSize: '0.875rem', marginBottom: '0.5rem' }}>
@@ -183,6 +197,7 @@ export default function ConferenceDetailModal({ conferenceId, onClose }) {
                 {conference.role}
               </p>
             </div>
+
 
             {/* International */}
             <div style={{ marginBottom: '1.5rem' }}>
@@ -204,8 +219,42 @@ export default function ConferenceDetailModal({ conferenceId, onClose }) {
               </span>
             </div>
 
+            {/* Approval Status */}
+            <div style={{ marginBottom: '1.5rem' }}>
+              <label style={{ display: 'block', fontWeight: '600', color: '#6b7280', fontSize: '0.875rem', marginBottom: '0.5rem' }}>
+                Approval Status
+              </label>
+              <span
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  padding: '0.5rem 1rem',
+                  borderRadius: '9999px',
+                  backgroundColor: conference.isApproved ? '#10b98120' : '#ef444420',
+                  color: conference.isApproved ? '#10b981' : '#ef4444',
+                  fontSize: '0.875rem',
+                  fontWeight: '600',
+                  border: `1px solid ${conference.isApproved ? '#10b98140' : '#ef444440'}`,
+                }}
+              >
+                {conference.isApproved ? (
+                  <>
+                    <span style={{ fontSize: '1.25rem' }}>✅</span>
+                    Approved
+                  </>
+                ) : (
+                  <>
+                    <span style={{ fontSize: '1.25rem' }}>❌</span>
+                    Pending Review
+                  </>
+                )}
+              </span>
+            </div>
+
             {/* Divider */}
             <div style={{ borderTop: '1px solid #e5e7eb', margin: '1.5rem 0' }} />
+
 
             {/* Document Section */}
             <div style={{ marginBottom: '1.5rem' }}>
@@ -264,6 +313,7 @@ export default function ConferenceDetailModal({ conferenceId, onClose }) {
                 </div>
               )}
             </div>
+
 
             {/* Close Button */}
             <button

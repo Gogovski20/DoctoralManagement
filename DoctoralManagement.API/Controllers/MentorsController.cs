@@ -62,5 +62,12 @@ namespace DoctoralManagement.API.Controllers
             await _mediator.Send(new DeleteMentorCommand { Id = id });
             return NoContent();
         }
+
+        [HttpGet("mentors")]
+        [Authorize(Roles = "Admin,Mentor")]
+        public async Task<IActionResult> GetMentors()
+        {
+            return Ok(await _mediator.Send(new GetMentorsQuery()));
+        }
     }
 }

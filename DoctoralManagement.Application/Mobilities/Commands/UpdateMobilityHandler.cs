@@ -7,7 +7,7 @@ using System.Net;
 
 namespace DoctoralManagement.Application.Mobilities.Commands
 {
-    public class UpdateMobilityHandler : IRequestHandler<UpdateMobilityCommand, PublicationResponse>
+    public class UpdateMobilityHandler : IRequestHandler<UpdateMobilityCommand, MobilityResponse>
     {
         private readonly IMobilityRepository _mobilityRepository;
         private readonly IEctsTrackingRepository _ectsRepository;
@@ -24,7 +24,7 @@ namespace DoctoralManagement.Application.Mobilities.Commands
             _authService = authService;
         }
 
-        public async Task<PublicationResponse> Handle(UpdateMobilityCommand request, CancellationToken cancellationToken)
+        public async Task<MobilityResponse> Handle(UpdateMobilityCommand request, CancellationToken cancellationToken)
         {
             var mobility = await _mobilityRepository.GetByIdAsync(request.Id);
             if (mobility == null)
@@ -47,34 +47,17 @@ namespace DoctoralManagement.Application.Mobilities.Commands
                     HttpStatusCode.BadRequest);
             }
 
-            int oldEcts = mobility.EctsPoints;
+            var dateSUtc = DateTime.SpecifyKind(request.StartDate, DateTimeKind.Utc);
+            var dateEUtc = DateTime.SpecifyKind(request.EndDate, DateTimeKind.Utc);
 
             mobility.Institution = request.Institution;
             mobility.Country = request.Country;
-            mobility.StartDate = request.StartDate;
-            mobility.EndDate = request.EndDate;
-
-            mobility.EctsPoints = request.EctsCredits;
+            mobility.StartDate = dateSUtc;
+            mobility.EndDate = dateEUtc;
 
             await _mobilityRepository.UpdateAsync(mobility);
 
-            
-
-            // Update ECTS tracking
-            var ectsTracking = await _ectsRepository.GetByStudentIdAsync(mobility.StudentId);
-            if (ectsTracking != null)
-            {
-                ectsTracking.InternationalMobility = ectsTracking.InternationalMobility - oldEcts + mobility.EctsPoints;
-                if (ectsTracking.InternationalMobility > 6)
-                    ectsTracking.InternationalMobility = 6;
-                else if (ectsTracking.InternationalMobility < 0)
-                    ectsTracking.InternationalMobility = 0;
-
-                await _ectsRepository.UpdateAsync(ectsTracking);
-                await _progressService.UpdateStudentSemesterAsync(mobility.StudentId, ectsTracking.TotalECTS);
-            }
-
-            return new PublicationResponse { };
+            return new MobilityResponse { };
         }
     }
 }

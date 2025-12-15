@@ -75,6 +75,7 @@ namespace DoctoralManagement.Application.Publications.Queries
                 PublishedOn = publication.PublishedOn,
                 IsIndexedInScopus = publication.IsIndexedInScopus,
                 IsIndexedInThomsonReuters = publication.IsIndexedInThomsonReuters,
+                IsApproved = publication.IsApproved,
                 Document = documentDto
             };
         }

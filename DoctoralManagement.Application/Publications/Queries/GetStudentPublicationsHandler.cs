@@ -1,4 +1,5 @@
 ﻿using DoctoralManagement.Application.Common;
+using DoctoralManagement.Application.Dtos;
 using DoctoralManagement.Domain.Exceptions;
 using DoctoralManagement.Domain.Interfaces;
 using MediatR;
@@ -45,7 +46,12 @@ namespace DoctoralManagement.Application.Publications.Queries
                 PublishedOn = p.PublishedOn,
                 IsIndexedInScopus = p.IsIndexedInScopus,
                 IsIndexedInThomsonReuters = p.IsIndexedInThomsonReuters,
-                EctsPoints = p.EctsPoints
+                EctsPoints = p.EctsPoints,
+                Document = p.Document == null ? null : new DocumentDto
+                {
+                    Id = p.Document.Id,
+                    FileName = p.Document.FileName
+                }
             });
         }
     }

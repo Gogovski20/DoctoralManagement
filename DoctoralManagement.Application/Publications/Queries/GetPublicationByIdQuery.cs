@@ -17,6 +17,7 @@ namespace DoctoralManagement.Application.Publications.Queries
         public DateTime PublishedOn { get; set; }
         public bool IsIndexedInScopus { get; set; }
         public bool IsIndexedInThomsonReuters { get; set; }
+        public bool IsApproved { get; set; }
         public ActivityDocumentDto? Document { get; set; }
     }
 }
