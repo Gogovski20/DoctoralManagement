@@ -29,7 +29,6 @@ export default function ReviewApplicationDetailPage() {
       const data = await studentService.getApplicationById(id);
       setApplication(data);
       
-      // Initialize form with current data
       setFormData({
         newStatus: '',
         reviewComments: data.reviewComments || '',

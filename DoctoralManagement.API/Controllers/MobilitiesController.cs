@@ -1,6 +1,5 @@
 ﻿using DoctoralManagement.Application.ActivityDocuments;
 using DoctoralManagement.Application.Common;
-using DoctoralManagement.Application.ConferenceParticipations.Queries;
 using DoctoralManagement.Application.Dtos;
 using DoctoralManagement.Application.Mobilities.Commands;
 using DoctoralManagement.Application.Mobilities.Queries;
@@ -127,21 +126,6 @@ namespace DoctoralManagement.API.Controllers
             return Ok(result);
         }
 
-        //[HttpGet("{mobilityid}/download")]
-        //[Authorize(Roles = "Student,Admin")]
-        //public async Task<IActionResult> DownloadDocument(int mobilityId, int documentId)
-        //{
-        //    var command = new DownloadActivityDocumentQuery
-        //    {
-        //        DocumentId = documentId,
-        //        ActivityId = mobilityId,
-        //        ActivityType = ActivityType.Mobility
-        //    };
-        //    var result = await _mediator.Send(command);
-
-        //    return File(result.FileBytes, result.ContentType, result.FileName);
-        //}
-
         [HttpGet("{mobilityId}/download")]
         [Authorize(Roles = "Student,Admin,Mentor")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -161,13 +145,11 @@ namespace DoctoralManagement.API.Controllers
 
                 var result = await _mediator.Send(command);
 
-                // Check if download was successful
                 if (!result.Success)
                 {
                     return NotFound(new { message = result.Message });
                 }
 
-                // Return file for download
                 return File(result.FileBytes, result.ContentType, result.FileName);
             }
             catch (Exception ex)
@@ -175,29 +157,6 @@ namespace DoctoralManagement.API.Controllers
                 return BadRequest(new { message = $"Error downloading document: {ex.Message}" });
             }
         }
-
-
-        //[HttpGet("{mobilityId}/download")]
-        //[Authorize(Roles = "Student,Admin")]
-        //public async Task<IActionResult> DownloadDocument(int mobilityId)
-        //{
-        //    try
-        //    {
-        //        var query = new DownloadActivityDocumentQuery
-        //        {
-        //            ActivityId = mobilityId,
-        //            ActivityType = ActivityType.Mobility
-        //        };
-
-        //        var result = await _mediator.Send(query);
-        //        return File(result.FileBytes, result.ContentType, result.FileName);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return BadRequest(new { error = ex.Message, mobilityId = mobilityId });
-        //    }
-        //}
-
 
         [HttpDelete("{mobilityId}/delete")]
         [Authorize(Roles = "Student,Admin")]

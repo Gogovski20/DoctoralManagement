@@ -47,7 +47,6 @@ export default function CompleteDoctoralProjectPage() {
 
       if (result.projectId) {
         alert('Project completed successfully!');
-        // Navigate based on user role
         const backPath = user?.role === 'Mentor' ? '/mentor/dashboard' : '/admin/doctoral-projects';
         navigate(backPath);
       } else {

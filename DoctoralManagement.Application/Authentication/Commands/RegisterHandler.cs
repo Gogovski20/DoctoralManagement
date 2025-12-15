@@ -63,7 +63,6 @@ namespace DoctoralManagement.Application.Authentication.Commands
                 return new RegisterResponse { Success = false, Message = "Self-registration is not allowed for this role. Contact an administrator." };
             }
 
-            // 1. Create Identity User
             var userId = await _authService.CreateUserAsync(
                 new RegisterUserDto(request.FullName, request.Email, request.Role),
                 request.Password,
@@ -71,7 +70,6 @@ namespace DoctoralManagement.Application.Authentication.Commands
                 mentorId
             );
 
-            // 2. Link reverse FK: Student.ApplicationUserId
             if (studentId.HasValue)
             {
                 var student = await _studentRepository.GetByIdAsync(studentId.Value);
@@ -79,7 +77,6 @@ namespace DoctoralManagement.Application.Authentication.Commands
                 await _studentRepository.UpdateAsync(student);
             }
 
-            // 3. Link reverse FK: Mentor.ApplicationUserId
             if (mentorId.HasValue)
             {
                 var mentor = await _mentorRepository.GetByIdAsync(mentorId.Value);

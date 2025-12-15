@@ -85,7 +85,6 @@ export default function CreateApplicationPage() {
     setLoading(true);
 
     try {
-      // Get current user's profile to get studentId
       const profile = await studentService.getStudentProfile();
       const studentId = profile?.studentId || profile?.studentId;
     
@@ -140,7 +139,6 @@ export default function CreateApplicationPage() {
     setError('');
 
     try {
-      // Create application on first document upload if it doesn't exist yet
       let appId = applicationId;
       if (!appId) {
         let studentId = null;
@@ -219,7 +217,7 @@ export default function CreateApplicationPage() {
       const result = await studentService.submitApplication(applicationId);
 
       if (result.success || result.id) {
-        setSubmitted(true);   // <- flag to show dashboard button
+        setSubmitted(true);   
         alert('Application submitted successfully!');
       } else {
         setError(result.message || 'Failed to submit application');

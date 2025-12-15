@@ -4,7 +4,7 @@
     {
         public int DoctoralProgramId { get; set; }
         public int MentorId { get; set; }
-        public string Role { get; set; } = "Member"; // Possible values: "Member", "Coordinator"
+        public string Role { get; set; } = "Member"; 
         public bool IsActive { get; set; } = true;
 
         // Navigation

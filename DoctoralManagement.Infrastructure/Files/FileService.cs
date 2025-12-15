@@ -12,7 +12,6 @@ namespace DoctoralManagement.Infrastructure.Files
 
         public byte[] ReadFile(string filePath)
         {
-            // If filePath is just a filename, reconstruct the full path
             if (!Path.IsPathRooted(filePath))
             {
                 filePath = Path.Combine(Directory.GetCurrentDirectory(), "Uploads", filePath);
@@ -31,7 +30,6 @@ namespace DoctoralManagement.Infrastructure.Files
 
         public bool FileExists(string filePath)
         {
-            // If filePath is just a filename, reconstruct the full path
             if (!Path.IsPathRooted(filePath))
             {
                 filePath = Path.Combine(Directory.GetCurrentDirectory(), "Uploads", filePath);
@@ -92,7 +90,6 @@ namespace DoctoralManagement.Infrastructure.Files
             string name = $"{FileName}{fileExtension}";
             string filePath = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
 
-            // Ensure Uploads directory exists
             if (!Directory.Exists(filePath))
             {
                 Directory.CreateDirectory(filePath);
@@ -105,73 +102,3 @@ namespace DoctoralManagement.Infrastructure.Files
         }
     }
 }
-
-//using DoctoralManagement.Domain.Interfaces;
-//using Microsoft.AspNetCore.Http;
-
-//namespace DoctoralManagement.Infrastructure.Files
-//{
-//    public class FileService : IFileService
-//    {
-//        public bool DeleteFile(string filePath)
-//        {
-//            if (File.Exists(filePath))
-//            {
-//                File.Delete(filePath);
-//                return true;
-//            }
-//            return false;
-//        }
-
-//        public bool FileExists(string filePath)
-//        {
-//            throw new NotImplementedException();
-//        }
-
-//        public string GetContentType(string filePath)
-//        {
-//            throw new NotImplementedException();
-//        }
-
-//        public string GetFilePath(IFormFile file)
-//        {
-//            return Path.Combine(Directory.GetCurrentDirectory(), "Uploads", file.FileName);
-//        }
-
-//        public long GetFileSize(IFormFile file)
-//        {
-//            return file.Length;
-//        }
-
-//        public byte[] ReadFile(string filePath)
-//        {
-//            if (!File.Exists(filePath))
-//            {
-//                throw new FileNotFoundException("File not found.", filePath);
-//            }
-//            return File.ReadAllBytes(filePath);
-//        }
-
-//        public string UploadFile(IFormFile file, string FileName)
-//        {
-//            List<string> validExtensions = new List<string> { ".jpg", ".jpeg", ".png", ".pdf", ".docx" };
-//            string fileExtension = Path.GetExtension(file.FileName);
-//            if (!validExtensions.Contains(fileExtension))
-//            {
-//                return "Invalid file type. Only .jpg, .jpeg, .png, .pdf, and .docx files are allowed.";
-//            }
-
-//            long size = file.Length;
-//            if (size > (5 * 1024 * 1024))
-//            {
-//                return "File size exceeds the 5MB limit.";
-//            }
-//            string name = $"{FileName}{fileExtension}";
-//            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
-//            using FileStream fileStream = new FileStream(Path.Combine(filePath, name), FileMode.Create);
-//            file.CopyTo(fileStream);
-
-//            return name;
-//        }
-//    }
-//}

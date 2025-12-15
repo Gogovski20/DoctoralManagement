@@ -83,7 +83,6 @@ export default function UploadDocumentsPage() {
     for (const doc of requiredDocs) {
       if (files[doc.key]) {
         await handleUpload(doc.key);
-        // Add a small delay between uploads
         await new Promise(resolve => setTimeout(resolve, 500));
       }
     }

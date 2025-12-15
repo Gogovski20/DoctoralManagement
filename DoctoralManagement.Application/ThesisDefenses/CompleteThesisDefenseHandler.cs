@@ -46,12 +46,10 @@ namespace DoctoralManagement.Application.ThesisDefenses
                 throw new DoctoralManagementException($"Defense cannot be marked complete until scheduled time ({defense.ScheduledAt}).", HttpStatusCode.BadRequest);
             }
 
-            // Set defense as completed (NOT passed/failed yet)
             defense.Status = DefenseStatus.Completed;
             defense.ResultNotes = request.ResultNotes;
             defense.CompletedAt = DateTime.UtcNow;
 
-            // Generate archive number once defense is completed
             defense.ArchiveNumber = string.IsNullOrWhiteSpace(request.ArchiveNumber)
                 ? GenerateArchiveNumber(defense)
                 : request.ArchiveNumber;

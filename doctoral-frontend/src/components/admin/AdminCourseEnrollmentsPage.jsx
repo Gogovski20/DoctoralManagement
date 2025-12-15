@@ -18,8 +18,6 @@ export default function AdminCourseEnrollmentsPage() {
     fetchEnrollments();
   }, []);
 
-
-  // Debug log when enrollment is selected for completion
   useEffect(() => {
     if (selectedEnrollmentForCompletion) {
       console.log('Selected enrollment for completion:', {
@@ -38,9 +36,8 @@ export default function AdminCourseEnrollmentsPage() {
     try {
       setLoading(true);
       setError('');
-      const data = await studentService.getAllEnrollments(); // data is already response.data
+      const data = await studentService.getAllEnrollments(); 
       
-      // Debug log to see enrollment structure
       if (Array.isArray(data) && data.length > 0) {
         console.log('First enrollment object properties:', Object.keys(data[0]));
         console.log('First enrollment object:', data[0]);
@@ -57,7 +54,6 @@ export default function AdminCourseEnrollmentsPage() {
 
 
   const handleCompleteSuccess = () => {
-    // Refresh the enrollments list
     fetchEnrollments();
     setSelectedEnrollmentForCompletion(null);
   };

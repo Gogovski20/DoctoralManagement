@@ -15,7 +15,6 @@ export default function EditPublicationModal({ publicationId, onClose, onSuccess
     isIndexedInThomsonReuters: false,
   });
 
-  // Load publication data
   useEffect(() => {
     const fetchPublication = async () => {
       try {
@@ -28,7 +27,6 @@ export default function EditPublicationModal({ publicationId, onClose, onSuccess
           return;
         }
 
-        // Format date to YYYY-MM-DD for input
         const dateObj = new Date(data.publishedOn);
         const formattedDate = dateObj.toISOString().split('T')[0];
 

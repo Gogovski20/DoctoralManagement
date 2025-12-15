@@ -14,7 +14,7 @@
         public string Doi { get; set; } = string.Empty;
         public bool IsIndexedInScopus { get; set; }
         public bool IsIndexedInThomsonReuters { get; set; }
-        public int EctsPoints { get; set; } // ECTS awarded for this publication
+        public int EctsPoints { get; set; } 
 
         public bool IsApproved { get; set; } = false;
 

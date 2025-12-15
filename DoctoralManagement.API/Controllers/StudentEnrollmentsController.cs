@@ -1,5 +1,4 @@
-﻿using DoctoralManagement.Application.Applications.Queries;
-using DoctoralManagement.Application.Common;
+﻿using DoctoralManagement.Application.Common;
 using DoctoralManagement.Application.Courses.Commands;
 using DoctoralManagement.Application.Courses.Queries;
 using DoctoralManagement.Domain.Interfaces;

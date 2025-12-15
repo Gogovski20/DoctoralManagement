@@ -70,18 +70,6 @@ namespace DoctoralManagement.Application.Mobilities.Commands
 
             var created = await _mobilityRepository.AddAsync(mobility);
 
-            //var ectsTracking = await _ectsRepository.GetByStudentIdAsync(request.StudentId);
-            //if (ectsTracking != null)
-            //{
-            //    ectsTracking.InternationalMobility += ectsPoints;
-            //    if (ectsTracking.InternationalMobility > 6)
-            //    {
-            //        ectsTracking.InternationalMobility = 6;
-            //    }
-            //    await _ectsRepository.UpdateAsync(ectsTracking);
-            //    await _ectsProgressService.UpdateStudentSemesterAsync(request.StudentId, ectsTracking.TotalECTS);
-            //}
-
             return new AddMobilityResponse
             {
                 Id = created.Id,

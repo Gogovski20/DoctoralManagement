@@ -94,8 +94,6 @@ export default function AdminDashboard() {
             <NavCard to="/admin/conferences" title="All Conferences" icon="🎤" />
             <NavCard to="/admin/mobilities" title="All Mobilities" icon="✈️" />
             <NavCard to="/admin/publications" title="All Publications" icon="📚" />
-
-            {/* NEW CARD FOR THESIS DEFENSES */}
             <NavCard to="/admin/thesis-defenses" title="Thesis Defenses" icon="🎓" />
           </div>
         </div>

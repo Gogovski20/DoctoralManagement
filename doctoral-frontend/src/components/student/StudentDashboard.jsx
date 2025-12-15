@@ -56,7 +56,6 @@ export default function StudentDashboard() {
     if (!status) return 'Draft';
     
     const statusStr = status.toString();
-    // Convert "Submitted" or enum string to readable format
     return statusStr
       .replace(/_/g, ' ')
       .replace(/([A-Z])/g, ' $1')

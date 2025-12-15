@@ -12,7 +12,6 @@ export default function Navbar() {
     navigate('/login');
   };
 
-  // Function to get user role from token
   const getUserRole = () => {
     if (!user?.token) return 'Student';
     try {

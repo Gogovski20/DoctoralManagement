@@ -10,8 +10,6 @@ export default function ApplicationDetailPage() {
   const [error, setError] = useState('');
   const [documents, setDocuments] = useState([]);
 
-  // const studentId = Number(localStorage.getItem("studentId")); // or extract from token
-
   useEffect(() => {
     fetchApplication();
   }, [id]);

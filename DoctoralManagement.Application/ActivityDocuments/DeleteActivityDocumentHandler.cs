@@ -23,13 +23,9 @@ namespace DoctoralManagement.Application.ActivityDocuments
             if (document.Status == DocumentStatus.Approved)
                 throw new Exception("Approved documents cannot be deleted.");
 
-            // Make sure this document belongs to the correct activity
             if (!IsValidActivityDocument(request, document))
                 throw new Exception("Document does not belong to the specified activity.");
 
-            // Optional authorization/ownership logic here...
-
-            // Delete file and data
             _fileService.DeleteFile(document.FilePath);
             await _activityDocumentRepository.DeleteAsync(document);
 

@@ -13,7 +13,6 @@ export default function EditMobilityModal({ mobilityId, onClose, onSuccess }) {
     endDate: '',
   });
 
-  // Load mobility data
   useEffect(() => {
     const fetchMobility = async () => {
       try {
@@ -26,7 +25,6 @@ export default function EditMobilityModal({ mobilityId, onClose, onSuccess }) {
           return;
         }
 
-        // Format dates to YYYY-MM-DD for input
         const startDateObj = new Date(data.startDate);
         const endDateObj = new Date(data.endDate);
         const formattedStartDate = startDateObj.toISOString().split('T')[0];
@@ -52,7 +50,6 @@ export default function EditMobilityModal({ mobilityId, onClose, onSuccess }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Validate dates
     if (new Date(formData.endDate) <= new Date(formData.startDate)) {
       setError('End date must be after start date.');
       return;

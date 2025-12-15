@@ -13,7 +13,6 @@ export default function EditConferenceModal({ conferenceId, onClose, onSuccess }
     isInternational: false,
   });
 
-  // Load conference data
   useEffect(() => {
     const fetchConference = async () => {
       try {
@@ -26,7 +25,6 @@ export default function EditConferenceModal({ conferenceId, onClose, onSuccess }
           return;
         }
 
-        // Format date to YYYY-MM-DD for input
         const dateObj = new Date(data.date);
         const formattedDate = dateObj.toISOString().split('T')[0];
 

@@ -27,19 +27,13 @@ export default function ECTSTrackingPage() {
       setEctsDetailed(detailedData);
     } catch (err) {
       console.error('Failed to fetch ECTS data:', err);
-      
-      // Check if this is a "no data" error (404 or 500 because record doesn't exist)
-      // vs a real server error
       const status = err.response?.status;
       const isNoDataError = status === 404 || status === 500;
       
       if (isNoDataError) {
-        // Don't show error - just leave data as null
-        // This will trigger the "no data" message below
         setEctsStatus(null);
         setEctsDetailed(null);
       } else {
-        // Real error - show to user
         setError(
           err.response?.data?.message || 
           'Failed to load ECTS tracking data'
@@ -51,10 +45,10 @@ export default function ECTSTrackingPage() {
   };
 
   const getProgressBarColor = (progressPercent) => {
-    if (progressPercent >= 100) return '#10b981'; // Green
-    if (progressPercent >= 70) return '#3b82f6'; // Blue
-    if (progressPercent >= 40) return '#f59e0b'; // Amber
-    return '#ef4444'; // Red
+    if (progressPercent >= 100) return '#10b981'; 
+    if (progressPercent >= 70) return '#3b82f6'; 
+    if (progressPercent >= 40) return '#f59e0b'; 
+    return '#ef4444'; 
   };
 
   const formatProgressPercent = (percent) => {

@@ -90,7 +90,6 @@ export default function DoctoralProjectDetailPage() {
   const handleDownloadDocument = async (doc) => {
     try {
       setDownloadingFile(doc.id);
-      // Construct download URL - adjust based on your backend structure
       const response = await fetch(`/api/DoctoralProjects/${project.id}/documents/${doc.id}/download`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -412,7 +411,6 @@ export default function DoctoralProjectDetailPage() {
                       }}
                       onClick={() => {
                         if (window.confirm('Are you sure you want to delete this project? This action cannot be undone.')) {
-                          // Add delete functionality when needed
                           console.log('Delete project:', project.id);
                         }
                       }}

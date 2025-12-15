@@ -1,11 +1,8 @@
 ﻿using DoctoralManagement.Application.Common;
-using DoctoralManagement.Application.ConferenceParticipations.Commands;
-using DoctoralManagement.Application.DoctoralProjects.Queries;
 using DoctoralManagement.Application.Dtos;
 using DoctoralManagement.Application.ThesisDefenseReviews;
 using DoctoralManagement.Application.ThesisDefenses;
 using DoctoralManagement.Domain.Interfaces;
-using DoctoralManagement.Infrastructure.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
