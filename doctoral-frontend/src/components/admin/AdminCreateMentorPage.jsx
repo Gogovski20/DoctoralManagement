@@ -56,7 +56,6 @@ export default function AdminCreateMentorPage() {
     setError('');
     setSuccess('');
 
-    // Filter out empty research areas
     const filteredResearchAreas = formData.researchAreas.filter(area => area.trim() !== '');
 
     if (filteredResearchAreas.length === 0) {

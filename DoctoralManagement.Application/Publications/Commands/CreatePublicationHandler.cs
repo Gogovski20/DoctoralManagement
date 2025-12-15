@@ -71,18 +71,6 @@ namespace DoctoralManagement.Application.Publications.Commands
 
             var created = await _publicationRepository.AddAsync(publication);
 
-            //var ectsTracking = await _ectsRepository.GetByStudentIdAsync(request.StudentId);
-            //if (ectsTracking != null)
-            //{
-            //    ectsTracking.Publications += ectsPoints;
-            //    if (ectsTracking.Publications > 27)
-            //    {
-            //        ectsTracking.Publications = 27;
-            //    }
-            //    await _ectsRepository.UpdateAsync(ectsTracking);
-            //    await _ectsProgressService.UpdateStudentSemesterAsync(request.StudentId, ectsTracking.TotalECTS);
-            //}
-
             return new CreatePublicationResponse
             {
                 Id = created.Id,

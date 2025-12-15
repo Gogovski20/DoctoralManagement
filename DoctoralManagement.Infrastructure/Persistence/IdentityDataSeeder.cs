@@ -26,15 +26,6 @@ namespace DoctoralManagement.Infrastructure.Persistence
                 }
             }
 
-            // Check if Admin Role exists
-            //var adminRole = await roleManager.FindByNameAsync("Admin");
-            //if (adminRole == null)
-            //{
-            //    adminRole = new IdentityRole<int> { Name = "Admin", NormalizedName = "ADMIN" };
-            //    await roleManager.CreateAsync(adminRole);
-            //}
-
-            // Check if Admin User exists
             var adminUser = await userManager.FindByEmailAsync("admin@dms.com");
             if (adminUser == null)
             {
@@ -48,7 +39,7 @@ namespace DoctoralManagement.Infrastructure.Persistence
                     IsActive = true
                 };
 
-                await userManager.CreateAsync(adminUser, "Admin123!"); // strong password
+                await userManager.CreateAsync(adminUser, "Admin123!"); 
                 await userManager.AddToRoleAsync(adminUser, "Admin");
             }
         }

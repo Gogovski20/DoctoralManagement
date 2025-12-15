@@ -7,7 +7,7 @@
         public int CourseId { get; set; }
         public DateTime EnrolledDate { get; set; }
         public bool Completed { get; set; } = false;
-        public decimal? Grade { get; set; } // e.g., 8.5
+        public decimal? Grade { get; set; } 
 
         // Navigation
         public Student Student { get; set; } = null!;

@@ -129,21 +129,6 @@ namespace DoctoralManagement.API.Controllers
             return Ok(result);
         }
 
-        //[HttpGet("{conferenceId}/download")]
-        //[Authorize(Roles = "Student,Admin")]
-        //public async Task<IActionResult> DownloadDocument(int conferenceId, int documentId)
-        //{
-        //    var command = new DownloadActivityDocumentQuery 
-        //    {
-        //        DocumentId = documentId,
-        //        ActivityId = conferenceId,
-        //        ActivityType = ActivityType.Conference
-        //    };
-        //    var result = await _mediator.Send(command);
-
-        //    return File(result.FileBytes, result.ContentType, result.FileName);
-        //}
-
         [HttpGet("{conferenceId}/download")]
         [Authorize(Roles = "Student,Admin,Mentor")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -163,13 +148,11 @@ namespace DoctoralManagement.API.Controllers
 
                 var result = await _mediator.Send(command);
 
-                // Check if download was successful
                 if (!result.Success)
                 {
                     return NotFound(new { message = result.Message });
                 }
 
-                // Return file for download
                 return File(result.FileBytes, result.ContentType, result.FileName);
             }
             catch (Exception ex)

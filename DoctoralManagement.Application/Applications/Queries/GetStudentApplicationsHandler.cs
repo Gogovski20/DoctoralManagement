@@ -22,7 +22,6 @@ namespace DoctoralManagement.Application.Applications.Queries
 
             foreach (var application in applications)
             {
-                // Get the program information separately to ensure it's loaded
                 var program = await _doctoralProgramRepository.GetByIdAsync(application.DoctoralProgramId);
 
                 responses.Add(new GetStudentApplicationsResponse

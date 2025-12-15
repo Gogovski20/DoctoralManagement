@@ -72,7 +72,7 @@ namespace DoctoralManagement.Infrastructure.Persistence
 
 
 
-                entity.ToTable("AspNetUsers"); // keeps original identity table name
+                entity.ToTable("AspNetUsers");
             });
         }
 
@@ -112,27 +112,6 @@ namespace DoctoralManagement.Infrastructure.Persistence
             });
         }
 
-        //private void ConfigureMentor(ModelBuilder modelBuilder)
-        //{
-        //    modelBuilder.Entity<Mentor>(entity =>
-        //    {
-        //        entity.HasKey(m => m.Id);
-        //        entity.Property(m => m.FullName).IsRequired().HasMaxLength(200);
-        //        entity.Property(m => m.Email).IsRequired().HasMaxLength(100);
-        //        entity.Property(m => m.Department).IsRequired().HasMaxLength(100);
-        //        entity.Property(m => m.Title).IsRequired().HasMaxLength(50);
-
-        //        entity.HasIndex(m => m.Email).IsUnique();
-
-        //        // Store ResearchAreas as JSON array in PostgreSQL
-        //        entity.Property(m => m.ResearchAreas)
-        //              .HasConversion(
-        //                  v => string.Join(',', v),
-        //                  v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList()
-        //              );
-        //    });
-        //}
-
         private void ConfigureMentor(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Mentor>(entity =>
@@ -145,7 +124,6 @@ namespace DoctoralManagement.Infrastructure.Persistence
 
                 entity.HasIndex(m => m.Email).IsUnique();
 
-                // Store ResearchAreas as JSON array in PostgreSQL - WITH VALUE COMPARER
                 entity.Property(m => m.ResearchAreas)
                       .HasConversion(
                           v => string.Join(',', v),
@@ -185,7 +163,6 @@ namespace DoctoralManagement.Infrastructure.Persistence
         {
             modelBuilder.Entity<ProgramMentor>(entity =>
             {
-                // Composite key
                 entity.HasKey(pm => new { pm.DoctoralProgramId, pm.MentorId });
 
                 entity.Property(pm => pm.Role).IsRequired().HasMaxLength(50);
@@ -237,8 +214,7 @@ namespace DoctoralManagement.Infrastructure.Persistence
             {
                 entity.HasKey(et => et.Id);
 
-                entity.ToTable("ECTSTrackings");
-                // One-to-one with Student is already configured in Student configuration
+                entity.ToTable("ECTSTrackings");              
             });
         }
 
@@ -283,7 +259,6 @@ namespace DoctoralManagement.Infrastructure.Persistence
                       .HasForeignKey(p => p.StudentId)
                       .OnDelete(DeleteBehavior.Cascade);
 
-                // ONE-TO-ONE with ActivityDocument
                 entity.HasOne(p => p.Document)
                       .WithOne(d => d.Publication)
                       .HasForeignKey<Publication>(p => p.ActivityDocumentId)
@@ -306,7 +281,6 @@ namespace DoctoralManagement.Infrastructure.Persistence
                       .HasForeignKey(m => m.StudentId)
                       .OnDelete(DeleteBehavior.Cascade);
 
-                // ONE-TO-ONE with ActivityDocument
                 entity.HasOne(m => m.Document)
                       .WithOne(d => d.Mobility)
                       .HasForeignKey<Mobility>(m => m.ActivityDocumentId)
@@ -491,7 +465,6 @@ namespace DoctoralManagement.Infrastructure.Persistence
                 entity.Property(d => d.ContentType).HasMaxLength(100);
                 entity.Property(d => d.ReviewComment).HasMaxLength(1000);
 
-                // ONE-TO-ONE relationships with activity entities
                 entity.HasOne(d => d.Publication)
                     .WithOne(p => p.Document)
                     .HasForeignKey<ActivityDocument>(d => d.PublicationId)

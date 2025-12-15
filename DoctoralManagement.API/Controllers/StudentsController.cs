@@ -51,23 +51,6 @@ namespace DoctoralManagement.API.Controllers
             return Ok(result);
         }
 
-        //// POST: api/Students
-        //// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        //[HttpPost]
-        //[Authorize(Roles = "Admin")]
-        //public async Task<ActionResult<CreateStudentResponse>> CreateStudent(CreateStudentCommand command)
-        //{
-        //    try
-        //    {
-        //        var result = await _mediator.Send(command);
-        //        return Ok(result);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //}
-
         [HttpPost]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<CreateStudentResponse>> CreateStudent(CreateStudentCommand command)
@@ -79,7 +62,6 @@ namespace DoctoralManagement.API.Controllers
             }
             catch (DbUpdateException dbEx)
             {
-                // Log the inner exception for database errors
                 var innerException = dbEx.InnerException?.Message ?? dbEx.Message;
                 return BadRequest(new { message = $"Database error: {innerException}", details = dbEx.Message });
             }

@@ -4,7 +4,7 @@ import { studentService } from '../../api/studentService';
 import { useAuth } from '../../context/AuthContext';
 
 export default function CreateDoctoralProjectPage() {
-  const [step, setStep] = useState(1); // 1: Basic Info, 2: Upload Proposal, 3: Review & Submit
+  const [step, setStep] = useState(1); 
   const [programs, setPrograms] = useState([]);
   const [mentors, setMentors] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -12,13 +12,11 @@ export default function CreateDoctoralProjectPage() {
   const [projectId, setProjectId] = useState(null);
   const [submitted, setSubmitted] = useState(false);
 
-  // Form state - Step 1
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [selectedProgram, setSelectedProgram] = useState('');
   const [selectedMentor, setSelectedMentor] = useState('');
 
-  // Form state - Step 2
   const [proposalFile, setProposalFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState(null);
@@ -168,7 +166,6 @@ export default function CreateDoctoralProjectPage() {
       if (result.id) {
         setSubmitted(true);
         alert('Doctoral project submitted successfully!');
-        // Redirect to projects page after a moment
         setTimeout(() => {
           navigate('/doctoral-project');
         }, 1500);

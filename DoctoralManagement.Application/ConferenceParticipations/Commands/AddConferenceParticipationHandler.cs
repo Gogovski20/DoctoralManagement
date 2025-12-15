@@ -62,18 +62,6 @@ namespace DoctoralManagement.Application.ConferenceParticipations.Commands
 
             var created = await _conferenceParticipationRepository.AddAsync(participation);
 
-            //var ectsTracking = await _ectsTrackingRepository.GetByStudentIdAsync(student.Id);
-            //if (ectsTracking != null)
-            //{
-            //    ectsTracking.TeachingActivities += ectsPoints;
-            //    if (ectsTracking.TeachingActivities > 18)
-            //    {
-            //        ectsTracking.TeachingActivities = 18;
-            //    }
-            //    await _ectsTrackingRepository.UpdateAsync(ectsTracking);
-            //    await _ectsProgressService.UpdateStudentSemesterAsync(request.StudentId, ectsTracking.TotalECTS);
-            //}
-
             return new AddConferenceParticipationResponse 
             {
                 Id = created.Id,

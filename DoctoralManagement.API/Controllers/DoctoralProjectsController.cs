@@ -1,7 +1,5 @@
 ﻿using DoctoralManagement.Application.ActivityDocuments;
-using DoctoralManagement.Application.Applications.Queries;
 using DoctoralManagement.Application.Common;
-using DoctoralManagement.Application.ConferenceParticipations.Queries;
 using DoctoralManagement.Application.DoctoralProjects.Commands;
 using DoctoralManagement.Application.DoctoralProjects.Queries;
 using DoctoralManagement.Application.Dtos;
@@ -155,21 +153,6 @@ namespace DoctoralManagement.API.Controllers
             return Ok(result);
         }
 
-        //[HttpGet("{projectId}/download")]
-        //[Authorize(Roles = "Student,Admin")]
-        //public async Task<IActionResult> DownloadDocument(int projectId, int documentId)
-        //{
-        //    var command = new DownloadActivityDocumentQuery 
-        //    { 
-        //        DocumentId = documentId,
-        //        ActivityId = projectId,
-        //        ActivityType = ActivityType.DoctoralProject
-        //    };
-        //    var result = await _mediator.Send(command);
-
-        //    return File(result.FileBytes, result.ContentType, result.FileName);
-        //}
-
         [HttpGet("{projectId}/download")]
         [Authorize(Roles = "Student,Admin,Mentor,Secretary")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -189,13 +172,11 @@ namespace DoctoralManagement.API.Controllers
 
                 var result = await _mediator.Send(command);
 
-                // Check if download was successful
                 if (!result.Success)
                 {
                     return NotFound(new { message = result.Message });
                 }
 
-                // Return file for download
                 return File(result.FileBytes, result.ContentType, result.FileName);
             }
             catch (Exception ex)

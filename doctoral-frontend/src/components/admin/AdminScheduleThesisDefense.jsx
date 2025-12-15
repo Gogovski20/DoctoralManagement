@@ -18,7 +18,6 @@ export default function AdminScheduleThesisDefense() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  /* ---------------- LOAD DATA ---------------- */
   useEffect(() => {
     loadData();
   }, []);
@@ -83,7 +82,6 @@ export default function AdminScheduleThesisDefense() {
     }
   };
 
-  /* ---------------- UI ---------------- */
   return (
     <div style={{ padding: "2rem", maxWidth: "700px", margin: "0 auto" }}>
       <h1 style={{ fontSize: "1.8rem", fontWeight: "bold" }}>
