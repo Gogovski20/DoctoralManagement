@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using DoctoralManagement.Application.Dtos;
+using MediatR;
 
 namespace DoctoralManagement.Application.Publications.Queries
 {
@@ -16,5 +17,6 @@ namespace DoctoralManagement.Application.Publications.Queries
         public bool IsIndexedInScopus { get; set; }
         public bool IsIndexedInThomsonReuters { get; set; }
         public int EctsPoints { get; set; }
+        public DocumentDto? Document { get; set; }
     }
 }

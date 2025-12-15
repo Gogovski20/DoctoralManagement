@@ -56,12 +56,14 @@ namespace DoctoralManagement.Application.Publications.Commands
                 throw new DoctoralManagementException("Student is not accepted to a doctoral program", HttpStatusCode.BadRequest);
             }
 
+            var dateUtc = DateTime.SpecifyKind(request.PublishedOn, DateTimeKind.Utc);
+
             var publication = new Publication
             {
                 StudentId = request.StudentId,
                 Title = request.Title,
                 Journal = request.Journal,
-                PublishedOn = request.PublishedOn,
+                PublishedOn = dateUtc,
                 Doi = request.Doi,
                 IsIndexedInScopus = request.IsIndexedInScopus,
                 IsIndexedInThomsonReuters = request.IsIndexedInThomsonReuters,

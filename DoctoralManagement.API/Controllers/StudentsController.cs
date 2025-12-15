@@ -110,5 +110,18 @@ namespace DoctoralManagement.API.Controllers
             await _mediator.Send(command);
             return NoContent();
         }
+
+        [HttpGet("search")]
+        [Authorize(Roles = "Admin, Mentor, Secretary")]
+        public async Task<IActionResult> SearchStudents([FromQuery] string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+                return BadRequest("Search term is required");
+
+            var searchQuery = new SearchStudentsQuery { SearchTerm = query };
+            var results = await _mediator.Send(searchQuery);
+
+            return Ok(results);
+        }
     }
 }

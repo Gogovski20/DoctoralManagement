@@ -16,6 +16,7 @@ namespace DoctoralManagement.Application.ConferenceParticipations.Queries
         public DateTime Date { get; set; }
         public string Role { get; set; } = string.Empty;
         public bool IsInternational { get; set; }
+        public bool IsApproved { get; set; }
         public ActivityDocumentDto? Document { get; set; }   
     }
 }

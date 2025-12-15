@@ -1,8 +1,11 @@
-﻿using DoctoralManagement.Application.ConferenceParticipations.Commands;
+﻿using DoctoralManagement.Application.Common;
+using DoctoralManagement.Application.ConferenceParticipations.Commands;
+using DoctoralManagement.Application.DoctoralProjects.Queries;
 using DoctoralManagement.Application.Dtos;
 using DoctoralManagement.Application.ThesisDefenseReviews;
 using DoctoralManagement.Application.ThesisDefenses;
 using DoctoralManagement.Domain.Interfaces;
+using DoctoralManagement.Infrastructure.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,11 +18,15 @@ namespace DoctoralManagement.API.Controllers
     {
         private readonly IMediator _mediator;
         private readonly ICommitteeReviewRepository _committeeReviewRepository;
+        private readonly ICurrentUserService _currentUserService;
+        private readonly IStudentRepository _studentRepository;
 
-        public ThesisDefensesController(IMediator mediator, ICommitteeReviewRepository committeeReviewRepository)
+        public ThesisDefensesController(IMediator mediator, ICommitteeReviewRepository committeeReviewRepository, ICurrentUserService currentUserService, IStudentRepository studentRepository)
         {
             _mediator = mediator;
             _committeeReviewRepository = committeeReviewRepository;
+            _currentUserService = currentUserService;
+            _studentRepository = studentRepository;
         }
 
         [HttpGet("{id}")]
@@ -27,6 +34,32 @@ namespace DoctoralManagement.API.Controllers
         public async Task<ActionResult<GetDefenseByIdResponse>> GetDefenseById(int defenseId)
         {
             var result = await _mediator.Send(new GetDefenseByIdQuery { DefenseId = defenseId });
+            return Ok(result);
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Admin,Secretary")]
+        public async Task<ActionResult<GetAllThesisDefensesResponse>> GetAllDefenses()
+        {
+            var result = await _mediator.Send(new GetAllThesisDefensesQuery());
+            return Ok(result);
+        }
+
+        [HttpGet("my")]
+        [Authorize(Roles = "Student")]
+        public async Task<ActionResult<IEnumerable<GetMyThesisDefensesResponse>>> GetMyDefenses()
+        {
+            var userId = _currentUserService.UserId;
+            var student = await _studentRepository.GetByUserIdAsync(userId);
+
+            if (student == null)
+            {
+                return NotFound("Student not found");
+            }
+
+            var query = new GetMyThesisDefensesQuery { StudentId = student.Id };
+            var result = await _mediator.Send(query);
+
             return Ok(result);
         }
 
@@ -111,7 +144,5 @@ namespace DoctoralManagement.API.Controllers
             var result = await _mediator.Send(command);
             return Ok(result);
         }
-
-
     }
 }

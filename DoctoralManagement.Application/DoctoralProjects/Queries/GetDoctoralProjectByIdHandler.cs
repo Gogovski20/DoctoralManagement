@@ -77,7 +77,9 @@ namespace DoctoralManagement.Application.DoctoralProjects.Queries
                 MentorName = project.Mentor?.FullName ?? "N/A",
                 CreatedAt = project.CreatedAt,
                 SubmittedAt = project.SubmittedAt,
-                Documents = documents
+                Documents = documents,
+                HasThesisDocument = project.Documents?.Any(d =>
+                d.DocumentType == Domain.Entities.ActivityDocumentType.DefenseThesisDocument) ?? false
             };
         }
     }

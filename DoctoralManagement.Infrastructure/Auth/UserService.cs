@@ -1,8 +1,6 @@
 ﻿using DoctoralManagement.Application.Common;
 using DoctoralManagement.Application.Dtos;
-using DoctoralManagement.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 
 namespace DoctoralManagement.Infrastructure.Auth
 {

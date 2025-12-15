@@ -46,7 +46,7 @@ export default function ActivitiesPage() {
             </p>
           </div>
           <Link
-            to="/"
+            to="/dashboard"
             style={{
               textDecoration: 'none',
               backgroundColor: '#e5e7eb',
@@ -71,12 +71,12 @@ export default function ActivitiesPage() {
             }}
           >
             {activities.map((activity) => {
-              // Only conferences goes to separate page, others use local state
-              if (activity.key === 'conferences') {
+              // Publications goes to separate page
+              if (activity.key === 'publications') {
                 return (
-                  <Link 
-                    key={activity.key} 
-                    to="/activities/conferences" 
+                  <Link
+                    key={activity.key}
+                    to="/activities/publications"
                     style={{ textDecoration: 'none', height: '100%' }}
                   >
                     <div
@@ -102,53 +102,93 @@ export default function ActivitiesPage() {
                       <h3 style={{ fontWeight: 600, margin: 0, fontSize: '1.1rem', marginBottom: '0.5rem' }}>
                         {activity.title}
                       </h3>
-                      <p style={{ fontSize: '0.9rem', opacity: 0.9, margin: 0 }}>{activity.description}</p>
+                      <p style={{ fontSize: '0.9rem', opacity: 0.9, margin: 0 }}>
+                        {activity.description}
+                      </p>
                     </div>
                   </Link>
                 );
               }
 
-              // Other activities use local state (unchanged)
-              return (
-                <button
-                  key={activity.key}
-                  onClick={() => setSelectedActivity(activity)}
-                  style={{
-                    border: 'none',
-                    padding: 0,
-                    background: 'transparent',
-                    textAlign: 'left',
-                    cursor: 'pointer',
-                    height: '100%',
-                  }}
-                >
-                  <div
-                    style={{
-                      background: activity.gradient,
-                      color: 'white',
-                      padding: '1.5rem',
-                      borderRadius: '0.75rem',
-                      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
-                      transition: 'all 0.2s',
-                      height: '100%',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.2)';
-                      e.currentTarget.style.transform = 'translateY(-2px)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1)';
-                      e.currentTarget.style.transform = 'translateY(0)';
-                    }}
+              // Mobilities goes to separate page
+              if (activity.key === 'mobilities') {
+                return (
+                  <Link
+                    key={activity.key}
+                    to="/activities/mobilities"
+                    style={{ textDecoration: 'none', height: '100%' }}
                   >
-                    <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>{activity.icon}</div>
-                    <h3 style={{ fontWeight: 600, margin: 0, fontSize: '1.1rem', marginBottom: '0.5rem' }}>
-                      {activity.title}
-                    </h3>
-                    <p style={{ fontSize: '0.9rem', opacity: 0.9, margin: 0 }}>{activity.description}</p>
-                  </div>
-                </button>
-              );
+                    <div
+                      style={{
+                        background: activity.gradient,
+                        color: 'white',
+                        padding: '1.5rem',
+                        borderRadius: '0.75rem',
+                        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                        transition: 'all 0.2s',
+                        height: '100%',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.2)';
+                        e.currentTarget.style.transform = 'translateY(-2px)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1)';
+                        e.currentTarget.style.transform = 'translateY(0)';
+                      }}
+                    >
+                      <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>{activity.icon}</div>
+                      <h3 style={{ fontWeight: 600, margin: 0, fontSize: '1.1rem', marginBottom: '0.5rem' }}>
+                        {activity.title}
+                      </h3>
+                      <p style={{ fontSize: '0.9rem', opacity: 0.9, margin: 0 }}>
+                        {activity.description}
+                      </p>
+                    </div>
+                  </Link>
+                );
+              }
+
+              // Conferences goes to separate page
+              if (activity.key === 'conferences') {
+                return (
+                  <Link
+                    key={activity.key}
+                    to="/activities/conferences"
+                    style={{ textDecoration: 'none', height: '100%' }}
+                  >
+                    <div
+                      style={{
+                        background: activity.gradient,
+                        color: 'white',
+                        padding: '1.5rem',
+                        borderRadius: '0.75rem',
+                        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                        transition: 'all 0.2s',
+                        height: '100%',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.2)';
+                        e.currentTarget.style.transform = 'translateY(-2px)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1)';
+                        e.currentTarget.style.transform = 'translateY(0)';
+                      }}
+                    >
+                      <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>{activity.icon}</div>
+                      <h3 style={{ fontWeight: 600, margin: 0, fontSize: '1.1rem', marginBottom: '0.5rem' }}>
+                        {activity.title}
+                      </h3>
+                      <p style={{ fontSize: '0.9rem', opacity: 0.9, margin: 0 }}>
+                        {activity.description}
+                      </p>
+                    </div>
+                  </Link>
+                );
+              }
+
+              return null;
             })}
           </div>
         )}

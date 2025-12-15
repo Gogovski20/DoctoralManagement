@@ -62,6 +62,15 @@ namespace DoctoralManagement.Infrastructure.Repositories
                 .ToListAsync();
         }
 
+        public async Task<IEnumerable<CourseEnrollment>> GetCourseEnrollments()
+        {
+            return await _context.CourseEnrollments
+                .Include(e => e.Course)
+                .Include(e => e.Student)
+                .AsNoTracking()
+                .ToListAsync();
+        }
+
         public async Task<CourseEnrollment?> GetStudentCourseEnrollmentAsync(int studentId, int courseId)
         {
             return await _context.CourseEnrollments

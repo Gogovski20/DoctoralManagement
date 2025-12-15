@@ -33,6 +33,15 @@ namespace DoctoralManagement.API.Controllers
             return Ok(result);
         }
 
+        [HttpGet]
+        [Authorize(Roles = "Admin,Mentor")]
+        public async Task<IActionResult> GetAllConferences()
+        {
+            var query = new GetAllConferenceParticipationsQuery();
+            var result = await _mediator.Send(query);
+            return Ok(result);
+        }
+
         [HttpGet("student/{studentId}")]
         [Authorize(Roles = "Student,Admin,Mentor")]
         public async Task<IActionResult> GetStudentConferences(int studentId)
@@ -69,7 +78,7 @@ namespace DoctoralManagement.API.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize(Roles = "Student,Admin")]
+        [Authorize(Roles = "Student")]
         public async Task<IActionResult> UpdateConferenceParticipation(int id, 
             [FromBody] UpdateConferenceParticipationCommand command)
         {

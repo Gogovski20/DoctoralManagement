@@ -44,9 +44,9 @@ namespace DoctoralManagement.Application.Applications.Commands
                 throw new DoctoralManagementException("You are not authorized to update this application", HttpStatusCode.Forbidden);
             }
 
-            if (application.ApplicationStatus != Domain.Entities.ApplicationStatus.Draft)
+            if (application.ApplicationStatus != Domain.Entities.ApplicationStatus.Draft && application.ApplicationStatus != Domain.Entities.ApplicationStatus.Submitted)
             {
-                throw new DoctoralManagementException("Only applications in 'Draft' status can be updated.", HttpStatusCode.BadRequest);
+                throw new DoctoralManagementException("Only applications in 'Draft' or 'Submitted' status can be updated.", HttpStatusCode.BadRequest);
             }
 
             application.PrefferedMentorId = request.PreferredMentorId;

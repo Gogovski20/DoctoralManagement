@@ -1,4 +1,5 @@
 ﻿using DoctoralManagement.Application.Common;
+using DoctoralManagement.Application.Dtos;
 using DoctoralManagement.Domain.Exceptions;
 using DoctoralManagement.Domain.Interfaces;
 using MediatR;
@@ -43,7 +44,12 @@ namespace DoctoralManagement.Application.Mobilities.Queries
                 Institution = m.Institution,
                 Country = m.Country,
                 StartDate = m.StartDate,
-                EndDate = m.EndDate
+                EndDate = m.EndDate,
+                Document = m.Document == null ? null : new DocumentDto
+                {
+                    Id = m.Document.Id,
+                    FileName = m.Document.FileName
+                }
             }).ToList();
         }
     }

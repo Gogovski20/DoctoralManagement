@@ -1,4 +1,5 @@
 ﻿using DoctoralManagement.Application.Common;
+using DoctoralManagement.Application.Dtos;
 using DoctoralManagement.Domain.Exceptions;
 using DoctoralManagement.Domain.Interfaces;
 using MediatR;
@@ -43,7 +44,12 @@ namespace DoctoralManagement.Application.ConferenceParticipations.Queries
                 ConferenceName = c.ConferenceName,
                 Date = c.Date,
                 Role = c.Role,
-                IsInternational = c.IsInternational
+                IsInternational = c.IsInternational,
+                Document = c.Document == null ? null : new DocumentDto
+                {
+                    Id = c.Document.Id,
+                    FileName = c.Document.FileName
+                }
             }).ToList();
         }
     }

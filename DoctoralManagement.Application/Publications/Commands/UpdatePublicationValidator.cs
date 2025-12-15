@@ -22,10 +22,6 @@ namespace DoctoralManagement.Application.Publications.Commands
 
             RuleFor(x => x.Doi)
                 .MaximumLength(200);
-
-            RuleFor(x => x.EctsCredits)
-                .GreaterThanOrEqualTo(0)
-                .LessThanOrEqualTo(30);
         }
     }
 }

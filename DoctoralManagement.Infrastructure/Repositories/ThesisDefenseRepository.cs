@@ -27,6 +27,14 @@ namespace DoctoralManagement.Infrastructure.Repositories
                 .AnyAsync(d => d.DoctoralProjectId == projectId);
         }
 
+        public async Task<IEnumerable<ThesisDefense>> GetAllAsync()
+        {
+            return await _context.ThesisDefenses
+                .Include(t => t.DoctoralProject)
+                    .ThenInclude(p => p.Student)
+                .ToListAsync();
+        }
+
         public async Task<ThesisDefense?> GetByIdAsync(int id)
         {
             return await _context.ThesisDefenses
@@ -49,6 +57,15 @@ namespace DoctoralManagement.Infrastructure.Repositories
                 .ThenInclude(p => p.Student)
                 .Where(d => d.Status == status)
                 .OrderBy(d => d.ScheduledAt)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<ThesisDefense>> GetStudentDefenses(int studentId)
+        {
+            return await _context.ThesisDefenses
+                .Include(d => d.DoctoralProject)
+                    .ThenInclude(p => p.Student)
+                .Where(d => d.DoctoralProject.StudentId == studentId)
                 .ToListAsync();
         }
 

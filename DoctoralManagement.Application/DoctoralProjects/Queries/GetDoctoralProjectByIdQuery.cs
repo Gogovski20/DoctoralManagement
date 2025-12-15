@@ -19,5 +19,6 @@ namespace DoctoralManagement.Application.DoctoralProjects.Queries
         public DateTime CreatedAt { get; set; }
         public DateTime? SubmittedAt { get; set; }
         public List<ActivityDocumentDto> Documents { get; set; } = new List<ActivityDocumentDto>();
+        public bool HasThesisDocument { get; set; } 
     }
 }

@@ -56,13 +56,16 @@ namespace DoctoralManagement.Application.Mobilities.Commands
                 throw new DoctoralManagementException("Student is not accepted to a doctoral program", HttpStatusCode.BadRequest);
             }
 
+            var startDateUtc = DateTime.SpecifyKind(request.StartDate, DateTimeKind.Utc);
+            var endDateUtc = DateTime.SpecifyKind(request.EndDate, DateTimeKind.Utc);
+
             var mobility = new Mobility
             {
                 StudentId = request.StudentId,
                 Institution = request.Institution,
                 Country = request.Country,
-                StartDate = request.StartDate,
-                EndDate = request.EndDate,
+                StartDate = startDateUtc,
+                EndDate = endDateUtc,
             };
 
             var created = await _mobilityRepository.AddAsync(mobility);

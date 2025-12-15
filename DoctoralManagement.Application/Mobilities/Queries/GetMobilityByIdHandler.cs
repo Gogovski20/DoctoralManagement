@@ -74,6 +74,7 @@ namespace DoctoralManagement.Application.Mobilities.Queries
                 Country = mobility.Country,
                 StartDate = mobility.StartDate,
                 EndDate = mobility.EndDate,
+                IsApproved = mobility.IsApproved,
                 Document = documentDto
             };
         }

@@ -30,6 +30,11 @@ namespace DoctoralManagement.Application.Mobilities.Commands
             if (mobility == null)
                 throw new DoctoralManagementException($"Mobility with ID {request.Id} not found.", HttpStatusCode.NotFound);
 
+            if (mobility.IsApproved == true)
+            {
+                throw new DoctoralManagementException("You can't delete approved mobilities.", HttpStatusCode.BadRequest);
+            }
+
             var currentUserId = _currentUserService.UserId;
 
             var linkedStudentId = await _authService.GetLinkedStudentIdAsync(currentUserId);
@@ -39,22 +44,7 @@ namespace DoctoralManagement.Application.Mobilities.Commands
                 throw new DoctoralManagementException("You can only delete mobility for your own account.", HttpStatusCode.Forbidden);
             }
 
-            int ectsPoints = mobility.EctsPoints;
-            int studentId = mobility.StudentId;
-
             await _mobilityRepository.DeleteAsync(request.Id);
-
-            // Update ECTS tracking
-            var ectsTracking = await _ectsRepository.GetByStudentIdAsync(mobility.StudentId);
-            if (ectsTracking != null)
-            {
-                ectsTracking.InternationalMobility -= ectsPoints;
-                if (ectsTracking.InternationalMobility < 0)
-                    ectsTracking.InternationalMobility = 0;
-
-                await _ectsRepository.UpdateAsync(ectsTracking);
-                await _ectsProgressService.UpdateStudentSemesterAsync(studentId, ectsTracking.TotalECTS);
-            }
 
             return true;
         }

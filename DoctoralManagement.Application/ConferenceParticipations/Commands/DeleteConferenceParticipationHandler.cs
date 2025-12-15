@@ -29,6 +29,11 @@ namespace DoctoralManagement.Application.ConferenceParticipations.Commands
             var conference = await _conferenceParticipationRepository.GetByIdAsync(request.Id)
                 ?? throw new Exception($"Conference with id {request.Id} not found");
 
+            if (conference.IsApproved == true)
+            {
+                throw new DoctoralManagementException("You can't delete approved conferences.", HttpStatusCode.BadRequest);
+            }
+
             var currentUserId = _currentUserService.UserId;
 
             var linkedStudentId = await _authService.GetLinkedStudentIdAsync(currentUserId);
@@ -38,22 +43,8 @@ namespace DoctoralManagement.Application.ConferenceParticipations.Commands
                 throw new DoctoralManagementException("You can only delete conference participation for your own account.", HttpStatusCode.Forbidden);
             }
 
-            int ectsPoints = conference.EctsAwarded;
-            int studentId = conference.StudentId;
-
             await _conferenceParticipationRepository.DeleteAsync(conference.Id);
 
-            var ectsTracking = await _ectsTrackingRepository.GetByStudentIdAsync(conference.StudentId);
-            if (ectsTracking != null) 
-            {
-                ectsTracking.TeachingActivities -= ectsPoints;
-                if (ectsTracking.TeachingActivities < 0)
-                {
-                    ectsTracking.TeachingActivities = 0;
-                }
-                await _ectsTrackingRepository.UpdateAsync(ectsTracking);
-                await _ectsProgressService.UpdateStudentSemesterAsync(studentId, ectsTracking.TotalECTS); 
-            }
             return true;
         }
     }

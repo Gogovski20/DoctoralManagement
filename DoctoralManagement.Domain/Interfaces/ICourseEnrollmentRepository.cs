@@ -12,5 +12,6 @@ namespace DoctoralManagement.Domain.Interfaces
         Task UpdateAsync(CourseEnrollment enrollment);
         Task DeleteAsync(int id);
         Task<bool> ExistsAsync(int id);
+        Task<IEnumerable<CourseEnrollment>> GetCourseEnrollments();
     }
 }

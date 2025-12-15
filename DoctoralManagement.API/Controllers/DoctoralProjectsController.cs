@@ -217,5 +217,12 @@ namespace DoctoralManagement.API.Controllers
             var result = await _mediator.Send(command);
             return Ok(result);
         }
+
+        [HttpGet("defense-eligible")]
+        [Authorize(Roles = "Admin,Mentor")]
+        public async Task<IActionResult> GetDefenseEligibleProjects()
+        {
+            return Ok(await _mediator.Send(new GetDefenseEligibleProjectsQuery()));
+        }
     }
 }

@@ -16,6 +16,6 @@ namespace DoctoralManagement.Application.Courses.Queries
         public int EctsCredits { get; set; }
         public bool Completed { get; set; }
         public decimal? Grade { get; set; }
-        public System.DateTime EnrolledDate { get; set; }
+        public DateTime EnrolledDate { get; set; }
     }
 }

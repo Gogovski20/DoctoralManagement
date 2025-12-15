@@ -45,28 +45,15 @@ namespace DoctoralManagement.Application.ConferenceParticipations.Commands
                     HttpStatusCode.BadRequest);
             }
 
-            int oldEcts = conference.EctsAwarded;
+            var dateUtc = DateTime.SpecifyKind(request.Date, DateTimeKind.Utc);
 
             conference.ConferenceName = request.ConferenceName;
-            conference.Date = request.Date;
+            conference.Date = dateUtc;
             conference.Role = request.Role;
             conference.IsInternational = request.IsInternational;
 
-            conference.EctsAwarded = request.EctsCredits;
-
             await _conferenceParticipationRepository.UpdateAsync(conference);
 
-            var ectsTracking = await _ectsTrackingRepository.GetByIdAsync(conference.StudentId);
-            if (ectsTracking != null) 
-            {
-                ectsTracking.TeachingActivities = ectsTracking.TeachingActivities - oldEcts + conference.EctsAwarded;
-                if (ectsTracking.TeachingActivities > 18) 
-                {
-                    ectsTracking.TeachingActivities = 18;
-                }
-                await _ectsTrackingRepository.UpdateAsync(ectsTracking);
-                await _ectsProgressService.UpdateStudentSemesterAsync(conference.StudentId, ectsTracking.TotalECTS);
-            }
             return new UpdateConferenceParticipationResponse { };
         }
     }

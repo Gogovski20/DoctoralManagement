@@ -15,13 +15,9 @@ export default function DoctoralProjectPage() {
     try {
       setLoading(true);
       setError('');
-      console.log('Fetching projects:');
-      // Use /my endpoint - backend resolves studentId from JWT
       const data = await studentService.getMyDoctoralProjects();
-      console.log('Projects data:', data);
       setProjects(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error('Failed to fetch projects:', err);
       setError(err.response?.data?.message || 'Failed to load doctoral projects');
     } finally {
       setLoading(false);
@@ -30,24 +26,18 @@ export default function DoctoralProjectPage() {
 
   const getStatusColor = (status) => {
     if (!status) return '#6b7280';
-    const statusStr = status.toString().toLowerCase();
-    switch (statusStr) {
-      case 'draft':
-        return '#6b7280';
-      case 'submitted':
-        return '#3b82f6';
+    const s = status.toString().toLowerCase();
+    switch (s) {
+      case 'draft': return '#6b7280';
+      case 'submitted': return '#3b82f6';
       case 'underreview':
-      case 'under_review':
-        return '#f59e0b';
-      case 'approved':
-        return '#10b981';
-      case 'changesrequested':
-      case 'changes_requested':
-        return '#f97316';
-      case 'rejected':
-        return '#ef4444';
-      default:
-        return '#6b7280';
+      case 'under_review': return '#f59e0b';
+      case 'approved': return '#10b981';
+      case 'completed': return '#16a34a';
+      case 'defensechangesrequired':
+      case 'defense_changes_required': return '#f97316';
+      case 'rejected': return '#ef4444';
+      default: return '#6b7280';
     }
   };
 
@@ -56,20 +46,26 @@ export default function DoctoralProjectPage() {
     return status
       .toString()
       .replace(/([A-Z])/g, ' $1')
+      .replace(/_/g, ' ')
       .trim()
       .replace(/\b\w/g, l => l.toUpperCase());
+  };
+
+  const canUploadThesis = (status) => {
+    if (!status) return false;
+    const s = status.toString().toLowerCase();
+    return s === 'completed' || s === 'defensechangesrequired' || s === 'defense_changes_required';
   };
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('en-US', {
+      return new Date(dateString).toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'short',
         day: 'numeric'
       });
-    } catch (e) {
+    } catch {
       return 'Invalid Date';
     }
   };
@@ -77,16 +73,17 @@ export default function DoctoralProjectPage() {
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb', padding: '2rem' }}>
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+
         {/* Header */}
         <div style={{ marginBottom: '2rem' }}>
-          <Link to="/dashboard" style={{ color: '#0d9488', marginBottom: '1rem', display: 'inline-block' }}>
+          <Link to="/dashboard" style={{ color: '#0d9488' }}>
             ← Back to Dashboard
           </Link>
-          <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#1f2937', margin: '0.5rem 0 0 0' }}>
+          <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#1f2937', marginTop: '0.5rem' }}>
             Doctoral Projects
           </h1>
-          <p style={{ color: '#6b7280', marginTop: '0.5rem' }}>
-            Create and manage your doctoral research project
+          <p style={{ color: '#6b7280' }}>
+            Manage your doctoral research projects
           </p>
         </div>
 
@@ -103,18 +100,23 @@ export default function DoctoralProjectPage() {
           </div>
         )}
 
-        {/* Projects Section */}
+        {/* Projects */}
         <div style={{
           backgroundColor: 'white',
           borderRadius: '0.75rem',
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
           border: '1px solid #e5e7eb',
-          padding: '1.5rem',
+          padding: '1.5rem'
         }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1f2937', margin: 0 }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '1.5rem'
+          }}>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>
               Your Projects ({projects.length})
             </h2>
+
             {!loading && (
               <Link
                 to="/doctoral-project/new"
@@ -133,126 +135,102 @@ export default function DoctoralProjectPage() {
           </div>
 
           {loading ? (
-            <div style={{ textAlign: 'center', color: '#6b7280', padding: '3rem' }}>
-              <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>⏳</div>
-              <p>Loading your projects...</p>
+            <div style={{ textAlign: 'center', padding: '3rem', color: '#6b7280' }}>
+              ⏳ Loading projects...
             </div>
           ) : projects.length === 0 ? (
-            <div style={{ textAlign: 'center', color: '#6b7280', padding: '3rem' }}>
-              <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔬</div>
-              <p style={{ marginBottom: '1rem' }}>No doctoral projects yet.</p>
-              <Link to="/doctoral-project/new" style={{
-                backgroundColor: '#0d9488',
-                color: 'white',
-                padding: '0.75rem 1.5rem',
-                borderRadius: '0.5rem',
-                textDecoration: 'none',
-                fontWeight: '500',
-                display: 'inline-block',
-              }}>
+            <div style={{ textAlign: 'center', padding: '3rem', color: '#6b7280' }}>
+              <p>No doctoral projects yet.</p>
+              <Link
+                to="/doctoral-project/new"
+                style={{
+                  backgroundColor: '#0d9488',
+                  color: 'white',
+                  padding: '0.75rem 1.5rem',
+                  borderRadius: '0.5rem',
+                  textDecoration: 'none',
+                }}
+              >
                 Create your first project
               </Link>
             </div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '1.5rem' }}>
-              {projects.map((project) => (
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
+              gap: '1.5rem'
+            }}>
+              {projects.map(project => (
                 <div
                   key={project.id}
                   style={{
                     border: '1px solid #e5e7eb',
                     borderRadius: '0.75rem',
                     padding: '1.5rem',
-                    backgroundColor: 'white',
-                    transition: 'all 0.2s',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1)';
-                    e.currentTarget.style.borderColor = '#0d9488';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.boxShadow = 'none';
-                    e.currentTarget.style.borderColor = '#e5e7eb';
+                    transition: '0.2s'
                   }}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <div>
-                      <h3 style={{ fontWeight: '600', color: '#1f2937', margin: '0 0 0.5rem 0', fontSize: '1.125rem' }}>
-                        {project.title}
-                      </h3>
-                      <p style={{ color: '#6b7280', fontSize: '0.875rem', margin: 0 }}>
+                      <h3 style={{ fontWeight: '600' }}>{project.title}</h3>
+                      <p style={{ fontSize: '0.875rem', color: '#6b7280' }}>
                         {project.researchArea}
                       </p>
                     </div>
+
                     <span style={{
-                      display: 'inline-block',
                       padding: '0.25rem 0.75rem',
                       borderRadius: '9999px',
                       backgroundColor: getStatusColor(project.status) + '20',
                       color: getStatusColor(project.status),
-                      fontWeight: '500',
                       fontSize: '0.75rem',
-                      whiteSpace: 'nowrap',
+                      fontWeight: '500'
                     }}>
                       {getStatusLabel(project.status)}
                     </span>
                   </div>
 
-                  <div style={{ marginBottom: '1rem' }}>
-                    <p style={{ color: '#6b7280', fontSize: '0.875rem', margin: '0 0 0.25rem 0' }}>
-                      Mentor: <span style={{ fontWeight: '500', color: '#1f2937' }}>{project.mentorName || 'N/A'}</span>
+                  <div style={{ marginTop: '0.75rem' }}>
+                    <p style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+                      Mentor: <strong>{project.mentorName || 'N/A'}</strong>
                     </p>
-                    <p style={{ color: '#6b7280', fontSize: '0.875rem', margin: 0 }}>
-                      Created: <span style={{ fontWeight: '500', color: '#1f2937' }}>{formatDate(project.createdAt)}</span>
+                    <p style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+                      Created: <strong>{formatDate(project.createdAt)}</strong>
                     </p>
                   </div>
 
-                  {project.proposalDocumentPath && (
-                    <div style={{
-                      backgroundColor: '#f0fdf4',
-                      border: '1px solid #dcfce7',
-                      padding: '0.75rem',
-                      borderRadius: '0.5rem',
-                      marginBottom: '1rem',
-                    }}>
-                      <p style={{ fontSize: '0.75rem', color: '#166534', margin: 0 }}>
-                        ✓ Proposal document uploaded
-                      </p>
-                    </div>
-                  )}
-
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
                     <Link
                       to={`/doctoral-project/${project.id}`}
                       style={{
                         flex: 1,
                         backgroundColor: '#0d9488',
                         color: 'white',
-                        padding: '0.5rem 1rem',
+                        padding: '0.5rem',
                         borderRadius: '0.5rem',
-                        textDecoration: 'none',
-                        fontWeight: '500',
-                        fontSize: '0.875rem',
                         textAlign: 'center',
+                        textDecoration: 'none',
+                        fontSize: '0.875rem',
                       }}
                     >
                       View
                     </Link>
-                    {(project.status === 'Draft' || project.status === 'ChangesRequested') && (
+
+                    {canUploadThesis(project.status) && (
                       <Link
-                        to={`/doctoral-project/${project.id}/upload`}
+                        to={`/doctoral-project/${project.id}/upload-thesis`}
                         style={{
                           flex: 1,
-                          backgroundColor: '#3b82f6',
+                          backgroundColor: '#7c3aed',
                           color: 'white',
-                          padding: '0.5rem 1rem',
+                          padding: '0.5rem',
                           borderRadius: '0.5rem',
-                          textDecoration: 'none',
-                          fontWeight: '500',
-                          fontSize: '0.875rem',
                           textAlign: 'center',
+                          textDecoration: 'none',
+                          fontSize: '0.875rem',
                         }}
                       >
-                        Upload
+                        Upload Thesis
                       </Link>
                     )}
                   </div>

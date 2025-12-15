@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using DoctoralManagement.Application.Dtos;
+using MediatR;
 
 namespace DoctoralManagement.Application.Mobilities.Queries
 {
@@ -14,5 +15,6 @@ namespace DoctoralManagement.Application.Mobilities.Queries
         public string Country { get; set; } = string.Empty;
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
+        public DocumentDto? Document { get; set; }
     }
 }

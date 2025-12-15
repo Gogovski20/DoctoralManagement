@@ -1,5 +1,6 @@
 ﻿using DoctoralManagement.Application.ActivityDocuments;
 using DoctoralManagement.Application.Common;
+using DoctoralManagement.Application.ConferenceParticipations.Queries;
 using DoctoralManagement.Application.Dtos;
 using DoctoralManagement.Application.Publications.Commands;
 using DoctoralManagement.Application.Publications.Queries;
@@ -30,6 +31,15 @@ namespace DoctoralManagement.API.Controllers
         public async Task<IActionResult> AddPublication([FromBody] CreatePublicationCommand command)
         {
             var result = await _mediator.Send(command);
+            return Ok(result);
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Admin,Mentor")]
+        public async Task<IActionResult> GetAllPublications()
+        {
+            var query = new GetAllPublicationsQuery();
+            var result = await _mediator.Send(query);
             return Ok(result);
         }
 

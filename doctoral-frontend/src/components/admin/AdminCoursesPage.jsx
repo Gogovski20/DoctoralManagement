@@ -285,6 +285,21 @@ export default function AdminCoursesPage() {
                           >
                             Edit
                           </Link>
+                          <Link
+                            to={`/admin/courses/${course.id}/enroll`}
+                            style={{
+                              backgroundColor: '#10b981',
+                              color: 'white',
+                              padding: '0.5rem 1rem',
+                              borderRadius: '0.5rem',
+                              textDecoration: 'none',
+                              fontWeight: '500',
+                              fontSize: '0.875rem',
+                            }}
+                          >
+                            Enroll
+                          </Link>
+
                           <button
                             onClick={() => handleDelete(course.id, course.title)}
                             style={{

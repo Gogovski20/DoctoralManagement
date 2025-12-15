@@ -21,5 +21,15 @@ namespace DoctoralManagement.Domain.Interfaces
         Task<IEnumerable<Student>> GetAllNoTrackingAsync();
         Task<Student> GetByIdWithProgramNoTrackingAsync(int id);
         Task<IEnumerable<Student>> GetAllWithProgramNoTrackingAsync();
+        Task<List<StudentSearchDto>> SearchStudentsAsync(string searchTerm);
+    }
+
+    public class StudentSearchDto
+    {
+        public int Id { get; set; }
+        public string StudentIndex { get; set; } = string.Empty;
+        public string FullName { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public DateTime CreatedAt { get; set; }
     }
 }

@@ -4,7 +4,6 @@ using DoctoralManagement.Application.ConferenceParticipations.Queries;
 using DoctoralManagement.Application.Dtos;
 using DoctoralManagement.Application.Mobilities.Commands;
 using DoctoralManagement.Application.Mobilities.Queries;
-using DoctoralManagement.Application.Publications.Commands;
 using DoctoralManagement.Domain.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -35,6 +34,15 @@ namespace DoctoralManagement.API.Controllers
             return Ok(result);
         }
 
+        [HttpGet]
+        [Authorize(Roles = "Admin,Mentor")]
+        public async Task<IActionResult> GetAllMobilities()
+        {
+            var query = new GetAllMobilitiesQuery();
+            var result = await _mediator.Send(query);
+            return Ok(result);
+        }
+
         [HttpGet("student/{studentId}")]
         [Authorize(Roles = "Student,Admin,Mentor")]
         public async Task<IActionResult> GetStudentMobilities(int studentId)
@@ -46,7 +54,7 @@ namespace DoctoralManagement.API.Controllers
 
         [HttpGet("my")]
         [Authorize(Roles = "Student")]
-        public async Task<ActionResult<IEnumerable<MobilityResponse>>> GetMyMobilities()
+        public async Task<ActionResult<IEnumerable<Application.Mobilities.Queries.MobilityResponse>>> GetMyMobilities()
         {
             var userId = _currenUserService.UserId;
             var student = await _studentRepository.GetByUserIdAsync(userId);

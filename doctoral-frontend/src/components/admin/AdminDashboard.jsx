@@ -73,6 +73,7 @@ export default function AdminDashboard() {
           <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1f2937', marginBottom: '1rem' }}>
             Management
           </h2>
+
           <div
             style={{
               display: 'grid',
@@ -87,9 +88,15 @@ export default function AdminDashboard() {
             <NavCard to="/admin/programs" title="Manage Programs" icon="🏫" />
             <NavCard to="/admin/programs/new" title="Add New Program" icon="📚" />
             <NavCard to="/admin/courses" title="Manage Courses" icon="📖" />
+            <NavCard to="/admin/enrollments" title="Course Enrollments" icon="📝" />
             <NavCard to="/admin/applications" title="Review Applications" icon="📊" />
             <NavCard to="/admin/doctoral-projects" title="Doctoral Projects" icon="🔬" />
+            <NavCard to="/admin/conferences" title="All Conferences" icon="🎤" />
+            <NavCard to="/admin/mobilities" title="All Mobilities" icon="✈️" />
+            <NavCard to="/admin/publications" title="All Publications" icon="📚" />
 
+            {/* NEW CARD FOR THESIS DEFENSES */}
+            <NavCard to="/admin/thesis-defenses" title="Thesis Defenses" icon="🎓" />
           </div>
         </div>
       </div>
