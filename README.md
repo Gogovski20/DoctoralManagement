@@ -38,6 +38,7 @@ The project was developed as a thesis defense project and follows a layered back
 - Swagger
 - Request Validation
 - Global Exception Handling
+- Fluent Validation
 
 ### Frontend
 
